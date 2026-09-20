@@ -3,7 +3,7 @@ import os
 import pandas as pd
 import streamlit as st
 
-DATA_FILE = "race_data_v3.json"
+DATA_FILE = "race_data_v4.json"
 
 # カテゴリーとクラスの設定
 CATEGORY_CONFIG = {
@@ -13,8 +13,8 @@ CATEGORY_CONFIG = {
     "F1": ["総合"],
     "F2": ["総合"],
     "F3": ["総合"],
-    "GTWC Asia": ["GT3", "GT4"],
-    "Japan Cup": ["GT3", "GT4"],
+    "GTWC Asia": ["Pro", "Pro-Am", "Silver", "Am"],
+    "Japan Cup": ["Pro", "Pro-Am", "Silver", "Am"],
 }
 
 # 獲得ポイントの基本配点（1位〜10位）
@@ -51,11 +51,11 @@ tab1, tab2, tab3 = st.tabs(
     ["🏁 レース結果閲覧", "🏆 ポイントランキング", "⚙️ 車両・チームマスタ登録"]
 )
 
-# --- タブ3: チーム・車両のあらかじめ登録 ---
+# --- タブ3: チーム・車両の登録 ---
 with tab3:
   st.header("⚙️ 参加チーム・車両の登録")
   st.caption(
-      "ここでカテゴリーごとにチームや車両をあらかじめ登録しておくと、レース結果入力時に選択できるようになります。"
+      "ここでカテゴリーごとにチームや車両を登録しておくと、入力時に全台数分を選択できるようになります。"
   )
 
   c1, c2 = st.columns(2)
@@ -83,7 +83,7 @@ with tab3:
   else:
     st.info("まだ登録されていません。")
 
-# --- サイドバー：レース結果の入力（あらかじめ登録したチームを選択） ---
+# --- サイドバー：レース結果の入力 ---
 st.sidebar.header("📝 レース結果入力")
 s_cat = st.sidebar.selectbox(
     "カテゴリー", list(CATEGORY_CONFIG.keys()), key="s_cat"
@@ -102,8 +102,8 @@ with st.sidebar.form("race_input_form"):
   selected_results = []
 
   if registered_teams:
-    # 登録されたチームからマルチ選択、または1位〜5位などを選択
-    for rank in range(1, min(11, len(registered_teams) + 1)):
+    # 登録されている全台数分の選択ボックスを自動生成
+    for rank in range(1, len(registered_teams) + 1):
       team = st.selectbox(
           f"{rank}位",
           ["(選択なし)"] + registered_teams,
@@ -112,25 +112,28 @@ with st.sidebar.form("race_input_form"):
       if team != "(選択なし)":
         selected_results.append(team)
   else:
-    st.warning(
-        "※先に「⚙️ 車両・チームマスタ登録」タブでチームを登録してください。"
-    )
+    st.warning("先に「⚙️ 車両・チームマスタ登録」タブでチームを登録してください。")
 
-  submitted = st.sidebar.form_submit_button("レース結果を保存")
+  # フォーム内の保存ボタン（修正箇所）
+  submitted = st.form_submit_button("レース結果を保存する")
 
-  if submitted and race_name and selected_results:
-    if s_cat not in data["races"]:
-      data["races"][s_cat] = {}
-    if s_cls not in data["races"][s_cat]:
-      data["races"][s_cat][s_cls] = []
+  if submitted:
+    if not race_name:
+      st.sidebar.error("レース名を入力してください。")
+    elif not selected_results:
+      st.sidebar.error("少なくとも1つ以上の順位を選択してください。")
+    else:
+      if s_cat not in data["races"]:
+        data["races"][s_cat] = {}
+      if s_cls not in data["races"][s_cat]:
+        data["races"][s_cat][s_cls] = []
 
-    # 保存処理
-    data["races"][s_cat][s_cls].append(
-        {"race_name": race_name, "results": selected_results}
-    )
-    save_data(data)
-    st.sidebar.success(f"{race_name} の結果を保存しました！")
-    st.rerun()
+      data["races"][s_cat][s_cls].append(
+          {"race_name": race_name, "results": selected_results}
+      )
+      save_data(data)
+      st.sidebar.success(f"「{race_name}」の結果を保存しました！")
+      st.rerun()
 
 # --- タブ1: レース結果閲覧 ---
 with tab1:
@@ -181,14 +184,12 @@ with tab2:
     scores = {}
     races = data["races"][r_cat][r_cls]
 
-    # 全レースのポイントを集計
     for r in races:
       for idx, team in enumerate(r["results"]):
         pt = POINTS_TABLE[idx] if idx < len(POINTS_TABLE) else 0
         scores[team] = scores.get(team, 0) + pt
 
     if scores:
-      # ランキング順に並び替え
       sorted_scores = sorted(scores.items(), key=lambda x: x[1], reverse=True)
 
       df_rank = pd.DataFrame({
