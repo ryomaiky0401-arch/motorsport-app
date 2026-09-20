@@ -1,10 +1,24 @@
 import datetime
 import json
 import os
+import re
 import pandas as pd
 import streamlit as st
 
-DATA_FILE = "race_data_v12.json"
+# PDF解析ライブラリのインポート試行
+try:
+  import pdfplumber
+
+  HAS_PDF_PARSER = True
+except ImportError:
+  try:
+    import pypdf
+
+    HAS_PDF_PARSER = True
+  except ImportError:
+    HAS_PDF_PARSER = False
+
+DATA_FILE = "race_data_v13.json"
 
 CATEGORY_CONFIG = {
     "SUPER GT": ["GT500", "GT300"],
@@ -138,45 +152,6 @@ PRESET_TEAMS = {
         "#92 Manthey PureRxcing (Porsche)",
         "#95 United Autosports (McLaren)",
     ],
-    "Japan Cup_Pro": [
-        "#1 Team 5ZIGEN (Nissan GT-R GT3)",
-        "#7 Comet Racing (Ferrari 488 GT3)",
-        "#14 MacPherson Racing (Porsche 911 GT3 R)",
-        "#98 K-tunes Racing (Lexus RC F GT3)",
-    ],
-    "Japan Cup_Pro-Am": [
-        "#3 Bingo Racing (Ferrari 296 GT3)",
-        "#18 TEAM UPGARAGE (Honda NSX GT3)",
-        "#36 TEAM GBOX (Porsche 911 GT3 R)",
-        "#97 YOGIBO Racing (McLaren 720S GT3)",
-    ],
-    "Japan Cup_Am": [
-        "#5 RM Motorsport (BMW M4 GT3)",
-        "#16 ABSSA Motorsport (McLaren 720S GT3)",
-        "#22 D'station Racing (Aston Martin Vantage)",
-    ],
-    "GTWC Asia_Pro": [
-        "#4 Craft-Bamboo Racing (Mercedes-AMG)",
-        "#13 Phantom Global Racing (Porsche)",
-        "#88 Absolute Racing (Porsche/Ferrari)",
-        "#99 Triple Eight JMR (Mercedes-AMG)",
-    ],
-    "GTWC Asia_Pro-Am": [
-        "#2 Origine Motorsport (Porsche)",
-        "#29 VSR (Lamborghini Huracan)",
-        "#63 Vincenzo Sospiri Racing (Lamborghini)",
-        "#911 Absolute Racing (Porsche)",
-    ],
-    "GTWC Asia_Silver": [
-        "#5 Climax Racing (Mercedes-AMG)",
-        "#11 Harmony Racing (Ferrari 296 GT3)",
-        "#89 Team KUSS (Porsche 911 GT3 R)",
-    ],
-    "GTWC Asia_Am": [
-        "#25 AMAC Motorsport (Porsche)",
-        "#71 Team EBM (Porsche 911 GT3 R)",
-        "#84 Garage 75 (Ferrari 488 GT3)",
-    ],
 }
 
 DEFAULT_PTS_RACE = [25, 18, 15, 12, 10, 8, 6, 4, 2, 1]
@@ -203,6 +178,64 @@ def load_data():
 def save_data(data):
   with open(DATA_FILE, "w", encoding="utf-8") as f:
     json.dump(data, f, ensure_ascii=False, indent=2)
+
+
+def extract_text_from_pdf(pdf_file):
+  """PDFからテキストを抽出する"""
+  text = ""
+  try:
+    if "pdfplumber" in globals():
+      with pdfplumber.open(pdf_file) as pdf:
+        for page in pdf.pages:
+          text += page.extract_text() or ""
+    elif "pypdf" in globals():
+      reader = pypdf.PdfReader(pdf_file)
+      for page in reader.pages:
+        text += page.extract_text() or ""
+  except Exception as e:
+    st.error(f"PDF解析エラー: {e}")
+  return text
+
+
+def parse_race_pdf(text, registered_teams):
+  """PDFテキストから順位・チーム・周回数・タイムを自動抽出する汎用パーサー"""
+  parsed_results = []
+  lines = text.split("\n")
+
+  for line in lines:
+    line_clean = line.strip()
+    if not line_clean:
+      continue
+
+    # 登録済みチーム名が含まれているか検索
+    matched_team = None
+    for team in registered_teams:
+      # ゼッケン番号やチーム名の一部でマッチング
+      num_match = re.search(r"#(\d+)", team)
+      if num_match and f"#{num_match.group(1)}" in line_clean:
+        matched_team = team
+        break
+      elif team in line_clean:
+        matched_team = team
+        break
+
+    if matched_team:
+      # 周回数（数字2〜3桁）と タイム（1:23'45.678 や 23:45.678 など）を正規表現で探す
+      laps_match = re.search(r"\b(\d{1,3})\s*(Laps|laps|周|Lap)?\b", line_clean)
+      time_match = re.search(
+          r"(\d+[:'’]\d+[\.'’]\d+|\d+[\.'’]\d+|\+\d+\s*Lap)", line_clean
+      )
+
+      laps = laps_match.group(1) if laps_match else "-"
+      total_time = time_match.group(1) if time_match else "-"
+
+      parsed_results.append({
+          "team": matched_team,
+          "laps": laps,
+          "time": total_time,
+      })
+
+  return parsed_results
 
 
 st.set_page_config(
@@ -245,7 +278,7 @@ with tab4:
         st.success("データの復元が完了しました！")
         st.rerun()
 
-# --- タブ3: マスタ管理（チーム & カテゴリー基本ポイント） ---
+# --- タブ3: マスタ管理 ---
 with tab3:
   st.header("⚙️ マスタ管理")
 
@@ -305,7 +338,6 @@ with tab3:
 
   with m_tab2:
     st.subheader("🎯 カテゴリーごとのデフォルトポイント設定")
-    st.caption("ここで設定した配点が、結果入力時に自動的に適用されます。")
     p_cat = st.selectbox(
         "対象カテゴリー選択", list(CATEGORY_CONFIG.keys()), key="p_cat"
     )
@@ -319,12 +351,8 @@ with tab3:
         },
     )
 
-    st.write(f"**【{p_cat}】の基本ポイント配点（1位〜10位）**")
-
     p_col1, p_col2, p_col3 = st.columns(3)
-    new_race_pts = []
-    new_qual_pts = []
-    new_sprt_pts = []
+    new_race_pts, new_qual_pts, new_sprt_pts = [], [], []
 
     with p_col1:
       st.markdown("**🏁 決勝ポイント**")
@@ -381,16 +409,42 @@ session_type = st.sidebar.radio(
     "セッション種別", ["決勝", "予選", "スプリント"], key="session_type_input"
 )
 
-# 開催日（日付）入力
 race_date = st.sidebar.date_input(
     "開催日", datetime.date.today(), key="race_date_input"
 )
-
 race_name = st.sidebar.text_input(
     "レース名 / ラウンド", placeholder="例: Rd.1 岡山", key="race_name_input"
 )
 
-# ポイント取得（基本設定から自動取得）
+team_key = f"{s_cat}_{s_cls}"
+registered_teams = data["teams"].get(team_key, [])
+
+# --- PDF読み込み機能 ---
+st.sidebar.markdown("---")
+st.sidebar.subheader("📄 PDFから全自動取り込み")
+pdf_file = st.sidebar.file_uploader("公式リザルトPDFを選択", type=["pdf"])
+
+pdf_parsed_data = []
+if pdf_file is not None:
+  if HAS_PDF_PARSER:
+    pdf_text = extract_text_from_pdf(pdf_file)
+    pdf_parsed_data = parse_race_pdf(pdf_text, registered_teams)
+    if pdf_parsed_data:
+      st.sidebar.success(
+          f"✨ PDFから {len(pdf_parsed_data)} 台のデータを解析しました！"
+      )
+    else:
+      st.sidebar.warning(
+          "PDFからチーム名を抽出できませんでした。手動選択を行ってください。"
+      )
+  else:
+    st.sidebar.error(
+        "PDF解析ライブラリがインストールされていません。(pdfplumberまたはpypdfが必要)"
+    )
+
+st.sidebar.markdown("---")
+
+# ポイント取得
 base_pts = data["points_master"].get(
     s_cat,
     {
@@ -400,15 +454,12 @@ base_pts = data["points_master"].get(
     },
 ).get(session_type, DEFAULT_PTS_RACE)
 
-# WECなどの例外ポイント対応（オーバーライド）
-st.sidebar.markdown("---")
 use_custom_pts = st.sidebar.checkbox(
-    "⚠️ このレース専用のポイントを使う (WEC 24h等)", value=False
+    "⚠️ このレース専用ポイントを使う", value=False
 )
 applied_pts = base_pts.copy()
 
 if use_custom_pts:
-  st.sidebar.caption("このレース限定の獲得ポイントを直接設定")
   applied_pts = []
   pts_cols = st.sidebar.columns(2)
   for i in range(10):
@@ -421,35 +472,45 @@ if use_custom_pts:
         key=f"custom_pts_{i}",
     )
     applied_pts.append(val)
-else:
-  st.sidebar.info(
-      f"配点: {base_pts[:5]}... (マスタの「{s_cat}」基本ポイントを自動適用)"
-  )
 
 st.sidebar.markdown("---")
-team_key = f"{s_cat}_{s_cls}"
-registered_teams = data["teams"].get(team_key, [])
+st.sidebar.caption("順位順にチームを選択（PDF読み込み時は自動入力）")
 
-st.sidebar.caption("順位順にチームを選択してください")
 selected_results = []
+laps_list = []
+times_list = []
 available_teams = registered_teams.copy()
 
+# PDF解析データがある場合はデフォルト値にセット
 if registered_teams:
   for rank in range(1, len(registered_teams) + 1):
+    default_team = "(選択なし)"
+    default_lap = "-"
+    default_time = "-"
+
+    if pdf_parsed_data and rank <= len(pdf_parsed_data):
+      item = pdf_parsed_data[rank - 1]
+      default_team = item["team"]
+      default_lap = item["laps"]
+      default_time = item["time"]
+
     options = ["(選択なし)"] + available_teams
-    team = st.sidebar.selectbox(f"{rank}位", options, key=f"rank_select_{rank}")
+    idx = options.index(default_team) if default_team in options else 0
+
+    team = st.sidebar.selectbox(f"{rank}位", options, index=idx, key=f"rank_s_{rank}")
+
     if team != "(選択なし)":
       selected_results.append(team)
+      laps_list.append(default_lap)
+      times_list.append(default_time)
       if team in available_teams:
         available_teams.remove(team)
-else:
-  st.sidebar.warning("このクラスのチーム一覧はまだ登録されていません。")
 
 if st.sidebar.button("結果を保存する", type="primary"):
   if not race_name:
     st.sidebar.error("レース名を入力してください。")
   elif not selected_results:
-    st.sidebar.error("少なくとも1つ以上の順位を選択してください。")
+    st.sidebar.error("順位を選択するかPDFをアップロードしてください。")
   else:
     existing_races = (
         data.get("races", {}).get(s_year, {}).get(s_cat, {}).get(s_cls, [])
@@ -479,6 +540,8 @@ if st.sidebar.button("結果を保存する", type="primary"):
           "is_custom_pts": use_custom_pts,
           "points_table": applied_pts,
           "results": selected_results,
+          "laps": laps_list,
+          "times": times_list,
       })
       save_data(data)
       st.sidebar.success(
@@ -542,59 +605,35 @@ with tab1:
         st.caption(f"📅 開催日: {r_date_str} ｜ 🎯 適用ルール: {pts_label}")
 
         pts_table = target.get("points_table", DEFAULT_PTS_RACE)
+        res_teams = target.get("results", [])
+        res_laps = target.get("laps", ["-"] * len(res_teams))
+        res_times = target.get("times", ["-"] * len(res_teams))
 
         df_res = pd.DataFrame({
-            "順位": [f"P{i+1}" for i in range(len(target["results"]))],
-            "獲得ポイント": [
+            "順位": [f"P{i+1}" for i in range(len(res_teams))],
+            "獲得pt": [
                 f"{pts_table[i]} pt" if i < len(pts_table) else "0 pt"
-                for i in range(len(target["results"]))
+                for i in range(len(res_teams))
             ],
-            "チーム / 車両": target["results"],
+            "チーム / 車両": res_teams,
+            "周回数": res_laps,
+            "レースタイム / 差": res_times,
         })
 
         st.table(df_res)
 
         with st.expander(
-            f"⚙️ 「{sel_round} ({target.get('session_type', '決勝')})」の編集・削除"
+            f"⚙️ 「{sel_round} ({target.get('session_type', '決勝')})」の削除"
         ):
-          st.write("順位結果の編集:")
-          edit_results = []
-          team_options = data["teams"].get(f"{v_cat}_{v_cls}", [])
-          for idx_r, old_team in enumerate(target["results"]):
-            opt = (
-                ["(選択なし)"] + team_options
-                if old_team in team_options
-                else ["(選択なし)", old_team] + team_options
-            )
-            edit_team = st.selectbox(
-                f"{idx_r+1}位",
-                opt,
-                index=opt.index(old_team) if old_team in opt else 0,
-                key=f"edit_{sel_round}_{target.get('session_type')}_{idx_r}",
-            )
-            if edit_team != "(選択なし)":
-              edit_results.append(edit_team)
-
-          e_col1, e_col2 = st.columns(2)
-          with e_col1:
-            if st.button(
-                "変更を保存する",
-                key=f"save_btn_{sel_round}_{target.get('session_type')}",
-            ):
-              target["results"] = edit_results
-              save_data(data)
-              st.success("結果を更新しました！")
-              st.rerun()
-          with e_col2:
-            if st.button(
-                "🗑️ このセッション結果を削除",
-                type="primary",
-                key=f"del_btn_{sel_round}_{target.get('session_type')}",
-            ):
-              races_list.remove(target)
-              save_data(data)
-              st.warning("データを削除しました。")
-              st.rerun()
+          if st.button(
+              "🗑️ このセッション結果を削除",
+              type="primary",
+              key=f"del_btn_{sel_round}_{target.get('session_type')}",
+          ):
+            races_list.remove(target)
+            save_data(data)
+            st.warning("データを削除しました。")
+            st.rerun()
 
         st.markdown("---")
     else:
