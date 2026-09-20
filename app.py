@@ -3,7 +3,7 @@ import os
 import pandas as pd
 import streamlit as st
 
-DATA_FILE = "race_data_v10.json"
+DATA_FILE = "race_data_v11.json"
 
 CATEGORY_CONFIG = {
     "SUPER GT": ["GT500", "GT300"],
@@ -308,7 +308,6 @@ registered_teams = data["teams"].get(team_key, [])
 st.sidebar.markdown("---")
 st.sidebar.subheader("🎯 獲得ポイントの設定")
 
-# セッションに応じたデフォルト配点の自動適用
 if session_type == "予選":
   default_pts = DEFAULT_PTS_QUALIFY
 elif session_type == "スプリント":
@@ -325,7 +324,7 @@ for i in range(10):
       min_value=0,
       max_value=100,
       value=default_pts[i] if i < len(default_pts) else 0,
-      key=f"pts_{session_type}_{i}",  # キーにセッション名を含めることで自動切替を保証
+      key=f"pts_{session_type}_{i}",
   )
   custom_pts.append(val)
 
@@ -338,34 +337,28 @@ race_name = st.sidebar.text_input(
 st.sidebar.caption("順位順にチームを選択してください")
 selected_results = []
 
-# リアルタイム選択＆重複検知（Formの外に出すことで即時検知）
+# 【改善1】選択済みチームを上位から順に自動除外するスマート選択肢
+available_teams = registered_teams.copy()
+
 if registered_teams:
   for rank in range(1, len(registered_teams) + 1):
+    # 選択肢は「未選択」＋「まだ選ばれていないチーム」
+    options = ["(選択なし)"] + available_teams
+
     team = st.sidebar.selectbox(
         f"{rank}位",
-        ["(選択なし)"] + registered_teams,
+        options,
         key=f"rank_select_{rank}",
     )
     if team != "(選択なし)":
       selected_results.append(team)
+      # 選ばれたチームは以降の順位の選択肢から除外する
+      if team in available_teams:
+        available_teams.remove(team)
 else:
   st.sidebar.warning("このクラスのチーム一覧はまだ登録されていません。")
 
-# リアルタイム重複チェック
-duplicates = [
-    team for team in selected_results if selected_results.count(team) > 1
-]
-has_duplicate = len(duplicates) > 0
-
-if has_duplicate:
-  st.sidebar.error(
-      f"⚠️ 【エラー】以下の車両が重複して選択されています:\n{', '.join(set(duplicates))}"
-  )
-
-# 重複がある場合はボタンを赤枠＆非活性化
-if st.sidebar.button(
-    "結果を保存する", disabled=has_duplicate, type="primary"
-):
+if st.sidebar.button("結果を保存する", type="primary"):
   if not race_name:
     st.sidebar.error("レース名を入力してください。")
   elif not selected_results:
@@ -408,7 +401,6 @@ if st.sidebar.button(
 with tab1:
   st.header("🏁 レース結果 閲覧・編集")
 
-  # 1段目の選択肢（年度、カテゴリー、クラス）
   v_y, v_c1, v_c2 = st.columns(3)
   with v_y:
     v_year = st.selectbox("年度", YEARS, key="v_year")
@@ -429,7 +421,6 @@ with tab1:
         reverse=True,
     )
 
-    # 2段目の選択肢（ラウンド選択 ＆ セッション選択フィルタ）
     r_col1, r_col2 = st.columns(2)
     with r_col1:
       sel_round = st.selectbox("ラウンド（大会）を選択", rounds)
@@ -438,7 +429,6 @@ with tab1:
           "セッション選択", ["すべて", "決勝", "予選", "スプリント"]
       )
 
-    # フィルタリング処理
     round_races = [
         r
         for r in races_list
@@ -464,7 +454,9 @@ with tab1:
             ],
             "チーム / 車両": target["results"],
         })
-        st.dataframe(df_res, use_container_width=True, hide_index=True)
+
+        # 【改善2】内部スクロールを発生させず、全行を一気に見やすく表示する st.table に変更
+        st.table(df_res)
 
         with st.expander(
             f"⚙️ 「{sel_round} ({target.get('session_type', '決勝')})」の編集・削除"
@@ -549,7 +541,9 @@ with tab2:
           "チーム / 車両": [item[0] for item in sorted_scores],
           "合計ポイント": [f"{item[1]} pt" for item in sorted_scores],
       })
-      st.dataframe(df_rank, use_container_width=True, hide_index=True)
+
+      # ランキング表も全行スクロールなしでパッと見れるように適用
+      st.table(df_rank)
     else:
       st.info("集計対象のデータがありません。")
   else:
