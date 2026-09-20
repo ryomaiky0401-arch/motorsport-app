@@ -3,7 +3,7 @@ import os
 import pandas as pd
 import streamlit as st
 
-DATA_FILE = "race_data_v9.json"
+DATA_FILE = "race_data_v10.json"
 
 CATEGORY_CONFIG = {
     "SUPER GT": ["GT500", "GT300"],
@@ -16,7 +16,6 @@ CATEGORY_CONFIG = {
     "Japan Cup": ["Pro", "Pro-Am", "Silver", "Am"],
 }
 
-# 修正後のSuper GT GT500を含む最新マスタ
 PRESET_TEAMS = {
     "SUPER GT_GT500": [
         "#8 ARTA MUGEN HRC PRELUDE-GT",
@@ -299,7 +298,9 @@ s_cat = st.sidebar.selectbox(
     "カテゴリー", list(CATEGORY_CONFIG.keys()), key="s_cat"
 )
 s_cls = st.sidebar.selectbox("クラス", CATEGORY_CONFIG[s_cat], key="s_cls")
-session_type = st.sidebar.radio("セッション種別", ["決勝", "予選", "スプリント"])
+session_type = st.sidebar.radio(
+    "セッション種別", ["決勝", "予選", "スプリント"], key="session_type_input"
+)
 
 team_key = f"{s_cat}_{s_cls}"
 registered_teams = data["teams"].get(team_key, [])
@@ -307,6 +308,7 @@ registered_teams = data["teams"].get(team_key, [])
 st.sidebar.markdown("---")
 st.sidebar.subheader("🎯 獲得ポイントの設定")
 
+# セッションに応じたデフォルト配点の自動適用
 if session_type == "予選":
   default_pts = DEFAULT_PTS_QUALIFY
 elif session_type == "スプリント":
@@ -323,95 +325,90 @@ for i in range(10):
       min_value=0,
       max_value=100,
       value=default_pts[i] if i < len(default_pts) else 0,
-      key=f"pts_setting_{i}",
+      key=f"pts_{session_type}_{i}",  # キーにセッション名を含めることで自動切替を保証
   )
   custom_pts.append(val)
 
 st.sidebar.markdown("---")
 
-with st.sidebar.form("race_input_form"):
-  race_name = st.text_input(
-      "レース名 / ラウンド", placeholder="例: Rd.1 岡山"
+race_name = st.sidebar.text_input(
+    "レース名 / ラウンド", placeholder="例: Rd.1 岡山", key="race_name_input"
+)
+
+st.sidebar.caption("順位順にチームを選択してください")
+selected_results = []
+
+# リアルタイム選択＆重複検知（Formの外に出すことで即時検知）
+if registered_teams:
+  for rank in range(1, len(registered_teams) + 1):
+    team = st.sidebar.selectbox(
+        f"{rank}位",
+        ["(選択なし)"] + registered_teams,
+        key=f"rank_select_{rank}",
+    )
+    if team != "(選択なし)":
+      selected_results.append(team)
+else:
+  st.sidebar.warning("このクラスのチーム一覧はまだ登録されていません。")
+
+# リアルタイム重複チェック
+duplicates = [
+    team for team in selected_results if selected_results.count(team) > 1
+]
+has_duplicate = len(duplicates) > 0
+
+if has_duplicate:
+  st.sidebar.error(
+      f"⚠️ 【エラー】以下の車両が重複して選択されています:\n{', '.join(set(duplicates))}"
   )
 
-  st.caption("順位順にチームを選択してください")
-  selected_results = []
-
-  if registered_teams:
-    for rank in range(1, len(registered_teams) + 1):
-      team = st.selectbox(
-          f"{rank}位",
-          ["(選択なし)"] + registered_teams,
-          key=f"rank_{rank}",
-      )
-      if team != "(選択なし)":
-        selected_results.append(team)
+# 重複がある場合はボタンを赤枠＆非活性化
+if st.sidebar.button(
+    "結果を保存する", disabled=has_duplicate, type="primary"
+):
+  if not race_name:
+    st.sidebar.error("レース名を入力してください。")
+  elif not selected_results:
+    st.sidebar.error("少なくとも1つ以上の順位を選択してください。")
   else:
-    st.warning("このクラスのチーム一覧はまだ登録されていません。")
-
-  # チームの重複チェック
-  duplicates = [
-      team
-      for team in selected_results
-      if selected_results.count(team) > 1
-  ]
-  has_duplicate = len(duplicates) > 0
-
-  if has_duplicate:
-    st.error(
-        f"⚠️ 以下の車両が重複選択されています:\n{', '.join(set(duplicates))}"
+    existing_races = (
+        data.get("races", {}).get(s_year, {}).get(s_cat, {}).get(s_cls, [])
+    )
+    is_already_exist = any(
+        r.get("round_name") == race_name
+        and r.get("session_type", "決勝") == session_type
+        for r in existing_races
     )
 
-  submitted = st.form_submit_button(
-      "結果を保存する", disabled=has_duplicate
-  )
-
-  if submitted:
-    if not race_name:
-      st.sidebar.error("レース名を入力してください。")
-    elif not selected_results:
-      st.sidebar.error("少なくとも1つ以上の順位を選択してください。")
+    if is_already_exist:
+      st.sidebar.error(
+          f"⚠️ 「{race_name}」の【{session_type}】結果はすでに登録されています！"
+      )
     else:
-      # 同一レース・同セッションの重複登録チェック
-      existing_races = (
-          data.get("races", {})
-          .get(s_year, {})
-          .get(s_cat, {})
-          .get(s_cls, [])
-      )
-      is_already_exist = any(
-          r["round_name"] == race_name
-          and r.get("session_type", "決勝") == session_type
-          for r in existing_races
-      )
+      if s_year not in data["races"]:
+        data["races"][s_year] = {}
+      if s_cat not in data["races"][s_year]:
+        data["races"][s_year][s_cat] = {}
+      if s_cls not in data["races"][s_year][s_cat]:
+        data["races"][s_year][s_cat][s_cls] = []
 
-      if is_already_exist:
-        st.sidebar.error(
-            f"⚠️ 「{race_name}」の【{session_type}】結果はすでに登録されています！編集する場合は右画面の「閲覧・編集」から行ってください。"
-        )
-      else:
-        if s_year not in data["races"]:
-          data["races"][s_year] = {}
-        if s_cat not in data["races"][s_year]:
-          data["races"][s_year][s_cat] = {}
-        if s_cls not in data["races"][s_year][s_cat]:
-          data["races"][s_year][s_cat][s_cls] = []
-
-        data["races"][s_year][s_cat][s_cls].append({
-            "round_name": race_name,
-            "session_type": session_type,
-            "points_table": custom_pts,
-            "results": selected_results,
-        })
-        save_data(data)
-        st.sidebar.success(
-            f"[{s_year}]「{race_name} ({session_type})」の結果を保存しました！"
-        )
-        st.rerun()
+      data["races"][s_year][s_cat][s_cls].append({
+          "round_name": race_name,
+          "session_type": session_type,
+          "points_table": custom_pts,
+          "results": selected_results,
+      })
+      save_data(data)
+      st.sidebar.success(
+          f"[{s_year}]「{race_name} ({session_type})」の結果を保存しました！"
+      )
+      st.rerun()
 
 # --- タブ1: レース結果閲覧・編集・削除 ---
 with tab1:
   st.header("🏁 レース結果 閲覧・編集")
+
+  # 1段目の選択肢（年度、カテゴリー、クラス）
   v_y, v_c1, v_c2 = st.columns(3)
   with v_y:
     v_year = st.selectbox("年度", YEARS, key="v_year")
@@ -423,85 +420,97 @@ with tab1:
     v_cls = st.selectbox("クラス選択", CATEGORY_CONFIG[v_cat], key="v_cls")
 
   races_list = (
-      data.get("races", {})
-      .get(v_year, {})
-      .get(v_cat, {})
-      .get(v_cls, [])
+      data.get("races", {}).get(v_year, {}).get(v_cat, {}).get(v_cls, [])
   )
 
   if races_list:
-    # ラウンド名（大会名）でユニークにまとめる
     rounds = sorted(
         list(set(r.get("round_name", r.get("race_name")) for r in races_list)),
         reverse=True,
     )
-    sel_round = st.selectbox("ラウンド（大会）を選択", rounds)
 
-    # 該当ラウンドのセッション一覧を表示
+    # 2段目の選択肢（ラウンド選択 ＆ セッション選択フィルタ）
+    r_col1, r_col2 = st.columns(2)
+    with r_col1:
+      sel_round = st.selectbox("ラウンド（大会）を選択", rounds)
+    with r_col2:
+      sel_session_filter = st.selectbox(
+          "セッション選択", ["すべて", "決勝", "予選", "スプリント"]
+      )
+
+    # フィルタリング処理
     round_races = [
         r
         for r in races_list
         if r.get("round_name", r.get("race_name")) == sel_round
     ]
+    if sel_session_filter != "すべて":
+      round_races = [
+          r
+          for r in round_races
+          if r.get("session_type", "決勝") == sel_session_filter
+      ]
 
-    for target in round_races:
-      st.subheader(f"📍 {sel_round} - 【{target.get('session_type', '決勝')}】")
-      pts_table = target.get("points_table", DEFAULT_PTS_RACE)
+    if round_races:
+      for target in round_races:
+        st.subheader(f"📍 {sel_round} - 【{target.get('session_type', '決勝')}】")
+        pts_table = target.get("points_table", DEFAULT_PTS_RACE)
 
-      df_res = pd.DataFrame({
-          "順位": [f"P{i+1}" for i in range(len(target["results"]))],
-          "獲得ポイント": [
-              f"{pts_table[i]} pt" if i < len(pts_table) else "0 pt"
-              for i in range(len(target["results"]))
-          ],
-          "チーム / 車両": target["results"],
-      })
-      st.dataframe(df_res, use_container_width=True, hide_index=True)
+        df_res = pd.DataFrame({
+            "順位": [f"P{i+1}" for i in range(len(target["results"]))],
+            "獲得ポイント": [
+                f"{pts_table[i]} pt" if i < len(pts_table) else "0 pt"
+                for i in range(len(target["results"]))
+            ],
+            "チーム / 車両": target["results"],
+        })
+        st.dataframe(df_res, use_container_width=True, hide_index=True)
 
-      # 編集・削除アコーディオン
-      with st.expander(
-          f"⚙️ 「{sel_round} ({target.get('session_type', '決勝')})」の編集・削除"
-      ):
-        st.write("順位結果の編集:")
-        edit_results = []
-        team_options = data["teams"].get(f"{v_cat}_{v_cls}", [])
-        for idx_r, old_team in enumerate(target["results"]):
-          opt = (
-              ["(選択なし)"] + team_options
-              if old_team in team_options
-              else ["(選択なし)", old_team] + team_options
-          )
-          edit_team = st.selectbox(
-              f"{idx_r+1}位",
-              opt,
-              index=opt.index(old_team) if old_team in opt else 0,
-              key=f"edit_{sel_round}_{target.get('session_type')}_{idx_r}",
-          )
-          if edit_team != "(選択なし)":
-            edit_results.append(edit_team)
+        with st.expander(
+            f"⚙️ 「{sel_round} ({target.get('session_type', '決勝')})」の編集・削除"
+        ):
+          st.write("順位結果の編集:")
+          edit_results = []
+          team_options = data["teams"].get(f"{v_cat}_{v_cls}", [])
+          for idx_r, old_team in enumerate(target["results"]):
+            opt = (
+                ["(選択なし)"] + team_options
+                if old_team in team_options
+                else ["(選択なし)", old_team] + team_options
+            )
+            edit_team = st.selectbox(
+                f"{idx_r+1}位",
+                opt,
+                index=opt.index(old_team) if old_team in opt else 0,
+                key=f"edit_{sel_round}_{target.get('session_type')}_{idx_r}",
+            )
+            if edit_team != "(選択なし)":
+              edit_results.append(edit_team)
 
-        e_col1, e_col2 = st.columns(2)
-        with e_col1:
-          if st.button(
-              "変更を保存する",
-              key=f"save_btn_{sel_round}_{target.get('session_type')}",
-          ):
-            target["results"] = edit_results
-            save_data(data)
-            st.success("結果を更新しました！")
-            st.rerun()
-        with e_col2:
-          if st.button(
-              "🗑️ このセッション結果を削除",
-              type="primary",
-              key=f"del_btn_{sel_round}_{target.get('session_type')}",
-          ):
-            races_list.remove(target)
-            save_data(data)
-            st.warning("データを削除しました。")
-            st.rerun()
+          e_col1, e_col2 = st.columns(2)
+          with e_col1:
+            if st.button(
+                "変更を保存する",
+                key=f"save_btn_{sel_round}_{target.get('session_type')}",
+            ):
+              target["results"] = edit_results
+              save_data(data)
+              st.success("結果を更新しました！")
+              st.rerun()
+          with e_col2:
+            if st.button(
+                "🗑️ このセッション結果を削除",
+                type="primary",
+                key=f"del_btn_{sel_round}_{target.get('session_type')}",
+            ):
+              races_list.remove(target)
+              save_data(data)
+              st.warning("データを削除しました。")
+              st.rerun()
 
-      st.markdown("---")
+        st.markdown("---")
+    else:
+      st.info(f"「{sel_round}」の【{sel_session_filter}】データはありません。")
   else:
     st.info(f"{v_year} のレース結果データはまだありません。")
 
