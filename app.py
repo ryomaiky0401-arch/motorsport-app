@@ -1,9 +1,10 @@
+import datetime
 import json
 import os
 import pandas as pd
 import streamlit as st
 
-DATA_FILE = "race_data_v11.json"
+DATA_FILE = "race_data_v12.json"
 
 CATEGORY_CONFIG = {
     "SUPER GT": ["GT500", "GT300"],
@@ -193,8 +194,10 @@ def load_data():
         for k, v in PRESET_TEAMS.items():
           if k not in data["teams"] or not data["teams"][k]:
             data["teams"][k] = v
+      if "points_master" not in data:
+        data["points_master"] = {}
       return data
-  return {"races": {}, "teams": PRESET_TEAMS.copy()}
+  return {"races": {}, "teams": PRESET_TEAMS.copy(), "points_master": {}}
 
 
 def save_data(data):
@@ -214,14 +217,13 @@ data = load_data()
 tab1, tab2, tab3, tab4 = st.tabs([
     "🏁 レース結果閲覧・編集",
     "🏆 ポイントランキング",
-    "⚙️ 車両・チームマスタ管理",
+    "⚙️ 車両・チーム・ポイントマスタ管理",
     "💾 データバックアップ / 復元",
 ])
 
 # --- タブ4: バックアップ・復元 ---
 with tab4:
   st.header("💾 データのバックアップと復元")
-  st.info("バックアップの保存や復元がここで行えます。")
   c_bak1, c_bak2 = st.columns(2)
   with c_bak1:
     json_str = json.dumps(data, ensure_ascii=False, indent=2)
@@ -243,53 +245,130 @@ with tab4:
         st.success("データの復元が完了しました！")
         st.rerun()
 
-# --- タブ3: チーム・車両の管理 ---
+# --- タブ3: マスタ管理（チーム & カテゴリー基本ポイント） ---
 with tab3:
-  st.header("⚙️ 参加チーム・車両の管理")
-  c1, c2 = st.columns(2)
-  with c1:
-    m_cat = st.selectbox("カテゴリー", list(CATEGORY_CONFIG.keys()), key="m_cat")
-  with c2:
-    m_cls = st.selectbox("クラス", CATEGORY_CONFIG[m_cat], key="m_cls")
+  st.header("⚙️ マスタ管理")
 
-  key_name = f"{m_cat}_{m_cls}"
-  current_teams = data["teams"].get(key_name, [])
+  m_tab1, m_tab2 = st.tabs(
+      ["🏎️ 参加チーム・車両の管理", "🎯 シリーズ基本ポイント設定"]
+  )
 
-  st.subheader("➕ チーム・車両の新規追加")
-  new_team = st.text_input("チーム名 / 車両名")
-  if st.button("チームを追加"):
-    if new_team and new_team not in current_teams:
-      current_teams.append(new_team)
-      data["teams"][key_name] = current_teams
-      save_data(data)
-      st.success(f"「{new_team}」を追加しました！")
-      st.rerun()
-
-  st.divider()
-  st.subheader("✏️ 登録済みチームの編集・削除")
-  if current_teams:
-    selected_edit_team = st.selectbox("編集・削除するチームを選択", current_teams)
-    col_e1, col_e2 = st.columns(2)
-    with col_e1:
-      updated_name = st.text_input(
-          "修正後の名称", value=selected_edit_team, key="edit_input"
+  with m_tab1:
+    c1, c2 = st.columns(2)
+    with c1:
+      m_cat = st.selectbox(
+          "カテゴリー", list(CATEGORY_CONFIG.keys()), key="m_cat"
       )
-      if st.button("名称を更新する"):
-        idx = current_teams.index(selected_edit_team)
-        current_teams[idx] = updated_name
+    with c2:
+      m_cls = st.selectbox("クラス", CATEGORY_CONFIG[m_cat], key="m_cls")
+
+    key_name = f"{m_cat}_{m_cls}"
+    current_teams = data["teams"].get(key_name, [])
+
+    st.subheader("➕ チーム・車両の新規追加")
+    new_team = st.text_input("チーム名 / 車両名")
+    if st.button("チームを追加"):
+      if new_team and new_team not in current_teams:
+        current_teams.append(new_team)
         data["teams"][key_name] = current_teams
         save_data(data)
-        st.success("名称を更新しました！")
+        st.success(f"「{new_team}」を追加しました！")
         st.rerun()
-    with col_e2:
-      if st.button("このチームを削除する", type="primary"):
-        current_teams.remove(selected_edit_team)
-        data["teams"][key_name] = current_teams
-        save_data(data)
-        st.warning(f"「{selected_edit_team}」を削除しました。")
-        st.rerun()
-  else:
-    st.info("まだ登録されていません。")
+
+    st.divider()
+    st.subheader("✏️ 登録済みチームの編集・削除")
+    if current_teams:
+      selected_edit_team = st.selectbox(
+          "編集・削除するチームを選択", current_teams
+      )
+      col_e1, col_e2 = st.columns(2)
+      with col_e1:
+        updated_name = st.text_input(
+            "修正後の名称", value=selected_edit_team, key="edit_input"
+        )
+        if st.button("名称を更新する"):
+          idx = current_teams.index(selected_edit_team)
+          current_teams[idx] = updated_name
+          data["teams"][key_name] = current_teams
+          save_data(data)
+          st.success("名称を更新しました！")
+          st.rerun()
+      with col_e2:
+        if st.button("このチームを削除する", type="primary"):
+          current_teams.remove(selected_edit_team)
+          data["teams"][key_name] = current_teams
+          save_data(data)
+          st.warning(f"「{selected_edit_team}」を削除しました。")
+          st.rerun()
+    else:
+      st.info("まだ登録されていません。")
+
+  with m_tab2:
+    st.subheader("🎯 カテゴリーごとのデフォルトポイント設定")
+    st.caption("ここで設定した配点が、結果入力時に自動的に適用されます。")
+    p_cat = st.selectbox(
+        "対象カテゴリー選択", list(CATEGORY_CONFIG.keys()), key="p_cat"
+    )
+
+    cat_pts = data["points_master"].get(
+        p_cat,
+        {
+            "決勝": DEFAULT_PTS_RACE,
+            "予選": DEFAULT_PTS_QUALIFY,
+            "スプリント": DEFAULT_PTS_SPRINT,
+        },
+    )
+
+    st.write(f"**【{p_cat}】の基本ポイント配点（1位〜10位）**")
+
+    p_col1, p_col2, p_col3 = st.columns(3)
+    new_race_pts = []
+    new_qual_pts = []
+    new_sprt_pts = []
+
+    with p_col1:
+      st.markdown("**🏁 決勝ポイント**")
+      for i in range(10):
+        val = st.number_input(
+            f"{i+1}位",
+            min_value=0,
+            value=cat_pts["決勝"][i] if i < len(cat_pts["決勝"]) else 0,
+            key=f"m_pts_race_{p_cat}_{i}",
+        )
+        new_race_pts.append(val)
+
+    with p_col2:
+      st.markdown("**⏱️ 予選ポイント**")
+      for i in range(10):
+        val = st.number_input(
+            f"{i+1}位",
+            min_value=0,
+            value=cat_pts["予選"][i] if i < len(cat_pts["予選"]) else 0,
+            key=f"m_pts_qual_{p_cat}_{i}",
+        )
+        new_qual_pts.append(val)
+
+    with p_col3:
+      st.markdown("**⚡ スプリントポイント**")
+      for i in range(10):
+        val = st.number_input(
+            f"{i+1}位",
+            min_value=0,
+            value=(
+                cat_pts["スプリント"][i] if i < len(cat_pts["スプリント"]) else 0
+            ),
+            key=f"m_pts_sprt_{p_cat}_{i}",
+        )
+        new_sprt_pts.append(val)
+
+    if st.button(f"【{p_cat}】の基本ポイント設定を保存", type="primary"):
+      data["points_master"][p_cat] = {
+          "決勝": new_race_pts,
+          "予選": new_qual_pts,
+          "スプリント": new_sprt_pts,
+      }
+      save_data(data)
+      st.success(f"{p_cat} の基本ポイント配点を保存しました！")
 
 # --- サイドバー：レース結果の入力 ---
 st.sidebar.header("📝 結果入力")
@@ -302,57 +381,65 @@ session_type = st.sidebar.radio(
     "セッション種別", ["決勝", "予選", "スプリント"], key="session_type_input"
 )
 
-team_key = f"{s_cat}_{s_cls}"
-registered_teams = data["teams"].get(team_key, [])
-
-st.sidebar.markdown("---")
-st.sidebar.subheader("🎯 獲得ポイントの設定")
-
-if session_type == "予選":
-  default_pts = DEFAULT_PTS_QUALIFY
-elif session_type == "スプリント":
-  default_pts = DEFAULT_PTS_SPRINT
-else:
-  default_pts = DEFAULT_PTS_RACE
-
-custom_pts = []
-pts_cols = st.sidebar.columns(2)
-for i in range(10):
-  col = pts_cols[0] if i < 5 else pts_cols[1]
-  val = col.number_input(
-      f"{i+1}位 pt",
-      min_value=0,
-      max_value=100,
-      value=default_pts[i] if i < len(default_pts) else 0,
-      key=f"pts_{session_type}_{i}",
-  )
-  custom_pts.append(val)
-
-st.sidebar.markdown("---")
+# 開催日（日付）入力
+race_date = st.sidebar.date_input(
+    "開催日", datetime.date.today(), key="race_date_input"
+)
 
 race_name = st.sidebar.text_input(
     "レース名 / ラウンド", placeholder="例: Rd.1 岡山", key="race_name_input"
 )
 
+# ポイント取得（基本設定から自動取得）
+base_pts = data["points_master"].get(
+    s_cat,
+    {
+        "決勝": DEFAULT_PTS_RACE,
+        "予選": DEFAULT_PTS_QUALIFY,
+        "スプリント": DEFAULT_PTS_SPRINT,
+    },
+).get(session_type, DEFAULT_PTS_RACE)
+
+# WECなどの例外ポイント対応（オーバーライド）
+st.sidebar.markdown("---")
+use_custom_pts = st.sidebar.checkbox(
+    "⚠️ このレース専用のポイントを使う (WEC 24h等)", value=False
+)
+applied_pts = base_pts.copy()
+
+if use_custom_pts:
+  st.sidebar.caption("このレース限定の獲得ポイントを直接設定")
+  applied_pts = []
+  pts_cols = st.sidebar.columns(2)
+  for i in range(10):
+    col = pts_cols[0] if i < 5 else pts_cols[1]
+    val = col.number_input(
+        f"{i+1}位 pt",
+        min_value=0,
+        max_value=200,
+        value=base_pts[i] if i < len(base_pts) else 0,
+        key=f"custom_pts_{i}",
+    )
+    applied_pts.append(val)
+else:
+  st.sidebar.info(
+      f"配点: {base_pts[:5]}... (マスタの「{s_cat}」基本ポイントを自動適用)"
+  )
+
+st.sidebar.markdown("---")
+team_key = f"{s_cat}_{s_cls}"
+registered_teams = data["teams"].get(team_key, [])
+
 st.sidebar.caption("順位順にチームを選択してください")
 selected_results = []
-
-# 【改善1】選択済みチームを上位から順に自動除外するスマート選択肢
 available_teams = registered_teams.copy()
 
 if registered_teams:
   for rank in range(1, len(registered_teams) + 1):
-    # 選択肢は「未選択」＋「まだ選ばれていないチーム」
     options = ["(選択なし)"] + available_teams
-
-    team = st.sidebar.selectbox(
-        f"{rank}位",
-        options,
-        key=f"rank_select_{rank}",
-    )
+    team = st.sidebar.selectbox(f"{rank}位", options, key=f"rank_select_{rank}")
     if team != "(選択なし)":
       selected_results.append(team)
-      # 選ばれたチームは以降の順位の選択肢から除外する
       if team in available_teams:
         available_teams.remove(team)
 else:
@@ -387,8 +474,10 @@ if st.sidebar.button("結果を保存する", type="primary"):
 
       data["races"][s_year][s_cat][s_cls].append({
           "round_name": race_name,
+          "race_date": str(race_date),
           "session_type": session_type,
-          "points_table": custom_pts,
+          "is_custom_pts": use_custom_pts,
+          "points_table": applied_pts,
           "results": selected_results,
       })
       save_data(data)
@@ -443,7 +532,15 @@ with tab1:
 
     if round_races:
       for target in round_races:
-        st.subheader(f"📍 {sel_round} - 【{target.get('session_type', '決勝')}】")
+        r_date_str = target.get("race_date", "日付未設定")
+        is_custom = target.get("is_custom_pts", False)
+        pts_label = "⚠️ 特別ポイント" if is_custom else "通常ポイント"
+
+        st.subheader(
+            f"📍 {sel_round} - 【{target.get('session_type', '決勝')}】"
+        )
+        st.caption(f"📅 開催日: {r_date_str} ｜ 🎯 適用ルール: {pts_label}")
+
         pts_table = target.get("points_table", DEFAULT_PTS_RACE)
 
         df_res = pd.DataFrame({
@@ -455,7 +552,6 @@ with tab1:
             "チーム / 車両": target["results"],
         })
 
-        # 【改善2】内部スクロールを発生させず、全行を一気に見やすく表示する st.table に変更
         st.table(df_res)
 
         with st.expander(
@@ -542,7 +638,6 @@ with tab2:
           "合計ポイント": [f"{item[1]} pt" for item in sorted_scores],
       })
 
-      # ランキング表も全行スクロールなしでパッと見れるように適用
       st.table(df_rank)
     else:
       st.info("集計対象のデータがありません。")
