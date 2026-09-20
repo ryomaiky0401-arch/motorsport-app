@@ -120,7 +120,7 @@ def extract_text_from_pdf(pdf_file):
 
 
 def parse_race_pdf(text, registered_teams):
-  """PDFからメタ情報（日付・レース名・セッション）と順位結果を抽出"""
+  """PDFからメタ情報（日付・レース名・セッション）と順位・PDF上のチーム名を直接抽出"""
   parsed_info = {
       "race_name": "",
       "race_date": datetime.date.today(),
@@ -150,42 +150,63 @@ def parse_race_pdf(text, registered_teams):
   else:
     parsed_info["session_type"] = "決勝"
 
-  # 3. レース名/ラウンドの抽出 (例: Rd.1, Round 1, SUPER GT Rd.5 など)
+  # 3. レース名/ラウンドの抽出
   rd_match = re.search(
       r"(Rd\.\d+|Round\s*\d+|第\d+戦)[^\n]*", text, re.IGNORECASE
   )
   if rd_match:
     parsed_info["race_name"] = rd_match.group(0).strip()
   else:
-    # 該当がなければヘッダー1行目を仮設定
     parsed_info["race_name"] = lines[0] if lines else "公式レース"
 
-  # 4. リザルト・チームの抽出
+  # 4. PDFからの直接リザルト解析（既存マスタに縛られずPDF表記を正とする）
   for line in lines:
-    matched_team = None
-    for team in registered_teams:
-      num_match = re.search(r"#(\d+)", team)
-      if num_match and f"#{num_match.group(1)}" in line:
-        matched_team = team
-        break
-      elif team in line:
-        matched_team = team
-        break
+    # 行頭付近に順位数字または車番（#xx または 数字）を含む行をリザルト行と判定
+    # 例: "1 36 au TOM'S GR Supra 84 2:10'15.123" や "1 #36 au TOM'S ..." など
+    res_match = re.search(
+        r"^(?:\d+\s+)?(?:#?(\d+))\s+(.+?)\s+(\d{1,3})\s+(\d+[:'’]\d+[\.'’]\d+|\+\d+\s*Lap|\d+[\.'’]\d+)",
+        line,
+    )
 
-    if matched_team:
-      laps_match = re.search(r"\b(\d{1,3})\s*(Laps|laps|周|Lap)?\b", line)
-      time_match = re.search(
-          r"(\d+[:'’]\d+[\.'’]\d+|\d+[\.'’]\d+|\+\d+\s*Lap)", line
+    if res_match:
+      car_num = res_match.group(1)
+      raw_name = res_match.group(2).strip()
+      laps = res_match.group(3)
+      total_time = res_match.group(4)
+
+      # 登録済みチームで車番が一致するものがあれば優先（後からの名前ブレ防止のため）
+      matched_team = None
+      for team in registered_teams:
+        if f"#{car_num}" in team or f"#{car_num} " in team:
+          matched_team = team
+          break
+
+      # マスタに一致がなければPDF記載通りの名前を採用
+      final_team_name = (
+          matched_team if matched_team else f"#{car_num} {raw_name}"
       )
 
-      laps = laps_match.group(1) if laps_match else "-"
-      total_time = time_match.group(1) if time_match else "-"
-
       parsed_info["results"].append({
-          "team": matched_team,
+          "team": final_team_name,
           "laps": laps,
           "time": total_time,
       })
+    else:
+      # マスタチーム名との完全部分一致フォールバック（従来の補完）
+      for team in registered_teams:
+        num_match = re.search(r"#(\d+)", team)
+        if num_match and f"#{num_match.group(1)}" in line:
+          if not any(r["team"] == team for r in parsed_info["results"]):
+            laps_m = re.search(r"\b(\d{1,3})\s*(Laps|周|Lap)?\b", line)
+            time_m = re.search(
+                r"(\d+[:'’]\d+[\.'’]\d+|\d+[\.'’]\d+|\+\d+\s*Lap)", line
+            )
+            parsed_info["results"].append({
+                "team": team,
+                "laps": laps_m.group(1) if laps_m else "-",
+                "time": time_m.group(1) if time_m else "-",
+            })
+          break
 
   return parsed_info
 
@@ -213,7 +234,9 @@ s_cat = st.sidebar.selectbox(
 s_cls = st.sidebar.selectbox("クラス", CATEGORY_CONFIG[s_cat], key="s_cls")
 
 team_key = f"{s_cat}_{s_cls}"
-registered_teams = data["teams"].get(team_key, [])
+if team_key not in data["teams"]:
+  data["teams"][team_key] = []
+registered_teams = data["teams"][team_key]
 
 # --- PDF自動解析処理 ---
 st.sidebar.markdown("---")
@@ -237,14 +260,14 @@ if pdf_file is not None:
 
     if pdf_results:
       st.sidebar.success(
-          f"✨ レース名・日付・{len(pdf_results)}台のデータを自動検出しました！"
+          f"✨ PDFから {len(pdf_results)} 台の情報を直接読み込みました！"
       )
     else:
       st.sidebar.warning(
-          "PDFからチーム名を一致させられませんでした。チーム名登録をご確認ください。"
+          "PDFからリザルト行を検出できませんでした。手動で入力してください。"
       )
   else:
-    st.sidebar.error("PDF解析ライブラリがありません。(requirements.txtを確認してください)")
+    st.sidebar.error("PDF解析ライブラリがありません。")
 
 st.sidebar.markdown("---")
 
@@ -296,38 +319,45 @@ if use_custom_pts:
 selected_results = []
 laps_list = []
 times_list = []
-available_teams = registered_teams.copy()
 
-if registered_teams:
-  for rank in range(1, len(registered_teams) + 1):
-    default_team = "(選択なし)"
-    default_lap = "-"
-    default_time = "-"
+# リザルト枠の決定（PDF解析件数または登録チーム数の大きい方）
+max_ranks = max(len(pdf_results), len(registered_teams), 10)
 
-    if pdf_results and rank <= len(pdf_results):
-      item = pdf_results[rank - 1]
-      default_team = item["team"]
-      default_lap = item["laps"]
-      default_time = item["time"]
+for rank in range(1, max_ranks + 1):
+  default_team_val = ""
+  default_lap = "-"
+  default_time = "-"
 
-    options = ["(選択なし)"] + available_teams
-    idx = options.index(default_team) if default_team in options else 0
+  if pdf_results and rank <= len(pdf_results):
+    item = pdf_results[rank - 1]
+    default_team_val = item["team"]
+    default_lap = item["laps"]
+    default_time = item["time"]
+  elif rank <= len(registered_teams):
+    default_team_val = registered_teams[rank - 1]
 
-    team = st.sidebar.selectbox(f"{rank}位", options, index=idx, key=f"rank_s_{rank}")
+  # チーム表記を直接編集可能なテキスト入力欄に変更（PDF表記をベースにしつつ後から手動修正可能）
+  team_input = st.sidebar.text_input(
+      f"{rank}位 チーム表記", value=default_team_val, key=f"rank_t_{rank}"
+  )
 
-    if team != "(選択なし)":
-      selected_results.append(team)
-      laps_list.append(default_lap)
-      times_list.append(default_time)
-      if team in available_teams:
-        available_teams.remove(team)
+  if team_input.strip():
+    selected_results.append(team_input.strip())
+    laps_list.append(default_lap)
+    times_list.append(default_time)
 
 if st.sidebar.button("結果を保存する", type="primary"):
   if not race_name:
     st.sidebar.error("レース名を入力してください。")
   elif not selected_results:
-    st.sidebar.error("順位を選択するかPDFをアップロードしてください。")
+    st.sidebar.error("順位・チーム名を入力してください。")
   else:
+    # 未登録のチーム名があればチームマスタに自動追加
+    for t_name in selected_results:
+      if t_name not in registered_teams:
+        registered_teams.append(t_name)
+    data["teams"][team_key] = registered_teams
+
     if s_year not in data["races"]:
       data["races"][s_year] = {}
     if s_cat not in data["races"][s_year]:
@@ -415,7 +445,7 @@ with tab1:
                 f"{pts_table[i]} pt" if i < len(pts_table) else "0 pt"
                 for i in range(len(res_teams))
             ],
-            "チーム / 車両": res_teams,
+            "チーム / 車両表記": res_teams,
             "周回数": res_laps,
             "レースタイム / 差": res_times,
         })
@@ -470,7 +500,7 @@ with tab2:
       sorted_scores = sorted(scores.items(), key=lambda x: x[1], reverse=True)
       df_rank = pd.DataFrame({
           "順位": [f"{i+1} 位" for i in range(len(sorted_scores))],
-          "チーム / 車両": [item[0] for item in sorted_scores],
+          "チーム / 車両表記": [item[0] for item in sorted_scores],
           "合計ポイント": [f"{item[1]} pt" for item in sorted_scores],
       })
       st.table(df_rank)
@@ -479,4 +509,49 @@ with tab2:
   else:
     st.info(f"{r_year} のランキングデータはありません。")
 
-# --- タブ3 & 4 は前述同様 ---
+# --- タブ3: 車両・チーム・ポイントマスタ管理 ---
+with tab3:
+  st.header("⚙️ チーム・表示名マスタ管理")
+  m_cat = st.selectbox(
+      "カテゴリー", list(CATEGORY_CONFIG.keys()), key="m_cat"
+  )
+  m_cls = st.selectbox("クラス", CATEGORY_CONFIG[m_cat], key="m_cls")
+
+  m_key = f"{m_cat}_{m_cls}"
+  current_teams = data["teams"].get(m_key, [])
+
+  st.write("登録済みチーム一覧（PDFから自動登録された名前もここに保存されます）")
+
+  updated_teams = []
+  for idx, team_name in enumerate(current_teams):
+    col_t1, col_t2 = st.columns([4, 1])
+    with col_t1:
+      new_name = st.text_input(
+          f"チーム {idx+1}",
+          value=team_name,
+          key=f"m_team_{m_key}_{idx}",
+          label_visibility="collapsed",
+      )
+    with col_t2:
+      del_check = st.checkbox("削除", key=f"m_del_{m_key}_{idx}")
+    if not del_check and new_name.strip():
+      updated_teams.append(new_name.strip())
+
+  new_add = st.text_input("新規チーム手動追加", placeholder="例: #99 NEW TEAM")
+  if st.button("チーム一覧を保存・更新"):
+    if new_add.strip():
+      updated_teams.append(new_add.strip())
+    data["teams"][m_key] = updated_teams
+    save_data(data)
+    st.success("チーム一覧を更新しました！")
+    st.rerun()
+
+# --- タブ4: バックアップ ---
+with tab4:
+  st.header("💾 バックアップ / 復元")
+  st.download_button(
+      "📥 データをJSON形式でダウンロード",
+      data=json.dumps(data, ensure_ascii=False, indent=2),
+      file_name="race_data_backup.json",
+      mime="application/json",
+  )
