@@ -4,35 +4,179 @@ import os
 import pandas as pd
 import streamlit as st
 
-DATA_FILE = "race_data_v13.json"
+DATA_FILE = "race_data_v12.json"
 
 CATEGORY_CONFIG = {
     "SUPER GT": ["GT500", "GT300"],
     "Super Formula": ["総合"],
     "WEC": ["Hypercar", "LMGT3"],
     "F1": ["総合"],
+    "F2": ["総合"],
+    "F3": ["総合"],
     "GTWC Asia": ["Pro", "Pro-Am", "Silver", "Am"],
+    "Japan Cup": ["Pro", "Pro-Am", "Silver", "Am"],
 }
 
-# 各カテゴリーのデフォルト初期チームリスト（入力の手間を減らすためのプリセット）
-DEFAULT_TEAMS = {
+PRESET_TEAMS = {
     "SUPER GT_GT500": [
+        "#8 ARTA MUGEN HRC PRELUDE-GT",
+        "#12 TRS IMPUL with SDG Z",
+        "#14 ENEOS X PRIME GR Supra",
+        "#16 ARTA MUGEN HRC PRELUDE-GT",
+        "#17 Astemo HRC PRELUDE-GT",
+        "#19 WedsSport BANDOH GR Supra",
+        "#23 MOTUL Niterra Z",
+        "#24 リアライズコーポレーション Z",
         "#36 au TOM'S GR Supra",
         "#37 Deloitte TOM'S GR Supra",
-        "#3 NITERRA MOTUL Z",
-        "#23 MOTUL AUTECH Z",
-        "#100 STANLEY CIVIC TYPE R-GT",
-        "#8 ARTA CIVIC TYPE R-GT #8",
-        "#16 ARTA CIVIC TYPE R-GT #16",
-        "#14 ENEOS X PRIME GR Supra",
         "#38 KeePer CERUMO GR Supra",
         "#39 DENSO KOBELCO SARD GR Supra",
-        "#12 MARELLI IMPUL Z",
-        "#17 Astemo CIVIC TYPE R-GT",
-        "#64 Modulo CIVIC TYPE R-GT",
-        "#19 WedsSport ADVAN GR Supra",
-        "#24 リアライズコーポレーション ADVAN Z",
-    ]
+        "#64 Modulo HRC PRELUDE-GT",
+        "#100 STANLEY HRC PRELUDE-GT",
+    ],
+    "SUPER GT_GT300": [
+        "#2 muta Racing GR86 GT",
+        "#4 グッドスマイル 初音ミク AMG",
+        "#6 UNI-CONSTRUCTION AMG GT3",
+        "#7 BMW M Team Studie x CSL",
+        "#9 PACIFIC VSPO NAC AMG",
+        "#11 GAINER TANAX Z",
+        "#18 UPGARAGE NSX GT3",
+        "#20 シェイドレーシング GR86 GT",
+        "#22 アールキューズ AMG GT3",
+        "#25 HOPPPY Schatz GR Supra",
+        "#30 apr GR86 GT",
+        "#31 apr LC500h GT",
+        "#45 PONOS FERRARI 296 GT3",
+        "#48 NILZZ Racing GT-R",
+        "#50 ANEST IWATA Racing RC F GT3",
+        "#52 埼玉 Green Brave GR Supra GT",
+        "#56 リアライズ日産メカニックチャレンジ GT-R",
+        "#60 LMcorsa GR Supra GT",
+        "#61 SUBARU BRZ R&D SPORT",
+        "#65 LEON PYRAMID AMG",
+        "#87 JLOC Lamborghini Huracan GT3",
+        "#88 JLOC Lamborghini Huracan GT3",
+        "#96 K-tunes RC F GT3",
+        "#360 RUNUP RIVAUX GT-R",
+        "#777 D'station Vantage GT3",
+    ],
+    "F1_総合": [
+        "Oracle Red Bull Racing",
+        "Mercedes-AMG PETRONAS F1 Team",
+        "Scuderia Ferrari HP",
+        "McLaren Formula 1 Team",
+        "Aston Martin Aramco F1 Team",
+        "BWT Alpine F1 Team",
+        "Williams Racing",
+        "Visa Cash App RB F1 Team",
+        "MoneyGram Haas F1 Team",
+        "Stake F1 Team Kick Sauber",
+        "Cadillac Formula 1 Team",
+    ],
+    "F2_総合": [
+        "ART Grand Prix",
+        "PREMA Racing",
+        "Rodin Motorsport",
+        "DAMS Lucas Oil",
+        "Invicta Racing",
+        "MP Motorsport",
+        "Van Amersfoort Racing",
+        "Hitech Pulse-Eight",
+        "Campos Racing",
+        "Trident",
+        "PHM AIX Racing",
+    ],
+    "F3_総合": [
+        "PREMA Racing",
+        "Trident",
+        "ART Grand Prix",
+        "Campos Racing",
+        "Hitech Pulse-Eight",
+        "MP Motorsport",
+        "Van Amersfoort Racing",
+        "Rodin Motorsport",
+        "AIX Racing",
+        "Jenzer Motorsport",
+    ],
+    "WEC_Hypercar": [
+        "#2 Cadillac Racing",
+        "#5 Porsche Penske Motorsport",
+        "#6 Porsche Penske Motorsport",
+        "#7 TOYOTA GAZOO Racing",
+        "#8 TOYOTA GAZOO Racing",
+        "#11 Isotta Fraschini",
+        "#12 Hertz Team JOTA",
+        "#15 BMW M Team WRT",
+        "#20 BMW M Team WRT",
+        "#35 Alpine Endurance Team",
+        "#36 Alpine Endurance Team",
+        "#38 Hertz Team JOTA",
+        "#50 Ferrari AF Corse",
+        "#51 Ferrari AF Corse",
+        "#63 Lamborghini Iron Lynx",
+        "#83 AF Corse (Ferrari)",
+        "#93 Peugeot TotalEnergies",
+        "#94 Peugeot TotalEnergies",
+        "#99 Proton Competition",
+    ],
+    "WEC_LMGT3": [
+        "#27 Heart of Racing Team (Aston Martin)",
+        "#31 Team WRT (BMW)",
+        "#46 Team WRT (BMW)",
+        "#54 Vista AF Corse (Ferrari)",
+        "#55 Vista AF Corse (Ferrari)",
+        "#59 United Autosports (McLaren)",
+        "#77 Proton Competition (Ford)",
+        "#78 Akkodis ASP Team (Lexus)",
+        "#81 TF Sport (Corvette)",
+        "#82 TF Sport (Corvette)",
+        "#85 Iron Dames (Lamborghini)",
+        "#87 Akkodis ASP Team (Lexus)",
+        "#88 Proton Competition (Ford)",
+        "#91 Manthey EMA (Porsche)",
+        "#92 Manthey PureRxcing (Porsche)",
+        "#95 United Autosports (McLaren)",
+    ],
+    "Japan Cup_Pro": [
+        "#1 Team 5ZIGEN (Nissan GT-R GT3)",
+        "#7 Comet Racing (Ferrari 488 GT3)",
+        "#14 MacPherson Racing (Porsche 911 GT3 R)",
+        "#98 K-tunes Racing (Lexus RC F GT3)",
+    ],
+    "Japan Cup_Pro-Am": [
+        "#3 Bingo Racing (Ferrari 296 GT3)",
+        "#18 TEAM UPGARAGE (Honda NSX GT3)",
+        "#36 TEAM GBOX (Porsche 911 GT3 R)",
+        "#97 YOGIBO Racing (McLaren 720S GT3)",
+    ],
+    "Japan Cup_Am": [
+        "#5 RM Motorsport (BMW M4 GT3)",
+        "#16 ABSSA Motorsport (McLaren 720S GT3)",
+        "#22 D'station Racing (Aston Martin Vantage)",
+    ],
+    "GTWC Asia_Pro": [
+        "#4 Craft-Bamboo Racing (Mercedes-AMG)",
+        "#13 Phantom Global Racing (Porsche)",
+        "#88 Absolute Racing (Porsche/Ferrari)",
+        "#99 Triple Eight JMR (Mercedes-AMG)",
+    ],
+    "GTWC Asia_Pro-Am": [
+        "#2 Origine Motorsport (Porsche)",
+        "#29 VSR (Lamborghini Huracan)",
+        "#63 Vincenzo Sospiri Racing (Lamborghini)",
+        "#911 Absolute Racing (Porsche)",
+    ],
+    "GTWC Asia_Silver": [
+        "#5 Climax Racing (Mercedes-AMG)",
+        "#11 Harmony Racing (Ferrari 296 GT3)",
+        "#89 Team KUSS (Porsche 911 GT3 R)",
+    ],
+    "GTWC Asia_Am": [
+        "#25 AMAC Motorsport (Porsche)",
+        "#71 Team EBM (Porsche 911 GT3 R)",
+        "#84 Garage 75 (Ferrari 488 GT3)",
+    ],
 }
 
 DEFAULT_PTS_RACE = [25, 18, 15, 12, 10, 8, 6, 4, 2, 1]
@@ -46,12 +190,14 @@ def load_data():
   if os.path.exists(DATA_FILE):
     with open(DATA_FILE, "r", encoding="utf-8") as f:
       data = json.load(f)
-      if "teams" not in data:
-        data["teams"] = {}
+      if "teams" in data:
+        for k, v in PRESET_TEAMS.items():
+          if k not in data["teams"] or not data["teams"][k]:
+            data["teams"][k] = v
       if "points_master" not in data:
         data["points_master"] = {}
       return data
-  return {"races": {}, "teams": {}, "points_master": {}}
+  return {"races": {}, "teams": PRESET_TEAMS.copy(), "points_master": {}}
 
 
 def save_data(data):
@@ -60,68 +206,191 @@ def save_data(data):
 
 
 st.set_page_config(
-    page_title="モータースポーツ総合結果 & ランキング", layout="wide"
+    page_title="モータースポーツ総合結果 & ランキング",
+    layout="wide",
+    initial_sidebar_state="expanded",
 )
 st.title("🏎️ モータースポーツ ダッシュボード")
 
 data = load_data()
 
-tab1, tab2, tab3 = st.tabs(
-    ["🏁 レース結果閲覧・編集", "🏆 ポイントランキング", "⚙️ チームマスタ管理"]
-)
+tab1, tab2, tab3, tab4 = st.tabs([
+    "🏁 レース結果閲覧・編集",
+    "🏆 ポイントランキング",
+    "⚙️ 車両・チーム・ポイントマスタ管理",
+    "💾 データバックアップ / 復元",
+])
 
-# ---------------------------------------------------------
-# サイドバー：確実な「マスタ選択式」結果入力
-# ---------------------------------------------------------
-st.sidebar.header("📝 レース結果の入力")
+# --- タブ4: バックアップ・復元 ---
+with tab4:
+  st.header("💾 データのバックアップと復元")
+  c_bak1, c_bak2 = st.columns(2)
+  with c_bak1:
+    json_str = json.dumps(data, ensure_ascii=False, indent=2)
+    st.download_button(
+        label="📥 データをバックアップ（JSON保存）",
+        data=json_str,
+        file_name="motorsport_data_backup.json",
+        mime="application/json",
+    )
+  with c_bak2:
+    uploaded_file = st.file_uploader(
+        "バックアップファイルを選択", type=["json"]
+    )
+    if uploaded_file is not None:
+      if st.button("ファイルを読み込んでデータを復元する"):
+        loaded_data = json.load(uploaded_file)
+        data.update(loaded_data)
+        save_data(data)
+        st.success("データの復元が完了しました！")
+        st.rerun()
+
+# --- タブ3: マスタ管理（チーム & カテゴリー基本ポイント） ---
+with tab3:
+  st.header("⚙️ マスタ管理")
+
+  m_tab1, m_tab2 = st.tabs(
+      ["🏎️ 参加チーム・車両の管理", "🎯 シリーズ基本ポイント設定"]
+  )
+
+  with m_tab1:
+    c1, c2 = st.columns(2)
+    with c1:
+      m_cat = st.selectbox(
+          "カテゴリー", list(CATEGORY_CONFIG.keys()), key="m_cat"
+      )
+    with c2:
+      m_cls = st.selectbox("クラス", CATEGORY_CONFIG[m_cat], key="m_cls")
+
+    key_name = f"{m_cat}_{m_cls}"
+    current_teams = data["teams"].get(key_name, [])
+
+    st.subheader("➕ チーム・車両の新規追加")
+    new_team = st.text_input("チーム名 / 車両名")
+    if st.button("チームを追加"):
+      if new_team and new_team not in current_teams:
+        current_teams.append(new_team)
+        data["teams"][key_name] = current_teams
+        save_data(data)
+        st.success(f"「{new_team}」を追加しました！")
+        st.rerun()
+
+    st.divider()
+    st.subheader("✏️ 登録済みチームの編集・削除")
+    if current_teams:
+      selected_edit_team = st.selectbox(
+          "編集・削除するチームを選択", current_teams
+      )
+      col_e1, col_e2 = st.columns(2)
+      with col_e1:
+        updated_name = st.text_input(
+            "修正後の名称", value=selected_edit_team, key="edit_input"
+        )
+        if st.button("名称を更新する"):
+          idx = current_teams.index(selected_edit_team)
+          current_teams[idx] = updated_name
+          data["teams"][key_name] = current_teams
+          save_data(data)
+          st.success("名称を更新しました！")
+          st.rerun()
+      with col_e2:
+        if st.button("このチームを削除する", type="primary"):
+          current_teams.remove(selected_edit_team)
+          data["teams"][key_name] = current_teams
+          save_data(data)
+          st.warning(f"「{selected_edit_team}」を削除しました。")
+          st.rerun()
+    else:
+      st.info("まだ登録されていません。")
+
+  with m_tab2:
+    st.subheader("🎯 カテゴリーごとのデフォルトポイント設定")
+    st.caption("ここで設定した配点が、結果入力時に自動的に適用されます。")
+    p_cat = st.selectbox(
+        "対象カテゴリー選択", list(CATEGORY_CONFIG.keys()), key="p_cat"
+    )
+
+    cat_pts = data["points_master"].get(
+        p_cat,
+        {
+            "決勝": DEFAULT_PTS_RACE,
+            "予選": DEFAULT_PTS_QUALIFY,
+            "スプリント": DEFAULT_PTS_SPRINT,
+        },
+    )
+
+    st.write(f"**【{p_cat}】の基本ポイント配点（1位〜10位）**")
+
+    p_col1, p_col2, p_col3 = st.columns(3)
+    new_race_pts = []
+    new_qual_pts = []
+    new_sprt_pts = []
+
+    with p_col1:
+      st.markdown("**🏁 決勝ポイント**")
+      for i in range(10):
+        val = st.number_input(
+            f"{i+1}位",
+            min_value=0,
+            value=cat_pts["決勝"][i] if i < len(cat_pts["決勝"]) else 0,
+            key=f"m_pts_race_{p_cat}_{i}",
+        )
+        new_race_pts.append(val)
+
+    with p_col2:
+      st.markdown("**⏱️ 予選ポイント**")
+      for i in range(10):
+        val = st.number_input(
+            f"{i+1}位",
+            min_value=0,
+            value=cat_pts["予選"][i] if i < len(cat_pts["予選"]) else 0,
+            key=f"m_pts_qual_{p_cat}_{i}",
+        )
+        new_qual_pts.append(val)
+
+    with p_col3:
+      st.markdown("**⚡ スプリントポイント**")
+      for i in range(10):
+        val = st.number_input(
+            f"{i+1}位",
+            min_value=0,
+            value=(
+                cat_pts["スプリント"][i] if i < len(cat_pts["スプリント"]) else 0
+            ),
+            key=f"m_pts_sprt_{p_cat}_{i}",
+        )
+        new_sprt_pts.append(val)
+
+    if st.button(f"【{p_cat}】の基本ポイント設定を保存", type="primary"):
+      data["points_master"][p_cat] = {
+          "決勝": new_race_pts,
+          "予選": new_qual_pts,
+          "スプリント": new_sprt_pts,
+      }
+      save_data(data)
+      st.success(f"{p_cat} の基本ポイント配点を保存しました！")
+
+# --- サイドバー：レース結果の入力 ---
+st.sidebar.header("📝 結果入力")
 s_year = st.sidebar.selectbox("シーズン年度", YEARS, key="s_year")
 s_cat = st.sidebar.selectbox(
     "カテゴリー", list(CATEGORY_CONFIG.keys()), key="s_cat"
 )
 s_cls = st.sidebar.selectbox("クラス", CATEGORY_CONFIG[s_cat], key="s_cls")
-
-team_key = f"{s_cat}_{s_cls}"
-
-# 該当クラスの登録済みチームを取得
-registered_teams = data["teams"].get(team_key, [])
-
-# プリセット初期値が未読み込みの場合はセット
-if not registered_teams and team_key in DEFAULT_TEAMS:
-  data["teams"][team_key] = DEFAULT_TEAMS[team_key]
-  save_data(data)
-  registered_teams = DEFAULT_TEAMS[team_key]
-
-st.sidebar.markdown("---")
-
 session_type = st.sidebar.radio(
-    "セッション種別", ["決勝", "予選", "スプリント"], index=0
+    "セッション種別", ["決勝", "予選", "スプリント"], key="session_type_input"
 )
-race_date = st.sidebar.date_input("開催日", value=datetime.date.today())
-race_name = st.sidebar.text_input("レース名 / ラウンド", placeholder="例: Rd.1 岡山")
 
-st.sidebar.markdown("---")
-st.sidebar.subheader("🏆 順位の選択")
+# 開催日（日付）入力
+race_date = st.sidebar.date_input(
+    "開催日", datetime.date.today(), key="race_date_input"
+)
 
-if not registered_teams:
-  st.sidebar.warning(
-      "⚠️ チームがまだ登録されていません。「⚙️ チームマスタ管理」タブでチームを追加してください。"
-  )
-  team_options = ["(未登録)"]
-else:
-  team_options = ["-- 選択してください --"] + registered_teams
+race_name = st.sidebar.text_input(
+    "レース名 / ラウンド", placeholder="例: Rd.1 岡山", key="race_name_input"
+)
 
-# 1位〜10位（必要に応じて拡大可能）の選択ボックス
-max_rank_input = st.sidebar.slider("入力する順位の数", 5, 20, 10)
-
-selected_results = []
-for rank in range(1, max_rank_input + 1):
-  selected_team = st.sidebar.selectbox(
-      f"{rank} 位", options=team_options, key=f"select_rank_{rank}"
-  )
-  if selected_team and selected_team != "-- 選択してください --":
-    selected_results.append(selected_team)
-
-# ポイントルールの設定
+# ポイント取得（基本設定から自動取得）
 base_pts = data["points_master"].get(
     s_cat,
     {
@@ -131,12 +400,15 @@ base_pts = data["points_master"].get(
     },
 ).get(session_type, DEFAULT_PTS_RACE)
 
+# WECなどの例外ポイント対応（オーバーライド）
+st.sidebar.markdown("---")
 use_custom_pts = st.sidebar.checkbox(
-    "⚠️ このレース専用ポイントを使う", value=False
+    "⚠️ このレース専用のポイントを使う (WEC 24h等)", value=False
 )
 applied_pts = base_pts.copy()
 
 if use_custom_pts:
+  st.sidebar.caption("このレース限定の獲得ポイントを直接設定")
   applied_pts = []
   pts_cols = st.sidebar.columns(2)
   for i in range(10):
@@ -146,43 +418,78 @@ if use_custom_pts:
         min_value=0,
         max_value=200,
         value=base_pts[i] if i < len(base_pts) else 0,
-        key=f"c_pt_{i}",
+        key=f"custom_pts_{i}",
     )
     applied_pts.append(val)
+else:
+  st.sidebar.info(
+      f"配点: {base_pts[:5]}... (マスタの「{s_cat}」基本ポイントを自動適用)"
+  )
 
 st.sidebar.markdown("---")
-if st.sidebar.button("💾 レース結果を保存する", type="primary"):
+team_key = f"{s_cat}_{s_cls}"
+registered_teams = data["teams"].get(team_key, [])
+
+st.sidebar.caption("順位順にチームを選択してください")
+selected_results = []
+available_teams = registered_teams.copy()
+
+if registered_teams:
+  for rank in range(1, len(registered_teams) + 1):
+    options = ["(選択なし)"] + available_teams
+    team = st.sidebar.selectbox(f"{rank}位", options, key=f"rank_select_{rank}")
+    if team != "(選択なし)":
+      selected_results.append(team)
+      if team in available_teams:
+        available_teams.remove(team)
+else:
+  st.sidebar.warning("このクラスのチーム一覧はまだ登録されていません。")
+
+if st.sidebar.button("結果を保存する", type="primary"):
   if not race_name:
     st.sidebar.error("レース名を入力してください。")
   elif not selected_results:
-    st.sidebar.error("少なくとも1つの順位を選択してください。")
+    st.sidebar.error("少なくとも1つ以上の順位を選択してください。")
   else:
-    if s_year not in data["races"]:
-      data["races"][s_year] = {}
-    if s_cat not in data["races"][s_year]:
-      data["races"][s_year][s_cat] = {}
-    if s_cls not in data["races"][s_year][s_cat]:
-      data["races"][s_year][s_cat][s_cls] = []
-
-    data["races"][s_year][s_cat][s_cls].append({
-        "round_name": race_name,
-        "race_date": str(race_date),
-        "session_type": session_type,
-        "is_custom_pts": use_custom_pts,
-        "points_table": applied_pts,
-        "results": selected_results,
-    })
-    save_data(data)
-    st.sidebar.success(
-        f"[{s_year}]「{race_name} ({session_type})」の結果を保存しました！"
+    existing_races = (
+        data.get("races", {}).get(s_year, {}).get(s_cat, {}).get(s_cls, [])
     )
-    st.rerun()
+    is_already_exist = any(
+        r.get("round_name") == race_name
+        and r.get("session_type", "決勝") == session_type
+        for r in existing_races
+    )
 
-# ---------------------------------------------------------
-# タブ1: レース結果閲覧
-# ---------------------------------------------------------
+    if is_already_exist:
+      st.sidebar.error(
+          f"⚠️ 「{race_name}」の【{session_type}】結果はすでに登録されています！"
+      )
+    else:
+      if s_year not in data["races"]:
+        data["races"][s_year] = {}
+      if s_cat not in data["races"][s_year]:
+        data["races"][s_year][s_cat] = {}
+      if s_cls not in data["races"][s_year][s_cat]:
+        data["races"][s_year][s_cat][s_cls] = []
+
+      data["races"][s_year][s_cat][s_cls].append({
+          "round_name": race_name,
+          "race_date": str(race_date),
+          "session_type": session_type,
+          "is_custom_pts": use_custom_pts,
+          "points_table": applied_pts,
+          "results": selected_results,
+      })
+      save_data(data)
+      st.sidebar.success(
+          f"[{s_year}]「{race_name} ({session_type})」の結果を保存しました！"
+      )
+      st.rerun()
+
+# --- タブ1: レース結果閲覧・編集・削除 ---
 with tab1:
-  st.header("🏁 レース結果 閲覧")
+  st.header("🏁 レース結果 閲覧・編集")
+
   v_y, v_c1, v_c2 = st.columns(3)
   with v_y:
     v_year = st.selectbox("年度", YEARS, key="v_year")
@@ -202,9 +509,10 @@ with tab1:
         list(set(r.get("round_name", r.get("race_name")) for r in races_list)),
         reverse=True,
     )
+
     r_col1, r_col2 = st.columns(2)
     with r_col1:
-      sel_round = st.selectbox("ラウンドを選択", rounds)
+      sel_round = st.selectbox("ラウンド（大会）を選択", rounds)
     with r_col2:
       sel_session_filter = st.selectbox(
           "セッション選択", ["すべて", "決勝", "予選", "スプリント"]
@@ -224,31 +532,77 @@ with tab1:
 
     if round_races:
       for target in round_races:
+        r_date_str = target.get("race_date", "日付未設定")
+        is_custom = target.get("is_custom_pts", False)
+        pts_label = "⚠️ 特別ポイント" if is_custom else "通常ポイント"
+
         st.subheader(
             f"📍 {sel_round} - 【{target.get('session_type', '決勝')}】"
         )
-        st.caption(f"📅 開催日: {target.get('race_date', '未設定')}")
+        st.caption(f"📅 開催日: {r_date_str} ｜ 🎯 適用ルール: {pts_label}")
 
         pts_table = target.get("points_table", DEFAULT_PTS_RACE)
-        res_teams = target.get("results", [])
 
         df_res = pd.DataFrame({
-            "順位": [f"P{i+1}" for i in range(len(res_teams))],
-            "獲得pt": [
+            "順位": [f"P{i+1}" for i in range(len(target["results"]))],
+            "獲得ポイント": [
                 f"{pts_table[i]} pt" if i < len(pts_table) else "0 pt"
-                for i in range(len(res_teams))
+                for i in range(len(target["results"]))
             ],
-            "チーム / 車両": res_teams,
+            "チーム / 車両": target["results"],
         })
-        st.table(df_res)
-    else:
-      st.info("該当するセッションのデータがありません。")
-  else:
-    st.info("登録されているレースデータがありません。")
 
-# ---------------------------------------------------------
-# タブ2: ポイントランキング
-# ---------------------------------------------------------
+        st.table(df_res)
+
+        with st.expander(
+            f"⚙️ 「{sel_round} ({target.get('session_type', '決勝')})」の編集・削除"
+        ):
+          st.write("順位結果の編集:")
+          edit_results = []
+          team_options = data["teams"].get(f"{v_cat}_{v_cls}", [])
+          for idx_r, old_team in enumerate(target["results"]):
+            opt = (
+                ["(選択なし)"] + team_options
+                if old_team in team_options
+                else ["(選択なし)", old_team] + team_options
+            )
+            edit_team = st.selectbox(
+                f"{idx_r+1}位",
+                opt,
+                index=opt.index(old_team) if old_team in opt else 0,
+                key=f"edit_{sel_round}_{target.get('session_type')}_{idx_r}",
+            )
+            if edit_team != "(選択なし)":
+              edit_results.append(edit_team)
+
+          e_col1, e_col2 = st.columns(2)
+          with e_col1:
+            if st.button(
+                "変更を保存する",
+                key=f"save_btn_{sel_round}_{target.get('session_type')}",
+            ):
+              target["results"] = edit_results
+              save_data(data)
+              st.success("結果を更新しました！")
+              st.rerun()
+          with e_col2:
+            if st.button(
+                "🗑️ このセッション結果を削除",
+                type="primary",
+                key=f"del_btn_{sel_round}_{target.get('session_type')}",
+            ):
+              races_list.remove(target)
+              save_data(data)
+              st.warning("データを削除しました。")
+              st.rerun()
+
+        st.markdown("---")
+    else:
+      st.info(f"「{sel_round}」の【{sel_session_filter}】データはありません。")
+  else:
+    st.info(f"{v_year} のレース結果データはまだありません。")
+
+# --- タブ2: ポイントランキング自動計算 ---
 with tab2:
   st.header("🏆 年間ポイントランキング")
   r_y, r_c1, r_c2 = st.columns(3)
@@ -267,7 +621,9 @@ with tab2:
       and r_cls in data["races"][r_year][r_cat]
   ):
     scores = {}
-    for r in data["races"][r_year][r_cat][r_cls]:
+    races = data["races"][r_year][r_cat][r_cls]
+
+    for r in races:
       pts_table = r.get("points_table", DEFAULT_PTS_RACE)
       for idx, team in enumerate(r["results"]):
         pt = pts_table[idx] if idx < len(pts_table) else 0
@@ -275,61 +631,15 @@ with tab2:
 
     if scores:
       sorted_scores = sorted(scores.items(), key=lambda x: x[1], reverse=True)
+
       df_rank = pd.DataFrame({
           "順位": [f"{i+1} 位" for i in range(len(sorted_scores))],
           "チーム / 車両": [item[0] for item in sorted_scores],
           "合計ポイント": [f"{item[1]} pt" for item in sorted_scores],
       })
+
       st.table(df_rank)
     else:
       st.info("集計対象のデータがありません。")
   else:
-    st.info("まだレース結果が登録されていません。")
-
-# ---------------------------------------------------------
-# タブ3: チームマスタ管理
-# ---------------------------------------------------------
-with tab3:
-  st.header("⚙️ チームマスタ管理")
-  st.caption(
-      "ここで登録したチームが、サイドバーのドロップダウン選択肢に反映されます。"
-  )
-
-  m_c1, m_c2 = st.columns(2)
-  with m_c1:
-    m_cat = st.selectbox(
-        "管理するカテゴリー", list(CATEGORY_CONFIG.keys()), key="m_cat"
-    )
-  with m_c2:
-    m_cls = st.selectbox("管理するクラス", CATEGORY_CONFIG[m_cat], key="m_cls")
-
-  m_key = f"{m_cat}_{m_cls}"
-  current_teams = data["teams"].get(m_key, [])
-
-  st.subheader(f"📋 登録済みチーム一覧 ({m_cat} - {m_cls})")
-
-  if current_teams:
-    st.write(current_teams)
-  else:
-    st.warning("まだチームが登録されていません。")
-
-  st.markdown("---")
-  st.subheader("➕ チームの追加")
-  new_team_name = st.text_input(
-      "追加するチーム・車両名",
-      placeholder="例: #100 STANLEY CIVIC TYPE R-GT",
-  )
-
-  if st.button("チームを追加する"):
-    if new_team_name.strip():
-      if m_key not in data["teams"]:
-        data["teams"][m_key] = []
-      if new_team_name.strip() not in data["teams"][m_key]:
-        data["teams"][m_key].append(new_team_name.strip())
-        save_data(data)
-        st.success(f"「{new_team_name.strip()}」を追加しました！")
-        st.rerun()
-      else:
-        st.error("すでに登録されているチーム名です。")
-    else:
-      st.error("チーム名を入力してください。")
+    st.info(f"{r_year} のランキングデータはありません。")
