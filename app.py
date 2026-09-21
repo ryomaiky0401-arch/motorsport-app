@@ -220,7 +220,7 @@ def extract_f1_pdf(uploaded_pdf):
                     cells = [str(x).replace("\\n", " ").strip() if x is not None else "" for x in row]
                     # Final Classification本表は14列:
                     # POS, NO, DRIVER, NAT(画像のため空欄), ENTRANT, LAPS, ...
-                    if len(cells) >= 14 and re.fullmatch(r"\\d+", cells[0]) and re.fullmatch(r"\\d+", cells[1]):
+                    if len(cells) >= 14 and re.fullmatch(r"\d+", cells[0]) and re.fullmatch(r"\d+", cells[1]):
                         rank = int(cells[0])
                         driver = cells[2]
                         team = cells[5]
