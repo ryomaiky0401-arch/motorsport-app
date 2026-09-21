@@ -287,17 +287,25 @@ def extract_wec_timing_url(url):
             dm = driver_pat.search(line)
             crew = dm.group(1).strip() if dm else ""
 
-        # 車種列は3人目の名前の直後に続く。
-        # 先頭2名は "/" 区切りをそのまま保持し、3人目だけ車種名の直前で切る。
+        # pdfplumberでは車種列の一部がドライバー列の前後に連結される。
+        # 例: "WRT K. MAGNUSSEN / ... / D. VANTHOOR BMW M H"
+        #      "... / A. GIOVINAZZI F"
+        # まず先頭を「頭文字. 姓」が始まる位置まで切り、末尾は車種由来の断片を除去する。
+        first_driver = re.search(r"[A-ZÀ-ÖØ-Þ]\.\s", crew)
+        if first_driver:
+            crew = crew[first_driver.start():].strip()
+
         parts = [p.strip() for p in crew.split("/")][:3]
-        if len(parts) >= 3:
-            third = parts[2]
-            # WECの車種列先頭。姓の一部（VAN/DE等）には触れない。
-            third = re.split(
+        if parts:
+            # 最後のドライバー末尾に付く車種列。
+            parts[-1] = re.split(
                 r"\s+(?=(?:BMW|FERRARI|CADILLAC|ASTON|ALPINE|PEUGEOT|TOYOTA|GENESIS|PORSCHE|FORD|LEXUS|MERCEDES|CORVETTE|MCLAREN)\b)",
-                third, maxsplit=1, flags=re.I
+                parts[-1], maxsplit=1, flags=re.I
             )[0].strip()
-            crew = " / ".join([parts[0], parts[1], third])
+            # PDF列の残骸が1文字だけ付くケース (F/C/A/P/G/T/H/M) を除去。
+            # 正規の姓は1文字では終わらないため安全に落とせる。
+            parts[-1] = re.sub(r"\s+[A-Z]$", "", parts[-1]).strip()
+            crew = " / ".join(parts)
 
         points = 0
         if session == "ハイパーポール" and rank == 1:
