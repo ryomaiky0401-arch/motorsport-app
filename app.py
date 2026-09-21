@@ -1001,8 +1001,17 @@ with tab2:
     ):
         races = data["races"][r_year][r_cat][r_cls]
 
-        # 日付やラウンド順に並び替え
-        races = sorted(races, key=lambda x: (x.get("race_date", ""), x.get("round_name", "")))
+        # 日付 → 同一イベント内は「予選 → スプリント → 決勝」の順に固定。
+        # PDFを読み込んだ順番には左右されない。
+        session_order = {"予選": 0, "スプリント": 1, "決勝": 2}
+        races = sorted(
+            races,
+            key=lambda x: (
+                x.get("race_date", ""),
+                x.get("round_name", ""),
+                session_order.get(x.get("session_type", "決勝"), 99),
+            ),
+        )
 
         registered = data["teams"].get(f"{r_cat}_{r_cls}", [])
         race_headers = [f"{r.get('round_name')} ({r.get('session_type', '決勝')})" for r in races]
