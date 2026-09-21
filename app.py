@@ -659,7 +659,7 @@ def extract_wec_timing_url(url):
         # Al Kamel PDFは列の内部順序が崩れることがあるので、
         # 「順位の直後に車番がある」という前提を捨てる。
         # まず行内に現れる既知の車番を、チーム名との組み合わせで特定する。
-        compact_line = re.sub(r"\\s+", "", line).lower()
+        compact_line = re.sub(r"\s+", "", line).lower()
         matches = []
         for candidate, (candidate_team, candidate_cls) in entries.items():
             token = (candidate + candidate_team).replace(" ", "").lower()
@@ -673,14 +673,14 @@ def extract_wec_timing_url(url):
         # 順位は HP 1 / HP 2 ... があればそれを優先。
         # それ以外は「順位 + 車番 + チーム」または
         # 「...ドライバー 14 33TF Sport...」のような並びを拾う。
-        hp = re.search(r"\\bHP\\s*(\\d{1,2})\\b", line, re.I)
+        hp = re.search(r"\bHP\s*(\d{1,2})\b", line, re.I)
         if hp:
             rank = int(hp.group(1))
         else:
             team_token = re.escape(team)
             num_token = re.escape(num)
             rank_match = re.search(
-                rf"(?:^|\\s)(\\d{{1,2}})\\s*{num_token}\\s*{team_token}",
+                rf"(?:^|\s)(\d{{1,2}})\s*{num_token}\s*{team_token}",
                 line,
                 re.I,
             )
