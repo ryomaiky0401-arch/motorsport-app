@@ -1047,6 +1047,23 @@ tab1, tab2, tab_entry, tab3, tab4 = st.tabs([
     "💾 バックアップ / 復元",
 ])
 
+def country_flag(country):
+    flags = {
+        "日本":"🇯🇵","Japan":"🇯🇵","イギリス":"🇬🇧","英国":"🇬🇧","United Kingdom":"🇬🇧","UK":"🇬🇧",
+        "フランス":"🇫🇷","France":"🇫🇷","ドイツ":"🇩🇪","Germany":"🇩🇪","イタリア":"🇮🇹","Italy":"🇮🇹",
+        "アメリカ":"🇺🇸","USA":"🇺🇸","United States":"🇺🇸","スペイン":"🇪🇸","Spain":"🇪🇸",
+        "ベルギー":"🇧🇪","Belgium":"🇧🇪","オランダ":"🇳🇱","Netherlands":"🇳🇱","スイス":"🇨🇭","Switzerland":"🇨🇭",
+        "オーストリア":"🇦🇹","Austria":"🇦🇹","デンマーク":"🇩🇰","Denmark":"🇩🇰","ポルトガル":"🇵🇹","Portugal":"🇵🇹",
+        "ブラジル":"🇧🇷","Brazil":"🇧🇷","アルゼンチン":"🇦🇷","Argentina":"🇦🇷","オーストラリア":"🇦🇺","Australia":"🇦🇺",
+        "ニュージーランド":"🇳🇿","New Zealand":"🇳🇿","カナダ":"🇨🇦","Canada":"🇨🇦","メキシコ":"🇲🇽","Mexico":"🇲🇽",
+        "中国":"🇨🇳","China":"🇨🇳","韓国":"🇰🇷","South Korea":"🇰🇷","Korea":"🇰🇷","タイ":"🇹🇭","Thailand":"🇹🇭",
+        "インドネシア":"🇮🇩","Indonesia":"🇮🇩","マレーシア":"🇲🇾","Malaysia":"🇲🇾","モナコ":"🇲🇨","Monaco":"🇲🇨",
+        "ポーランド":"🇵🇱","Poland":"🇵🇱","フィンランド":"🇫🇮","Finland":"🇫🇮","スウェーデン":"🇸🇪","Sweden":"🇸🇪",
+        "ノルウェー":"🇳🇴","Norway":"🇳🇴"
+    }
+    return flags.get(str(country).strip(), "🌍")
+
+
 # --- エントリーリスト ---
 with tab_entry:
     st.header("🏎️ エントリーリスト")
@@ -1121,7 +1138,7 @@ with tab_entry:
                     if entry.get("machine"):
                         st.caption(entry["machine"])
                     if entry.get("country"):
-                        st.write(f"🌍 {entry['country']}")
+                        st.write(f"{country_flag(entry['country'])} {entry['country']}")
                     display_drivers = entry.get("driver_list") or [x.strip() for x in entry.get("drivers", "").split("/") if x.strip()]
                     for driver in display_drivers:
                         st.write(f"👤 {driver}")
