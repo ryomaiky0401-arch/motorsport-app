@@ -205,6 +205,37 @@ def save_data(data):
         json.dump(data, f, ensure_ascii=False, indent=2)
 
 
+def extract_f1_pdf(uploaded_pdf):
+    """FIA F1 timing PDFから順位・ドライバー・チームを抽出する。"""
+    import pdfplumber
+    import re
+
+    rows = []
+    with pdfplumber.open(uploaded_pdf) as pdf:
+        for page in pdf.pages:
+            tables = page.extract_tables() or []
+            for table in tables:
+                if not table:
+                    continue
+                for row in table:
+                    cells = [str(x).replace("\\n", " ").strip() if x is not None else "" for x in row]
+                    if len(cells) < 4:
+                        continue
+                    # FIA timing sheetは先頭列が順位、次が「車番 Driver」、その後に国籍・Entrantが並ぶ
+                    if re.fullmatch(r"\\d+", cells[0]) and cells[1]:
+                        rank = int(cells[0])
+                        driver = re.sub(r"^\\d+\\s+", "", cells[1]).strip()
+                        team = cells[3].strip()
+                        if 1 <= rank <= 30 and driver and team:
+                            rows.append({"順位": rank, "ドライバー": driver, "チーム": team})
+
+    # 同じ行が複数ページ等から拾われても順位ごとに1件にする
+    unique = {}
+    for row in rows:
+        unique.setdefault(row["順位"], row)
+    return [unique[k] for k in sorted(unique)]
+
+
 st.set_page_config(
     page_title="モータースポーツ総合結果 & ランキング",
     layout="wide",
@@ -370,6 +401,22 @@ with tab3:
             }
             save_data(data)
             st.success(f"{p_cat} の基本ポイント配点を保存しました！")
+
+
+# --- F1公式PDFインポート ---
+with st.sidebar.expander("📥 F1公式PDFを読み込む"):
+    st.caption("FIAのRace Classification PDFを選ぶと、順位・ドライバー・チームを読み取ります。まずはプレビューだけなので既存データは変更しません。")
+    f1_pdf = st.file_uploader("F1結果PDF", type=["pdf"], key="f1_pdf_import")
+    if f1_pdf is not None:
+        try:
+            f1_rows = extract_f1_pdf(f1_pdf)
+            if f1_rows:
+                st.success(f"{len(f1_rows)}台を読み取れました！")
+                st.dataframe(pd.DataFrame(f1_rows), use_container_width=True, hide_index=True)
+            else:
+                st.warning("順位表を読み取れませんでした。このPDFの形式を確認する必要があります。")
+        except Exception as e:
+            st.error(f"PDFの読み取りに失敗しました: {e}")
 
 # --- サイドバー：レース結果の入力 ---
 st.sidebar.header("📝 結果入力")
