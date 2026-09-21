@@ -207,6 +207,112 @@ def save_data(data):
         json.dump(data, f, ensure_ascii=False, indent=2)
 
 
+def extract_sf_result_url(url):
+    """SUPER FORMULA公式リザルトページから予選/決勝結果を取得する。"""
+    import re
+    import requests
+    from html.parser import HTMLParser
+    from urllib.parse import urlparse
+
+    class TableParser(HTMLParser):
+        def __init__(self):
+            super().__init__()
+            self.tables, self.table, self.row, self.cell = [], None, None, None
+        def handle_starttag(self, tag, attrs):
+            if tag == "table":
+                self.table = []
+            elif tag == "tr" and self.table is not None:
+                self.row = []
+            elif tag in ("td", "th") and self.row is not None:
+                self.cell = ""
+        def handle_data(self, data):
+            if self.cell is not None:
+                self.cell += data
+        def handle_endtag(self, tag):
+            if tag in ("td", "th") and self.cell is not None:
+                self.row.append(re.sub(r"\\s+", " ", self.cell).strip())
+                self.cell = None
+            elif tag == "tr" and self.row is not None:
+                if self.row:
+                    self.table.append(self.row)
+                self.row = None
+            elif tag == "table" and self.table is not None:
+                self.tables.append(self.table)
+                self.table = None
+
+    url = url.strip()
+    parsed = urlparse(url)
+    if parsed.netloc.lower() not in ["superformula.net", "www.superformula.net"]:
+        raise ValueError("SUPER FORMULA公式サイトのリザルトURLを入力してください。")
+
+    response = requests.get(url, timeout=20, headers={"User-Agent": "Mozilla/5.0"})
+    response.raise_for_status()
+    response.encoding = response.apparent_encoding or "utf-8"
+
+    lower_url = url.lower()
+    if "qf" in lower_url or "qualif" in response.text.lower() or "quarif" in response.text.lower():
+        session = "予選"
+    elif "race" in lower_url:
+        session = "決勝"
+    else:
+        raise ValueError("予選 / 決勝をURLから判定できませんでした。")
+
+    parser = TableParser()
+    parser.feed(response.text)
+    result_table = None
+    header = None
+    for table in parser.tables:
+        for row in table[:3]:
+            normalized = [x.lower().replace(".", "") for x in row]
+            if any(x in ["pos", "po", "position"] for x in normalized) and any(x in ["no", "number"] for x in normalized) and any("driver" in x for x in normalized):
+                result_table, header = table, row
+                break
+        if result_table:
+            break
+    if not result_table:
+        raise ValueError("公式ページのリザルト表を見つけられませんでした。")
+
+    h = [x.lower().replace(".", "").strip() for x in header]
+    def col(names):
+        for i, x in enumerate(h):
+            if x in names or any(n in x for n in names):
+                return i
+        return None
+
+    pos_i, no_i, driver_i = col(["pos", "po", "position"]), col(["no", "number"]), col(["driver"])
+    team_i = col(["team"])
+    car_i = col(["car"])
+    header_idx = result_table.index(header)
+    rows = []
+    race_points = [20, 15, 11, 8, 6, 5, 4, 3, 2, 1]
+    qual_points = [3, 2, 1]
+
+    for raw in result_table[header_idx + 1:]:
+        if pos_i is None or no_i is None or driver_i is None or max(pos_i, no_i, driver_i) >= len(raw):
+            continue
+        pos_match = re.search(r"\\d+", raw[pos_i])
+        if not pos_match:
+            continue
+        rank = int(pos_match.group())
+        num = raw[no_i].strip()
+        driver = raw[driver_i].strip()
+        team = raw[team_i].strip() if team_i is not None and team_i < len(raw) else (
+            raw[car_i].strip() if car_i is not None and car_i < len(raw) else ""
+        )
+        if not num or not driver:
+            continue
+        pts = (qual_points[rank - 1] if session == "予選" and rank <= len(qual_points)
+               else race_points[rank - 1] if session == "決勝" and rank <= len(race_points) else 0)
+        rows.append({
+            "順位": rank, "カーナンバー": num, "ドライバー": driver,
+            "チーム": team, "ポイント": pts, "ステータス": "完走",
+        })
+
+    if not rows:
+        raise ValueError("順位データを取得できませんでした。")
+    return rows, session
+
+
 def extract_wec_timing_url(url):
     """Al Kamel Timing Resultsのテキスト入りClassification PDFを直接解析する。OCRは使わない。"""
     import io
@@ -821,6 +927,74 @@ s_cat = st.sidebar.selectbox(
 )
 
 # 選択したカテゴリーのPDFインポートだけを表示
+# --- SUPER FORMULA公式Webリザルトインポート ---
+if s_cat == "Super Formula":
+    with st.sidebar.expander("🌐 SF公式リザルトを読み込む"):
+        if st.session_state.get("sf_import_success"):
+            st.success(st.session_state.pop("sf_import_success"))
+        st.caption("SUPER FORMULA公式サイトの予選または決勝リザルトURLを貼り付けます。")
+        sf_url = st.text_input("SF公式リザルトURL", placeholder="https://superformula.net/sf2/race2026/.../r1race", key="sf_result_url")
+        if sf_url.strip():
+            try:
+                with st.spinner("SF公式リザルトを読み込み中…"):
+                    sf_rows, sf_session = extract_sf_result_url(sf_url.strip())
+                st.success(f"{len(sf_rows)}台を読み取れました！ セッション: {sf_session}")
+                st.dataframe(pd.DataFrame(sf_rows), use_container_width=True, hide_index=True)
+
+                sf_year = st.selectbox("登録年度", YEARS, key="sf_import_year")
+                sf_round = st.text_input("レース名 / ラウンド", placeholder="例: Rd.1 もてぎ", key="sf_import_round")
+                sf_date = st.date_input("開催日", datetime.date.today(), key="sf_import_date")
+                sf_multiplier = 1.0
+                if sf_session == "決勝":
+                    sf_multiplier = st.selectbox(
+                        "決勝ポイント倍率",
+                        [1.0, 0.5],
+                        format_func=lambda x: "通常（100%）" if x == 1.0 else "ハーフポイント（50%）",
+                        key="sf_points_multiplier",
+                    )
+                    if sf_multiplier == 0.5:
+                        st.info("短縮レース等のハーフポイントとして登録します。")
+
+                preview_points = [row["ポイント"] * sf_multiplier for row in sf_rows]
+                if sf_session == "決勝" and sf_multiplier != 1.0:
+                    st.caption("登録ポイント: " + " / ".join(f"P{i+1} {p:g}pt" for i, p in enumerate(preview_points[:10])))
+
+                if st.button("このSF結果を登録 / 更新", type="primary", use_container_width=True, key="sf_import_save"):
+                    if not sf_round.strip():
+                        st.error("レース名 / ラウンドを入力してください。")
+                    else:
+                        races = data.setdefault("races", {}).setdefault(sf_year, {}).setdefault("Super Formula", {}).setdefault("総合", [])
+                        teams = [x["チーム"] for x in sf_rows]
+                        drivers = [x["ドライバー"] for x in sf_rows]
+                        car_numbers = [x["カーナンバー"] for x in sf_rows]
+                        statuses = [x["ステータス"] for x in sf_rows]
+                        official_points = [x["ポイント"] * sf_multiplier for x in sf_rows]
+                        new_race = {
+                            "round_name": sf_round.strip(), "race_date": str(sf_date),
+                            "session_type": sf_session, "is_custom_pts": sf_multiplier != 1.0,
+                            "points_table": official_points, "results": teams, "drivers": drivers,
+                            "car_numbers": car_numbers, "statuses": statuses,
+                            "official_points": official_points,
+                            "sf_points_multiplier": sf_multiplier,
+                        }
+                        idx = next((i for i, x in enumerate(races)
+                                    if x.get("round_name") == sf_round.strip()
+                                    and x.get("session_type", "決勝") == sf_session), None)
+                        if idx is None:
+                            races.append(new_race)
+                        else:
+                            races[idx] = new_race
+                        master = data.setdefault("teams", {}).setdefault("Super Formula_総合", [])
+                        for team in teams:
+                            if team and team not in master:
+                                master.append(team)
+                        save_data(data)
+                        st.session_state["sf_import_success"] = f"✅ SF {sf_session}結果を登録 / 更新しました！"
+                        st.rerun()
+            except Exception as e:
+                st.error(f"SF公式リザルトの読み込みに失敗しました: {e}")
+
+
 # --- F1公式PDFインポート ---
 if s_cat == "WEC":
     with st.sidebar.expander("🌐 WEC Timing Resultsを読み込む"):
