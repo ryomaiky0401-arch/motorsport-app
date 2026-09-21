@@ -273,10 +273,15 @@ def extract_wec_timing_url(url):
         # Classificationの実順位・車番は必ず行頭側にある。
         # 行中のラップ数などを順位/車番と誤認しないよう、再び行頭に固定する。
         # HPは行頭にある場合と行の途中にある場合があるが、途中のHPは無視してよい。
-        m = re.match(r"^(?:HP\s+)?(\d{1,2})\s+(\d{1,3})\s+(.+)$", line)
+        # 007/009はPDFの文字配置上、pdfplumberが "00 7" / "0 09" のように
+        # 車番内部へ空白を入れて抽出することがある。Astonの3桁車番だけ内部空白を許可する。
+        m = re.match(
+            r"^(?:HP\s+)?(\d{1,2})\s+((?:0\s*0\s*[79])|(?:\d{1,3}))\s+(.+)$",
+            line,
+        )
         if not m:
             continue
-        rank, num, rest = int(m.group(1)), m.group(2), m.group(3)
+        rank, num, rest = int(m.group(1)), re.sub(r"\s+", "", m.group(2)), m.group(3)
         if num not in entries:
             continue
         team, cls = entries[num]
@@ -328,7 +333,8 @@ def extract_wec_timing_url(url):
     for aston_num in ("007", "009"):
         if aston_num in existing_hypercar:
             continue
-        am = re.search(rf"(?m)^(?:HP\s+)?(\d{{1,2}})\s+{aston_num}\s+(.+)$", text)
+        spaced_num = r"0\s*0\s*" + aston_num[-1]
+        am = re.search(rf"(?m)^(?:HP\s+)?(\d{{1,2}})\s+{spaced_num}\s+(.+)$", text)
         if not am:
             continue
         rank = int(am.group(1))
