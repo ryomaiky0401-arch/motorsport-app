@@ -205,7 +205,6 @@ def save_data(data):
         json.dump(data, f, ensure_ascii=False, indent=2)
 
 
-# スマホ表示を考慮してサイドバーは初期状態で閉じる設定 (collapsed)
 st.set_page_config(
     page_title="モータースポーツ総合結果 & ランキング",
     layout="wide",
@@ -217,7 +216,7 @@ data = load_data()
 
 tab1, tab2, tab3, tab4 = st.tabs([
     "🏁 レース結果閲覧・編集",
-    "🏆 ポイントランキング & 星取表",
+    "🏆 ポイントランキング",
     "⚙️ マスタ管理",
     "💾 バックアップ / 復元",
 ])
@@ -383,7 +382,6 @@ session_type = st.sidebar.radio(
     "セッション種別", ["決勝", "予選", "スプリント"], key="session_type_input"
 )
 
-# 開催日（日付）入力
 race_date = st.sidebar.date_input(
     "開催日", datetime.date.today(), key="race_date_input"
 )
@@ -392,7 +390,6 @@ race_name = st.sidebar.text_input(
     "レース名 / ラウンド", placeholder="例: Rd.1 岡山", key="race_name_input"
 )
 
-# ポイント取得（基本設定から自動取得）
 base_pts = data["points_master"].get(
     s_cat,
     {
@@ -402,7 +399,6 @@ base_pts = data["points_master"].get(
     },
 ).get(session_type, DEFAULT_PTS_RACE)
 
-# WECなどの例外ポイント対応（オーバーライド）
 st.sidebar.markdown("---")
 use_custom_pts = st.sidebar.checkbox(
     "⚠️ このレース専用のポイントを使う (WEC 24h等)", value=False
@@ -554,7 +550,9 @@ with tab1:
                     "チーム / 車両": target["results"],
                 })
 
-                st.dataframe(df_res, use_container_width=True)
+                # スクロールせずに全体を表示するため height を自動調整
+                calc_height = (len(df_res) + 1) * 35 + 3
+                st.dataframe(df_res, use_container_width=True, height=calc_height)
 
                 with st.expander(
                     f"⚙️ 「{sel_round} ({target.get('session_type', '決勝')})」の編集・削除"
@@ -606,9 +604,9 @@ with tab1:
     else:
         st.info(f"{v_year} のレース結果データはまだありません。")
 
-# --- タブ2: ポイントランキング・星取表・推移グラフ ---
+# --- タブ2: ポイントランキング・推移グラフ ---
 with tab2:
-    st.header("🏆 年間ポイントランキング & 詳細分析")
+    st.header("🏆 年間ポイントランキング & 累計推移")
     r_y, r_c1, r_c2 = st.columns([1, 1, 1])
     with r_y:
         r_year = st.selectbox("年度", YEARS, key="r_year")
@@ -630,13 +628,9 @@ with tab2:
         # 日付やラウンド順に並び替え
         races = sorted(races, key=lambda x: (x.get("race_date", ""), x.get("round_name", "")))
 
-        # 全登録チームのリストを取得
         registered = data["teams"].get(f"{r_cat}_{r_cls}", [])
-
-        # レースヘッダー作成 (例: "Rd.1 岡山 (決勝)")
         race_headers = [f"{r.get('round_name')} ({r.get('session_type', '決勝')})" for r in races]
 
-        # チームごとの獲得ポイント計算
         team_points_matrix = {}
         for team in registered:
             team_points_matrix[team] = [0] * len(races)
@@ -649,16 +643,13 @@ with tab2:
                     team_points_matrix[team] = [0] * len(races)
                 team_points_matrix[team][race_idx] = pt
 
-        # 1. ランキングテーブルデータの構築
         summary_list = []
         for team, pts_list in team_points_matrix.items():
             total_pt = sum(pts_list)
             summary_list.append({"チーム / 車両": team, "合計ポイント": total_pt, "pts_list": pts_list})
 
-        # ポイント順にソート
         summary_list.sort(key=lambda x: x["合計ポイント"], reverse=True)
 
-        # ランキングデータフレーム作成
         df_rank = pd.DataFrame([
             {
                 "順位": f"P{i+1}",
@@ -669,9 +660,11 @@ with tab2:
         ])
 
         st.subheader("🥇 ポイントランキング")
-        st.dataframe(df_rank, use_container_width=True)
+        
+        # スクロールせずに全体を表示するため height を自動調整
+        calc_rank_height = (len(df_rank) + 1) * 35 + 3
+        st.dataframe(df_rank, use_container_width=True, height=calc_rank_height)
 
-        # ランキングCSVダウンロード
         csv_rank = df_rank.to_csv(index=False).encode("utf-8_sig")
         st.download_button(
             label="📥 ランキング（CSV）をダウンロード",
@@ -683,43 +676,13 @@ with tab2:
 
         st.markdown("---")
 
-        # 2. 星取表（マトリクス表）の構築
-        matrix_data = []
-        for i, item in enumerate(summary_list):
-            row = {
-                "順位": f"P{i+1}",
-                "チーム / 車両": item["チーム / 車両"],
-                "合計": item["合計ポイント"],
-            }
-            for idx, h_name in enumerate(race_headers):
-                row[h_name] = item["pts_list"][idx]
-            matrix_data.append(row)
-
-        df_matrix = pd.DataFrame(matrix_data)
-
-        st.subheader("📊 星取表（各レースポイント獲得状況）")
-        st.dataframe(df_matrix, use_container_width=True)
-
-        # 星取表CSVダウンロード
-        csv_matrix = df_matrix.to_csv(index=False).encode("utf-8_sig")
-        st.download_button(
-            label="📥 星取表（CSV）をダウンロード",
-            data=csv_matrix,
-            file_name=f"{r_year}_{r_cat}_{r_cls}_matrix.csv",
-            mime="text/csv",
-            use_container_width=True,
-        )
-
-        st.markdown("---")
-
-        # 3. シーズン累計ポイント推移の折れ線グラフ
+        # 累計ポイント推移の折れ線グラフ
         st.subheader("📈 累計ポイント推移グラフ")
 
         chart_data = {}
         for item in summary_list:
             team_name = item["チーム / 車両"]
             pts_list = item["pts_list"]
-            # 累計値を計算
             cum_pts = []
             current = 0
             for p in pts_list:
