@@ -1255,7 +1255,7 @@ with tab1:
 
         if round_races:
             # 閲覧画面は見やすさ優先で「決勝 → スプリント → 予選」の順に表示
-            view_session_order = {"決勝": 0, "スプリント": 1, "予選": 2}
+            view_session_order = {"決勝": 0, "スプリント": 1, "ハイパーポール": 2, "予選": 3}
             round_races = sorted(
                 round_races,
                 key=lambda x: view_session_order.get(x.get("session_type", "決勝"), 99),
@@ -1378,7 +1378,7 @@ with tab2:
 
         # 日付 → 同一イベント内は「予選 → スプリント → 決勝」の順に固定。
         # PDFを読み込んだ順番には左右されない。
-        session_order = {"予選": 0, "スプリント": 1, "決勝": 2}
+        session_order = {"予選": 0, "ハイパーポール": 1, "スプリント": 2, "決勝": 3}
         races = sorted(
             races,
             key=lambda x: (
