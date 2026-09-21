@@ -1047,21 +1047,22 @@ tab1, tab2, tab_entry, tab3, tab4 = st.tabs([
     "💾 バックアップ / 復元",
 ])
 
-def country_flag(country):
-    flags = {
-        "日本":"🇯🇵","Japan":"🇯🇵","イギリス":"🇬🇧","英国":"🇬🇧","United Kingdom":"🇬🇧","UK":"🇬🇧",
-        "フランス":"🇫🇷","France":"🇫🇷","ドイツ":"🇩🇪","Germany":"🇩🇪","イタリア":"🇮🇹","Italy":"🇮🇹",
-        "アメリカ":"🇺🇸","USA":"🇺🇸","United States":"🇺🇸","スペイン":"🇪🇸","Spain":"🇪🇸",
-        "ベルギー":"🇧🇪","Belgium":"🇧🇪","オランダ":"🇳🇱","Netherlands":"🇳🇱","スイス":"🇨🇭","Switzerland":"🇨🇭",
-        "オーストリア":"🇦🇹","Austria":"🇦🇹","デンマーク":"🇩🇰","Denmark":"🇩🇰","ポルトガル":"🇵🇹","Portugal":"🇵🇹",
-        "ブラジル":"🇧🇷","Brazil":"🇧🇷","アルゼンチン":"🇦🇷","Argentina":"🇦🇷","オーストラリア":"🇦🇺","Australia":"🇦🇺",
-        "ニュージーランド":"🇳🇿","New Zealand":"🇳🇿","カナダ":"🇨🇦","Canada":"🇨🇦","メキシコ":"🇲🇽","Mexico":"🇲🇽",
-        "中国":"🇨🇳","China":"🇨🇳","韓国":"🇰🇷","South Korea":"🇰🇷","Korea":"🇰🇷","タイ":"🇹🇭","Thailand":"🇹🇭",
-        "インドネシア":"🇮🇩","Indonesia":"🇮🇩","マレーシア":"🇲🇾","Malaysia":"🇲🇾","モナコ":"🇲🇨","Monaco":"🇲🇨",
-        "ポーランド":"🇵🇱","Poland":"🇵🇱","フィンランド":"🇫🇮","Finland":"🇫🇮","スウェーデン":"🇸🇪","Sweden":"🇸🇪",
-        "ノルウェー":"🇳🇴","Norway":"🇳🇴"
+def country_code(country):
+    """国・地域名から国旗画像用の2文字コードを返す。"""
+    codes = {
+        "日本":"jp","Japan":"jp","イギリス":"gb","英国":"gb","United Kingdom":"gb","UK":"gb",
+        "フランス":"fr","France":"fr","ドイツ":"de","Germany":"de","イタリア":"it","Italy":"it",
+        "アメリカ":"us","アメリカ合衆国":"us","USA":"us","United States":"us","スペイン":"es","Spain":"es",
+        "ベルギー":"be","Belgium":"be","オランダ":"nl","Netherlands":"nl","スイス":"ch","Switzerland":"ch",
+        "オーストリア":"at","Austria":"at","デンマーク":"dk","Denmark":"dk","ポルトガル":"pt","Portugal":"pt",
+        "ブラジル":"br","Brazil":"br","アルゼンチン":"ar","Argentina":"ar","オーストラリア":"au","Australia":"au",
+        "ニュージーランド":"nz","New Zealand":"nz","カナダ":"ca","Canada":"ca","メキシコ":"mx","Mexico":"mx",
+        "中国":"cn","China":"cn","韓国":"kr","South Korea":"kr","Korea":"kr","タイ":"th","Thailand":"th",
+        "インドネシア":"id","Indonesia":"id","マレーシア":"my","Malaysia":"my","モナコ":"mc","Monaco":"mc",
+        "ポーランド":"pl","Poland":"pl","フィンランド":"fi","Finland":"fi","スウェーデン":"se","Sweden":"se",
+        "ノルウェー":"no","Norway":"no"
     }
-    return flags.get(str(country).strip(), "🌍")
+    return codes.get(str(country).strip())
 
 
 # --- エントリーリスト ---
@@ -1139,7 +1140,15 @@ with tab_entry:
                     if entry.get("machine"):
                         st.caption(entry["machine"])
                     if entry.get("country"):
-                        st.write(f"{country_flag(entry['country'])} {entry['country']}")
+                        code = country_code(entry["country"])
+                        if code:
+                            flag_col, country_col = st.columns([1, 7], vertical_alignment="center")
+                            with flag_col:
+                                st.image(f"https://flagcdn.com/w80/{code}.png", width=32)
+                            with country_col:
+                                st.write(entry["country"])
+                        else:
+                            st.write(f"🌍 {entry['country']}")
                     display_drivers = entry.get("driver_list") or [x.strip() for x in entry.get("drivers", "").split("/") if x.strip()]
                     for driver in display_drivers:
                         st.write(f"👤 {driver}")
