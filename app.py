@@ -277,12 +277,15 @@ def extract_wec_timing_url(url):
         # 007/009はPDFの文字配置上、pdfplumberが "00 7" / "0 09" のように
         # 車番内部へ空白を入れて抽出することがある。Astonの3桁車番だけ内部空白を許可する。
         m = re.match(
-            r"^(?:HP\s+)?(\d{1,2})\s+((?:0\s*0\s*[79])|(?:\d{1,3}))\s+(.+)$",
+            r"^(?:HP\s*)?(?:(\d{1,2})\s+((?:0\s*0\s*[79])|\d{1,3})\s+|(\d{1,2})(00[79]))(.+)$",
             line,
         )
         if not m:
             continue
-        rank, num, rest = int(m.group(1)), re.sub(r"\s+", "", m.group(2)), m.group(3)
+        if m.group(1) is not None:
+            rank, num, rest = int(m.group(1)), re.sub(r"\s+", "", m.group(2)), m.group(5)
+        else:
+            rank, num, rest = int(m.group(3)), m.group(4), m.group(5)
         if num not in entries:
             continue
         team, cls = entries[num]
@@ -325,36 +328,6 @@ def extract_wec_timing_url(url):
         rows_by_class[cls].append({
             "順位": rank, "カーナンバー": num, "ドライバー": crew,
             "チーム": team, "ポイント": points, "ステータス": "完走",
-        })
-
-    # pdfplumberが列順を崩した行も取りこぼさないため、Aston #007/#009は
-    # 全文から順位・車番を直接確認して不足時だけ補完する。
-    # ドライバー人数には依存しない（Cadillac #12など2名表記も通常処理対象）。
-    existing_hypercar = {r["カーナンバー"] for r in rows_by_class["Hypercar"]}
-    for aston_num in ("007", "009"):
-        if aston_num in existing_hypercar:
-            continue
-        spaced_num = r"0\s*0\s*" + aston_num[-1]
-        am = re.search(rf"(?m)^(?:HP\s+)?(\d{{1,2}})\s+{spaced_num}\s+(.+)$", text)
-        if not am:
-            continue
-        rank = int(am.group(1))
-        rest = re.sub(r"\s+", " ", am.group(2)).strip()
-        dm = driver_pat.search(rest)
-        crew = dm.group(1).strip() if dm else ""
-        if crew:
-            first_driver = re.search(r"[A-ZÀ-ÖØ-Þ]\.\s", crew)
-            if first_driver:
-                crew = crew[first_driver.start():].strip()
-            parts = [p.strip() for p in crew.split("/")][:3]
-            if parts:
-                parts[-1] = re.split(r"\s+(?=ASTON\b)", parts[-1], maxsplit=1, flags=re.I)[0].strip()
-                parts[-1] = re.sub(r"\s+[A-Z]$", "", parts[-1]).strip()
-                crew = " / ".join(parts)
-        points = 1 if session == "ハイパーポール" and rank == 1 else 0
-        rows_by_class["Hypercar"].append({
-            "順位": rank, "カーナンバー": aston_num, "ドライバー": crew,
-            "チーム": "Aston Martin Thor Team", "ポイント": points, "ステータス": "完走",
         })
 
     groups = []
@@ -847,27 +820,6 @@ if s_cat == "WEC":
                 with st.spinner("公式Timing Resultsを読み込み中…"):
                     wec_groups = extract_wec_timing_url(wec_url.strip())
                 if wec_groups:
-                    # 一時デバッグ: Aston #007/#009 がpdfplumberで実際にどう抽出されているか確認
-                    if "Qualifying" in wec_url or "QUALIFYING" in wec_url or "qualifying" in wec_url:
-                        try:
-                            import re
-                            import io
-                            import requests
-                            import pdfplumber
-                            dbg_resp = requests.get(wec_url.strip(), timeout=20, headers={"User-Agent": "Mozilla/5.0"})
-                            dbg_pdf = pdfplumber.open(io.BytesIO(dbg_resp.content))
-                            dbg_text = "\n".join((p.extract_text() or "") for p in dbg_pdf.pages)
-                            dbg_pdf.close()
-                            dbg_lines = [
-                                re.sub(r"\s+", " ", ln).strip()
-                                for ln in dbg_text.splitlines()
-                                if any(token in ln.upper() for token in ["007", "009", "TINCKNELL", "GAMBLE", "RIBERAS", "SØRENSEN", "ASTON"])
-                            ]
-                            with st.expander("🔎 Aston読み取りデバッグ"):
-                                st.code("\n".join(dbg_lines) if dbg_lines else "Aston関連の文字列を検出できませんでした")
-                        except Exception as dbg_e:
-                            st.caption(f"デバッグ取得失敗: {dbg_e}")
-
                     for g in wec_groups:
                         st.markdown(f"**{g['クラス']} / {g['セッション']} — {len(g['rows'])}台**")
                         st.dataframe(pd.DataFrame(g["rows"]), use_container_width=True, hide_index=True)
