@@ -291,28 +291,42 @@ def extract_sf_result_url(url):
     rows = []
     race_points = [20, 15, 11, 8, 6, 5, 4, 3, 2, 1]
     qual_points = [3, 2, 1]
-    # 「順位 車番」の組を拾う。NOT CLASSIFIED後の順位も同じ形式で取得できる。
-    matches = list(re.finditer(r"(?:^|\s)(\d{1,2})\s+(?:[AB]\s+)?(\d{1,2})(?=\s|[^0-9])", result_text))
+    # 結果行は「順位 車番 ドライバー...」だが、決勝はラップ数・タイム等にも
+    # 数字の並びが大量にある。次の数字ペアまでで区切ると本物の行を途中で切って
+    # しまうため、車番ごとのドライバー名をアンカーにして結果行を判定する。
+    candidates = list(re.finditer(r"(?:^|\s)(\d{1,2})\s+(?:[AB]\s+)?(\d{1,2})(?=\s)", result_text))
+    found = []
     seen_ranks = set()
-    for m in matches:
+    for m in candidates:
         rank, num = int(m.group(1)), m.group(2)
         if rank < 1 or rank > 30 or num not in sf_entries or rank in seen_ranks:
             continue
-        # 誤検出防止：車番直後の区間に登録ドライバー名が存在することを確認。
-        next_pos = matches[matches.index(m)+1].start() if matches.index(m)+1 < len(matches) else len(result_text)
-        chunk = result_text[m.end():next_pos]
         driver, team = sf_entries[num]
-        driver_variants = [driver, driver.replace("･", "・"), driver.replace(" ", "")]
-        if not any(v in chunk or v.replace(" ", "") in chunk.replace(" ", "") for v in driver_variants):
+        # 車番の直後だけを見る。ここにドライバー名があれば実際の順位行。
+        chunk = result_text[m.end():m.end() + 180]
+        compact_chunk = re.sub(r"\s+", "", chunk).replace("・", "･")
+        compact_driver = re.sub(r"\s+", "", driver).replace("・", "･")
+        driver_parts = [p for p in re.split(r"[ ･・]+", driver) if p]
+        if compact_driver not in compact_chunk and not (
+            driver_parts and all(p in chunk for p in driver_parts)
+        ):
             continue
         seen_ranks.add(rank)
         pts = (qual_points[rank - 1] if session == "予選" and rank <= 3
                else race_points[rank - 1] if session == "決勝" and rank <= 10 else 0)
-        status = "完走"
-        if session == "決勝" and "NOT CLASSIFIED" in result_text[max(0, m.start()-40):m.start()+10]:
-            status = "リタイア"
-        rows.append({"順位": rank, "カーナンバー": num, "ドライバー": driver,
-                     "チーム": team, "ポイント": pts, "ステータス": status})
+        found.append((m.start(), {
+            "順位": rank, "カーナンバー": num, "ドライバー": driver,
+            "チーム": team, "ポイント": pts, "ステータス": "完走"
+        }))
+
+    # 決勝はCLASSIFIED / NOT CLASSIFIEDの境界でステータスを付与。
+    if session == "決勝":
+        nc_pos = result_text.find("NOT CLASSIFIED")
+        for pos, row in found:
+            if nc_pos >= 0 and pos > nc_pos:
+                row["ステータス"] = "リタイア"
+
+    rows.extend(row for _, row in found)
 
     # 予選のNOT CLASSIFIEDは順位番号が付かないため、通常の順位regexでは拾えない。
     # 公式ページに掲載された未分類車も末尾へ追加し、24台すべて保持する。
