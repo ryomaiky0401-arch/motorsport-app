@@ -1270,6 +1270,18 @@ with tab1:
                 )
                 st.caption(f"📅 開催日: {r_date_str} ｜ 🎯 適用ルール: {pts_label}")
 
+                # 削除は台数の多いセッションでもすぐ押せるよう、結果表の上に配置
+                if st.button(
+                    "🗑️ このセッション結果を削除",
+                    type="primary",
+                    key=f"del_btn_{sel_round}_{target.get('session_type')}",
+                    use_container_width=True,
+                ):
+                    races_list.remove(target)
+                    save_data(data)
+                    st.warning("データを削除しました。")
+                    st.rerun()
+
                 pts_table = target.get("points_table", DEFAULT_PTS_RACE)
 
                 statuses = target.get("statuses", ["完走"] * len(target["results"]))
@@ -1326,28 +1338,15 @@ with tab1:
                         if edit_team != "(選択なし)":
                             edit_results.append(edit_team)
 
-                    e_col1, e_col2 = st.columns(2)
-                    with e_col1:
-                        if st.button(
-                            "変更を保存する",
-                            key=f"save_btn_{sel_round}_{target.get('session_type')}",
-                            use_container_width=True,
-                        ):
-                            target["results"] = edit_results
-                            save_data(data)
-                            st.success("結果を更新しました！")
-                            st.rerun()
-                    with e_col2:
-                        if st.button(
-                            "🗑️ このセッション結果を削除",
-                            type="primary",
-                            key=f"del_btn_{sel_round}_{target.get('session_type')}",
-                            use_container_width=True,
-                        ):
-                            races_list.remove(target)
-                            save_data(data)
-                            st.warning("データを削除しました。")
-                            st.rerun()
+                    if st.button(
+                        "変更を保存する",
+                        key=f"save_btn_{sel_round}_{target.get('session_type')}",
+                        use_container_width=True,
+                    ):
+                        target["results"] = edit_results
+                        save_data(data)
+                        st.success("結果を更新しました！")
+                        st.rerun()
 
                 st.markdown("---")
         else:
