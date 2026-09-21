@@ -1107,18 +1107,17 @@ with tab2:
 
             st.markdown("---")
 
-            # 大会ごとの獲得ポイント合計グラフ
-            st.subheader("📊 大会別 獲得ポイント")
+            # 大会ごとの獲得ポイント合計を、従来と同じ折れ線グラフで表示
+            st.subheader("📈 大会別 獲得ポイント")
 
-            event_points = {}
             event_order = []
-            for race_idx, race in enumerate(races):
+            for race in races:
                 event_name = race.get("round_name", race.get("race_name", "大会名未設定"))
                 if event_name not in event_order:
                     event_order.append(event_name)
 
+            event_points = {}
             for item in summary_list:
-                team_name = item["チーム / 車両"]
                 totals = {event: 0 for event in event_order}
                 for race_idx, race in enumerate(races):
                     event_name = race.get("round_name", race.get("race_name", "大会名未設定"))
@@ -1127,25 +1126,9 @@ with tab2:
                             totals[event_name] += max(float(item["pts_list"][race_idx]), 0)
                         except (TypeError, ValueError):
                             pass
-                event_points[team_name] = [totals[event] for event in event_order]
+                event_points[item["チーム / 車両"]] = [totals[event] for event in event_order]
 
-            # 1大会ごとに各チームを別々の棒で比較する（積み上げにはしない）
-            event_rows = []
-            for event in event_order:
-                for team_name, values in event_points.items():
-                    event_rows.append({
-                        "大会": event,
-                        "チーム / 車両": team_name,
-                        "獲得ポイント": values[event_order.index(event)],
-                    })
-            df_event_chart = pd.DataFrame(event_rows)
-            st.bar_chart(
-                df_event_chart,
-                x="チーム / 車両",
-                y="獲得ポイント",
-                color="チーム / 車両",
-                stack=False,
-            )
+            st.line_chart(pd.DataFrame(event_points, index=event_order))
 
 
         with ranking_tab_driver:
@@ -1189,7 +1172,7 @@ with tab2:
                 )
 
                 st.markdown("---")
-                st.subheader("📊 ドライバー 大会別獲得ポイント")
+                st.subheader("📈 ドライバー 大会別獲得ポイント")
                 driver_event_points = {}
                 for item in driver_summary:
                     totals = {event: 0 for event in event_order}
@@ -1202,22 +1185,7 @@ with tab2:
                                 pass
                     driver_event_points[item["ドライバー"]] = [totals[event] for event in event_order]
 
-                driver_event_rows = []
-                for event in event_order:
-                    for driver_name, values in driver_event_points.items():
-                        driver_event_rows.append({
-                            "大会": event,
-                            "ドライバー": driver_name,
-                            "獲得ポイント": values[event_order.index(event)],
-                        })
-                df_driver_event_chart = pd.DataFrame(driver_event_rows)
-                st.bar_chart(
-                    df_driver_event_chart,
-                    x="ドライバー",
-                    y="獲得ポイント",
-                    color="ドライバー",
-                    stack=False,
-                )
+                st.line_chart(pd.DataFrame(driver_event_points, index=event_order))
 
     else:
         st.info(f"{r_year} {r_cat} ({r_cls}) の集計対象データがまだありません。")
