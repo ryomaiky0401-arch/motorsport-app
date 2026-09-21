@@ -214,6 +214,17 @@ st.title("🏎️ モータースポーツ ダッシュボード")
 
 data = load_data()
 
+# AUTO_F1_SYNC_MARKER
+try:
+    from f1_sync import fetch_f1_season, merge_f1_results
+    imported_f1 = fetch_f1_season(2026)
+    added_f1 = merge_f1_results(data, 2026, imported_f1)
+    if added_f1:
+        save_data(data)
+    st.sidebar.caption(f"F1自動取得: {added_f1}件追加")
+except Exception as auto_f1_error:
+    st.sidebar.warning(f"F1自動取得をスキップしました: {auto_f1_error}")
+
 tab1, tab2, tab3, tab4 = st.tabs([
     "🏁 レース結果閲覧・編集",
     "🏆 ポイントランキング",
