@@ -2308,8 +2308,8 @@ with tab2:
 
         team_points_matrix = {}
         # WEC Hypercarのマニュファクチャラー選手権は、各メーカーが指定した2台が対象。
-        # 追加車両（例: Ferrari #83）は対象外にし、対象車だけで順位を詰め直したうえで、
-        # 各メーカーの最上位1台の結果だけをメーカー得点として採用する。
+        # 追加車両（例: Ferrari #83）は対象外にし、対象車だけで順位を詰め直して
+        # その順位に応じた決勝ポイントを2台分合算する。
         wec_manufacturer_cars = {
             "15": "BMW", "20": "BMW",
             "50": "FERRARI", "51": "FERRARI",
@@ -2348,18 +2348,13 @@ with tab2:
                         "24h": [50, 36, 30, 24, 20, 16, 12, 8, 4, 2],
                     }.get(scale, [25, 18, 15, 12, 10, 8, 6, 4, 2, 1])
 
-                    # マニュファクチャラー選手権は、指定2台のポイントを合算しない。
-                    # 選手権対象車だけで順位を詰め直したうえで、各メーカーの
-                    # 最上位1台の結果だけをその大会のメーカー得点として採用する。
-                    best_manufacturer_points = {}
+                    # マニュファクチャラー選手権は、指定2台の両方が得点対象。
+                    # 追加車両を除外して対象車だけで順位を詰め直し、
+                    # その順位に応じた2台分のポイントをメーカーへ合算する。
                     for eligible_rank, (manufacturer, status) in enumerate(eligible):
                         pt = 0 if status in ["DNS", "DSQ"] else (
                             manufacturer_points[eligible_rank] if eligible_rank < len(manufacturer_points) else 0
                         )
-                        if manufacturer not in best_manufacturer_points:
-                            best_manufacturer_points[manufacturer] = pt
-
-                    for manufacturer, pt in best_manufacturer_points.items():
                         team_points_matrix[manufacturer][race_idx] += pt
 
                 elif session_type == "ハイパーポール":
@@ -2488,7 +2483,7 @@ with tab2:
         with ranking_tab_team:
             if is_wec_manufacturer:
                 st.subheader("🥇 マニュファクチャラーランキング")
-                st.caption("WEC Hypercar公式方式：指定2台を対象に順位を詰め直し、各メーカー最上位1台の結果を採用。Hyperpoleのポール1点も加算。")
+                st.caption("WEC Hypercar公式方式：指定2台を対象に順位を詰め直して2台分を合算。Hyperpoleのポール1点も加算。")
             else:
                 st.subheader("🥇 ポイントランキング")
         
