@@ -784,7 +784,7 @@ def extract_wec_timing_url(url):
                             parts[-1], maxsplit=1, flags=re.I
                         )[0].strip()
                         # Retired欄でも車種/クラス列の先頭1文字が末尾に混ざることがある。
-                        parts[-1] = re.sub(r"\\s+[A-Z]$", "", parts[-1]).strip()
+                        parts[-1] = re.sub(r"\s+[A-Z]$", "", parts[-1]).strip()
                         crew = " / ".join(parts)
                 next_rank = max([r["順位"] for r in rows_by_class[cls]], default=0) + 1
                 rows_by_class[cls].append({
