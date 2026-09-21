@@ -291,40 +291,69 @@ def extract_sf_result_url(url):
     rows = []
     race_points = [20, 15, 11, 8, 6, 5, 4, 3, 2, 1]
     qual_points = [3, 2, 1]
-    # 結果行は「順位 車番 ドライバー...」だが、決勝はラップ数・タイム等にも
-    # 数字の並びが大量にある。次の数字ペアまでで区切ると本物の行を途中で切って
-    # しまうため、車番ごとのドライバー名をアンカーにして結果行を判定する。
-    candidates = list(re.finditer(r"(?:^|\s)(\d{1,2})\s+(?:[AB]\s+)?(\d{1,2})(?=\s)", result_text))
+    # 公式ページの結果部分から各2026車番の出現位置を探し、その直前にある順位を採用する。
+    # 決勝はラップ数/タイム等の数字が多いため「順位 車番」の連続regexには頼らない。
     found = []
     seen_ranks = set()
-    for m in candidates:
-        rank, num = int(m.group(1)), m.group(2)
-        if rank < 1 or rank > 30 or num not in sf_entries or rank in seen_ranks:
-            continue
-        driver, team = sf_entries[num]
-        # 車番の直後だけを見る。ここにドライバー名があれば実際の順位行。
-        chunk = result_text[m.end():m.end() + 180]
-        compact_chunk = re.sub(r"\s+", "", chunk).replace("・", "･")
-        compact_driver = re.sub(r"\s+", "", driver).replace("・", "･")
-        driver_parts = [p for p in re.split(r"[ ･・]+", driver) if p]
-        if compact_driver not in compact_chunk and not (
-            driver_parts and all(p in chunk for p in driver_parts)
-        ):
-            continue
-        seen_ranks.add(rank)
-        pts = (qual_points[rank - 1] if session == "予選" and rank <= 3
-               else race_points[rank - 1] if session == "決勝" and rank <= 10 else 0)
-        found.append((m.start(), {
-            "順位": rank, "カーナンバー": num, "ドライバー": driver,
-            "チーム": team, "ポイント": pts, "ステータス": "完走"
-        }))
+    used_nums = set()
+    for num, (driver, team) in sf_entries.items():
+        # 車番の後ろ180文字以内にそのドライバー名がある出現だけを結果行候補にする。
+        for nm in re.finditer(r"(?<!\d)" + re.escape(num) + r"(?!\d)", result_text):
+            after = result_text[nm.end():nm.end() + 180]
+            compact_after = re.sub(r"\s+", "", after).replace("・", "･")
+            compact_driver = re.sub(r"\s+", "", driver).replace("・", "･")
+            driver_parts = [p for p in re.split(r"[ ･・]+", driver) if p]
+            if compact_driver not in compact_after and not (
+                driver_parts and all(p in after for p in driver_parts)
+            ):
+                continue
 
-    # 決勝はCLASSIFIED / NOT CLASSIFIEDの境界でステータスを付与。
+            # 車番の直前には決勝なら順位、予選なら「順位 A/B」がある。
+            before = result_text[max(0, nm.start() - 25):nm.start()]
+            if session == "予選":
+                rm = re.search(r"(\d{1,2})\s+[AB]\s*$", before)
+            else:
+                rm = re.search(r"(\d{1,2})\s*$", before)
+            if not rm:
+                continue
+            rank = int(rm.group(1))
+            if not (1 <= rank <= 30) or rank in seen_ranks or num in used_nums:
+                continue
+
+            seen_ranks.add(rank)
+            used_nums.add(num)
+            pts = (qual_points[rank - 1] if session == "予選" and rank <= 3
+                   else race_points[rank - 1] if session == "決勝" and rank <= 10 else 0)
+            found.append((nm.start(), {
+                "順位": rank, "カーナンバー": num, "ドライバー": driver,
+                "チーム": team, "ポイント": pts, "ステータス": "完走"
+            }))
+            break
+
+    # 決勝の未分類車は順位自体が無い場合もあるので、NOT CLASSIFIED部から未取得車を追加。
     if session == "決勝":
         nc_pos = result_text.find("NOT CLASSIFIED")
-        for pos, row in found:
-            if nc_pos >= 0 and pos > nc_pos:
-                row["ステータス"] = "リタイア"
+        if nc_pos >= 0:
+            nc_text = result_text[nc_pos:]
+            next_rank = max([row["順位"] for _, row in found], default=0) + 1
+            for num, (driver, team) in sf_entries.items():
+                if num in used_nums:
+                    continue
+                for nm in re.finditer(r"(?<!\d)" + re.escape(num) + r"(?!\d)", nc_text):
+                    after = nc_text[nm.end():nm.end() + 180]
+                    compact_after = re.sub(r"\s+", "", after).replace("・", "･")
+                    compact_driver = re.sub(r"\s+", "", driver).replace("・", "･")
+                    driver_parts = [p for p in re.split(r"[ ･・]+", driver) if p]
+                    if compact_driver in compact_after or (
+                        driver_parts and all(p in after for p in driver_parts)
+                    ):
+                        found.append((nc_pos + nm.start(), {
+                            "順位": next_rank, "カーナンバー": num, "ドライバー": driver,
+                            "チーム": team, "ポイント": 0, "ステータス": "リタイア"
+                        }))
+                        used_nums.add(num)
+                        next_rank += 1
+                        break
 
     rows.extend(row for _, row in found)
 
