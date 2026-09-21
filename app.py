@@ -360,6 +360,25 @@ def extract_supergt_result_url(url):
             "周回数": laps,
         })
 
+    # Q1ではタイム未計測などで順位欄が数値にならない車両が表末尾に出ることがある。
+    # 2026年はエントリーマップを使い、結果表から漏れた車両も0ptで残す。
+    if session == "予選Q1":
+        expected_nums = list(sgt_driver_map_2026.keys())
+        seen_nums = {str(x["カーナンバー"]) for x in rows}
+        for missing_num in expected_nums:
+            if missing_num in seen_nums:
+                continue
+            # GT500/GT300のマップが混ざらないよう、元のクラス台数で絞る。
+            if cls == "GT500" and missing_num not in {"8","12","14","16","17","19","23","24","36","37","38","39","64","100"}:
+                continue
+            if cls == "GT300" and missing_num in {"8","12","14","16","17","19","23","24","36","37","38","39","64","100"}:
+                continue
+            rows.append({
+                "順位": len(rows) + 1, "カーナンバー": missing_num,
+                "ドライバー": " / ".join(sgt_driver_map_2026[missing_num]),
+                "チーム": "", "ポイント": 0, "ステータス": "予選未分類", "周回数": None,
+            })
+
     if not rows:
         raise ValueError("SUPER GTの順位データを取得できませんでした。")
     return rows, session, cls
@@ -1737,16 +1756,26 @@ with tab1:
         with r_col1:
             sel_round = st.selectbox("ラウンド（大会）を選択", rounds)
         with r_col2:
-            # WECではHyperpoleを「予選」グループの中にまとめる
-            session_options = ["すべて", "決勝", "予選"] if v_cat == "WEC" else ["すべて", "決勝", "予選", "スプリント"]
+            # WEC/SUPER GTでは詳細な予選セッションを「予選」の下にまとめる
+            if v_cat in ["WEC", "SUPER GT"]:
+                session_options = ["すべて", "決勝", "予選"]
+            else:
+                session_options = ["すべて", "決勝", "予選", "スプリント"]
             sel_session_filter = st.selectbox("セッション選択", session_options)
 
             wec_qualifying_filter = None
+            sgt_qualifying_filter = None
             if v_cat == "WEC" and sel_session_filter == "予選":
                 wec_qualifying_filter = st.selectbox(
                     "予選セッション",
                     ["すべて", "予選", "ハイパーポール"],
                     key="wec_qualifying_session_filter",
+                )
+            elif v_cat == "SUPER GT" and sel_session_filter == "予選":
+                sgt_qualifying_filter = st.selectbox(
+                    "予選セッション",
+                    ["すべて", "予選Q1", "予選Q2"],
+                    key="sgt_qualifying_session_filter",
                 )
 
         round_races = [
@@ -1766,6 +1795,17 @@ with tab1:
                         r for r in round_races
                         if r.get("session_type", "決勝") == wec_qualifying_filter
                     ]
+            elif v_cat == "SUPER GT" and sel_session_filter == "予選":
+                if sgt_qualifying_filter in [None, "すべて"]:
+                    round_races = [
+                        r for r in round_races
+                        if r.get("session_type", "決勝") in ["予選", "予選Q1", "予選Q2"]
+                    ]
+                else:
+                    round_races = [
+                        r for r in round_races
+                        if r.get("session_type", "決勝") == sgt_qualifying_filter
+                    ]
             else:
                 round_races = [
                     r
@@ -1775,7 +1815,7 @@ with tab1:
 
         if round_races:
             # 閲覧画面は見やすさ優先で「決勝 → スプリント → 予選」の順に表示
-            view_session_order = {"決勝": 0, "スプリント": 1, "ハイパーポール": 2, "予選": 3}
+            view_session_order = {"決勝": 0, "スプリント": 1, "ハイパーポール": 2, "予選": 3, "予選Q2": 3, "予選Q1": 4}
             round_races = sorted(
                 round_races,
                 key=lambda x: view_session_order.get(x.get("session_type", "決勝"), 99),
