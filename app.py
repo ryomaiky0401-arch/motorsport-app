@@ -656,33 +656,39 @@ def extract_wec_timing_url(url):
     rows_by_class = {"Hypercar": [], "LMGT3": []}
 
     for line in lines:
-        # 2026 Imola PDFでは "1 34Racing..." のように車番とチーム名の間に
-        # 空白が入らない行がある。また一部はタイム等の後ろに "HP 2 69Team..."
-        # が回り込むため、HP表記がある場合は行中から順位を拾う。
-        hp = re.search(r"\\bHP\\s*(\\d{1,2})\\s+(.+)", line)
+        # Al Kamel PDFは列の内部順序が崩れることがあるので、
+        # 「順位の直後に車番がある」という前提を捨てる。
+        # まず行内に現れる既知の車番を、チーム名との組み合わせで特定する。
+        compact_line = re.sub(r"\\s+", "", line).lower()
+        matches = []
+        for candidate, (candidate_team, candidate_cls) in entries.items():
+            token = (candidate + candidate_team).replace(" ", "").lower()
+            if token in compact_line:
+                matches.append((candidate, candidate_team, candidate_cls))
+        if not matches:
+            continue
+        # 007/009など長い車番を優先
+        num, team, cls = sorted(matches, key=lambda x: len(x[0]), reverse=True)[0]
+
+        # 順位は HP 1 / HP 2 ... があればそれを優先。
+        # それ以外は「順位 + 車番 + チーム」または
+        # 「...ドライバー 14 33TF Sport...」のような並びを拾う。
+        hp = re.search(r"\\bHP\\s*(\\d{1,2})\\b", line, re.I)
         if hp:
             rank = int(hp.group(1))
-            tail = hp.group(2)
         else:
-            normal = re.match(r"^(\\d{1,2})\\s+(.+)", line)
-            if not normal:
+            team_token = re.escape(team)
+            num_token = re.escape(num)
+            rank_match = re.search(
+                rf"(?:^|\\s)(\\d{{1,2}})\\s*{num_token}\\s*{team_token}",
+                line,
+                re.I,
+            )
+            if not rank_match:
                 continue
-            rank = int(normal.group(1))
-            tail = normal.group(2)
+            rank = int(rank_match.group(1))
 
-        # 車番は既知の2026エントリーから照合する。
-        # 007/009はPDF抽出時に "00 7" / "0 09" になる場合があるので空白を除去。
-        compact_tail = re.sub(r"\\s+", "", tail)
-        num = next(
-            (candidate for candidate in sorted(entries, key=len, reverse=True)
-             if compact_tail.startswith(candidate)),
-            None,
-        )
-        if not num:
-            continue
-
-        # ドライバー抽出には元の行を使うので、ここではrestをtailとして保持。
-        rest = tail
+        rest = line
 
         if num not in entries:
             continue
