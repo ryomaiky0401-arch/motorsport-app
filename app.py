@@ -742,6 +742,19 @@ def extract_wec_timing_url(url):
 
 
 
+def fetch_fia_pdf_url(url):
+    """FIA公式Classification PDFをURLから取得してpdfplumberへ渡せる形にする。"""
+    parsed = urllib.parse.urlparse(url.strip())
+    if parsed.scheme not in ["http", "https"] or parsed.netloc.lower() not in ["fia.com", "www.fia.com", "api.fia.com"]:
+        raise ValueError("fia.com の公式PDF URLを入力してください。")
+    response = requests.get(url.strip(), timeout=30, headers={"User-Agent": "Mozilla/5.0"})
+    response.raise_for_status()
+    content_type = response.headers.get("Content-Type", "").lower()
+    if not response.content.startswith(b"%PDF") and "pdf" not in content_type:
+        raise ValueError("PDFを取得できませんでした。FIAのClassification PDFへの直接URLを貼ってください。")
+    return io.BytesIO(response.content)
+
+
 def extract_f1_pdf(uploaded_pdf):
     """FIA F1の決勝・予選・スプリントClassification PDFを抽出する。"""
     import pdfplumber
@@ -1397,12 +1410,14 @@ if s_cat == "WEC":
 
 
 if s_cat == "F1":
-    with st.sidebar.expander("📥 F1公式PDFを読み込む"):
-        st.caption("FIAのRace Classification PDFから完走車とリタイア車を読み取り、そのまま登録・更新できます。")
-        f1_pdf = st.file_uploader("F1結果PDF", type=["pdf"], key="f1_pdf_import")
-        if f1_pdf is not None:
+    with st.sidebar.expander("🌐 F1公式PDF URLを読み込む"):
+        st.caption("FIA公式のClassification PDFへの直接URLを貼るだけで読み取り・登録できます。")
+        f1_pdf_url = st.text_input("F1 Classification PDF URL", placeholder="https://www.fia.com/system/files/...classification.pdf", key="f1_pdf_import_url")
+        if f1_pdf_url.strip():
             try:
-                f1_rows, detected_session = extract_f1_pdf(f1_pdf)
+                with st.spinner("FIA公式PDFを読み込み中…"):
+                    f1_pdf = fetch_fia_pdf_url(f1_pdf_url)
+                    f1_rows, detected_session = extract_f1_pdf(f1_pdf)
                 if f1_rows:
                     st.success(f"{len(f1_rows)}台を読み取れました！ セッション: {detected_session}")
                     st.dataframe(pd.DataFrame(f1_rows), use_container_width=True, hide_index=True)
@@ -1480,12 +1495,14 @@ if s_cat == "F1":
 
 # --- F2公式PDFインポート ---
 if s_cat == "F2":
-    with st.sidebar.expander("📥 F2公式PDFを読み込む"):
-        st.caption("FIAのF2予選・Sprint・Feature Classification PDFを読み取り、登録・更新できます。")
-        f2_pdf = st.file_uploader("F2結果PDF", type=["pdf"], key="f2_pdf_import")
-        if f2_pdf is not None:
+    with st.sidebar.expander("🌐 F2公式PDF URLを読み込む"):
+        st.caption("FIA公式のClassification PDFへの直接URLを貼るだけで読み取り・登録できます。")
+        f2_pdf_url = st.text_input("F2 Classification PDF URL", placeholder="https://www.fia.com/system/files/...classification.pdf", key="f2_pdf_import_url")
+        if f2_pdf_url.strip():
             try:
-                f2_rows, f2_detected_session = extract_f2_pdf(f2_pdf)
+                with st.spinner("FIA公式PDFを読み込み中…"):
+                    f2_pdf = fetch_fia_pdf_url(f2_pdf_url)
+                    f2_rows, f2_detected_session = extract_f2_pdf(f2_pdf)
                 if f2_rows:
                     st.success(f"{len(f2_rows)}台を読み取れました！ セッション: {f2_detected_session}")
                     st.dataframe(pd.DataFrame(f2_rows), use_container_width=True, hide_index=True)
@@ -1558,14 +1575,16 @@ if s_cat == "F2":
 
 
 if s_cat == "F3":
-    with st.sidebar.expander("📥 F3公式PDFを読み込む"):
+    with st.sidebar.expander("🌐 F3公式PDF URLを読み込む"):
         if st.session_state.get("f3_import_success"):
             st.success(st.session_state.pop("f3_import_success"))
-        st.caption("FIAのF3予選・Sprint・Feature Classification PDFを読み取り、登録・更新できます。")
-        f3_pdf = st.file_uploader("F3結果PDF", type=["pdf"], key="f3_pdf_import")
-        if f3_pdf is not None:
+        st.caption("FIA公式のClassification PDFへの直接URLを貼るだけで読み取り・登録できます。")
+        f3_pdf_url = st.text_input("F3 Classification PDF URL", placeholder="https://www.fia.com/system/files/...classification.pdf", key="f3_pdf_import_url")
+        if f3_pdf_url.strip():
             try:
-                f3_rows, f3_detected_session = extract_f3_pdf(f3_pdf)
+                with st.spinner("FIA公式PDFを読み込み中…"):
+                    f3_pdf = fetch_fia_pdf_url(f3_pdf_url)
+                    f3_rows, f3_detected_session = extract_f3_pdf(f3_pdf)
                 if f3_rows:
                     st.success(f"{len(f3_rows)}台を読み取れました！ セッション: {f3_detected_session}")
                     st.dataframe(pd.DataFrame(f3_rows), use_container_width=True, hide_index=True)
