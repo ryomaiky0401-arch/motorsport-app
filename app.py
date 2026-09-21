@@ -200,8 +200,10 @@ def load_data():
                         data["teams"][k] = v
             if "points_master" not in data:
                 data["points_master"] = {}
+            if "entries" not in data:
+                data["entries"] = {}
             return data
-    return {"races": {}, "teams": PRESET_TEAMS.copy(), "points_master": {}}
+    return {"races": {}, "teams": PRESET_TEAMS.copy(), "points_master": {}, "entries": {}}
 
 
 def save_data(data):
@@ -1037,12 +1039,82 @@ st.title("🏎️ モータースポーツ ダッシュボード")
 
 data = load_data()
 
-tab1, tab2, tab3, tab4 = st.tabs([
+tab1, tab2, tab_entry, tab3, tab4 = st.tabs([
     "🏁 レース結果閲覧・編集",
     "🏆 ポイントランキング",
+    "🏎️ エントリーリスト",
     "⚙️ マスタ管理",
     "💾 バックアップ / 復元",
 ])
+
+# --- エントリーリスト ---
+with tab_entry:
+    st.header("🏎️ エントリーリスト")
+    e_y, e_c1, e_c2 = st.columns([1, 1, 1])
+    with e_y:
+        e_year = st.selectbox("年度", YEARS, key="entry_year")
+    with e_c1:
+        e_cat = st.selectbox("カテゴリー", list(CATEGORY_CONFIG.keys()), key="entry_cat")
+    with e_c2:
+        e_cls = st.selectbox("クラス", CATEGORY_CONFIG[e_cat], key="entry_cls")
+
+    entry_key = f"{e_cat}_{e_cls}"
+    entries = data.setdefault("entries", {}).setdefault(e_year, {}).setdefault(entry_key, [])
+
+    with st.expander("➕ エントリーを追加 / 編集"):
+        edit_options = ["新規追加"] + [f"No.{x.get('car_number', '')} {x.get('team', '')}" for x in entries]
+        edit_choice = st.selectbox("編集対象", edit_options, key="entry_edit_choice")
+        edit_idx = edit_options.index(edit_choice) - 1
+        current = entries[edit_idx] if edit_idx >= 0 else {}
+
+        ec1, ec2 = st.columns(2)
+        with ec1:
+            car_number = st.text_input("カーナンバー", value=current.get("car_number", ""), key=f"entry_no_{edit_choice}")
+            machine = st.text_input("マシン名", value=current.get("machine", ""), placeholder="例: Ferrari 499P", key=f"entry_machine_{edit_choice}")
+            team = st.text_input("チーム名", value=current.get("team", ""), key=f"entry_team_{edit_choice}")
+        with ec2:
+            drivers = st.text_area("ドライバー名", value=current.get("drivers", ""), placeholder="例: Driver A / Driver B / Driver C", key=f"entry_drivers_{edit_choice}")
+            image_url = st.text_input("マシン画像URL", value=current.get("image_url", ""), placeholder="https://...", key=f"entry_image_{edit_choice}")
+
+        b1, b2 = st.columns(2)
+        with b1:
+            if st.button("保存", type="primary", use_container_width=True, key="entry_save"):
+                if not team.strip():
+                    st.error("チーム名を入力してください。")
+                else:
+                    item = {"car_number": car_number.strip(), "machine": machine.strip(), "team": team.strip(), "drivers": drivers.strip(), "image_url": image_url.strip()}
+                    if edit_idx >= 0:
+                        entries[edit_idx] = item
+                    else:
+                        entries.append(item)
+                    save_data(data)
+                    st.success("エントリーを保存しました！")
+                    st.rerun()
+        with b2:
+            if edit_idx >= 0 and st.button("削除", use_container_width=True, key="entry_delete"):
+                entries.pop(edit_idx)
+                save_data(data)
+                st.rerun()
+
+    if entries:
+        st.divider()
+        for i in range(0, len(entries), 3):
+            cols = st.columns(3)
+            for col, entry in zip(cols, entries[i:i + 3]):
+                with col:
+                    if entry.get("image_url"):
+                        try:
+                            st.image(entry["image_url"], use_container_width=True)
+                        except Exception:
+                            st.caption("画像を表示できませんでした")
+                    no = f"No.{entry.get('car_number')}  " if entry.get("car_number") else ""
+                    st.subheader(f"{no}{entry.get('team', '')}")
+                    if entry.get("machine"):
+                        st.caption(entry["machine"])
+                    if entry.get("drivers"):
+                        st.write(f"👤 {entry['drivers']}")
+    else:
+        st.info("このカテゴリーのエントリーはまだ登録されていません。上の「エントリーを追加 / 編集」から追加できます。")
 
 # --- タブ4: バックアップ・復元 ---
 with tab4:
