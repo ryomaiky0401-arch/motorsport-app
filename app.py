@@ -844,6 +844,9 @@ if s_cat == "WEC":
         )
         if wec_url.strip():
             try:
+                            import io
+                            import requests
+                            import pdfplumber
                 with st.spinner("公式Timing Resultsを読み込み中…"):
                     wec_groups = extract_wec_timing_url(wec_url.strip())
                 if wec_groups:
