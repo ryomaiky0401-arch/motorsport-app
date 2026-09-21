@@ -850,6 +850,7 @@ if s_cat == "WEC":
                     # 一時デバッグ: Aston #007/#009 がpdfplumberで実際にどう抽出されているか確認
                     if "Qualifying" in wec_url or "QUALIFYING" in wec_url or "qualifying" in wec_url:
                         try:
+                            import re
                             import io
                             import requests
                             import pdfplumber
