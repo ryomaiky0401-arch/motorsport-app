@@ -310,14 +310,22 @@ def extract_supergt_result_url(url):
         tm = re.search(r"チーム\s*(.*?)\s*マシン\s*", team_machine)
         team = tm.group(1).strip() if tm else team_machine
         drivers = raw[driver_i].strip()
-        # 公式HTMLでは複数ドライバー名が連結されるため、既知の姓名境界を区切る。
-        # 例: 「坪井 翔山下 健太」→「坪井 翔 / 山下 健太」
-        drivers = re.sub(
-            r"(?<=[ぁ-んァ-ヶ一-龥A-Za-z])(?=(?:山下|小林|大嶋|サッシャ|佐藤|牧野|高星|三宅|野中|阪口|イゴール|ジュリアーノ|ベルトラン|大湯|平峰|福住|関口|千代|名取|塚越|太田|国本|笹原|坪井)\s)",
-            " / ",
-            drivers,
-        )
-        drivers = re.sub(r"\s{2,}", " / ", drivers)
+        # SUPER GT公式HTMLは複数ドライバーを1セル内に空白だけで並べる。
+        # 2026エントリーの車番ごとの人数/姓名を使って確実に「 / 」区切りへ整形する。
+        sgt_driver_map_2026 = {
+            "8": ["太田 格之進", "大津 弘樹"], "12": ["平峰 一貴", "ベルトラン・バゲット"],
+            "14": ["福住 仁嶺", "大嶋 和也"], "16": ["野尻 智紀", "佐藤 蓮"],
+            "17": ["塚越 広大", "野村 勇斗"], "19": ["国本 雄資", "阪口 晴南"],
+            "23": ["千代 勝正", "高星 明誠"], "24": ["名取 鉄平", "三宅 淳詞"],
+            "36": ["坪井 翔", "山下 健太"], "37": ["笹原 右京", "ジュリアーノ・アレジ"],
+            "38": ["大湯 都史樹", "小林 利徠斗"], "39": ["関口 雄飛", "サッシャ・フェネストラズ"],
+            "64": ["大草 りき", "イゴール・オオムラ・フラガ"], "100": ["山本 尚貴", "牧野 任祐"],
+        }
+        known_drivers = sgt_driver_map_2026.get(num)
+        if known_drivers:
+            drivers = " / ".join(known_drivers)
+        else:
+            drivers = re.sub(r"\s{2,}", " / ", drivers)
         points = 1 if session == "予選" and rank == 1 else (
             race_pts[cls][rank - 1] if session == "決勝" and rank <= len(race_pts[cls]) else 0
         )
