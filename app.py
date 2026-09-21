@@ -1185,24 +1185,26 @@ with tab_entry:
                         selected_livery = st.session_state.get(switch_key, selected_livery)
                         if selected_livery not in image_options:
                             selected_livery = next(iter(image_options))
-                        nav_left, nav_name, nav_right = st.columns([1, 5, 1], vertical_alignment="center")
-                        names = list(image_options.keys())
-                        pos = names.index(selected_livery)
-                        with nav_left:
-                            if st.button("◀", key=f"{switch_key}_prev", use_container_width=True):
-                                st.session_state[switch_key] = names[(pos - 1) % len(names)]
-                                st.rerun()
-                        with nav_name:
-                            st.markdown(f"<div style='text-align:center; font-size:0.85rem;'>🎨 {selected_livery}</div>", unsafe_allow_html=True)
-                        with nav_right:
-                            if st.button("▶", key=f"{switch_key}_next", use_container_width=True):
-                                st.session_state[switch_key] = names[(pos + 1) % len(names)]
-                                st.rerun()
                     if selected_livery:
                         try:
                             st.image(image_options[selected_livery], use_container_width=True)
                         except Exception:
                             st.caption("画像を表示できませんでした")
+                    # 切替UIは画像の下に置き、画像上端とカード本文の位置を他車と揃える
+                    if len(image_options) > 1:
+                        names = list(image_options.keys())
+                        pos = names.index(selected_livery)
+                        nav_left, nav_name, nav_right = st.columns([1, 5, 1], vertical_alignment="center")
+                        with nav_left:
+                            if st.button("◀", key=f"{switch_key}_prev", use_container_width=True):
+                                st.session_state[switch_key] = names[(pos - 1) % len(names)]
+                                st.rerun()
+                        with nav_name:
+                            st.markdown(f"<div style='text-align:center; font-size:0.78rem; opacity:0.75;'>🎨 {selected_livery}　{pos + 1}/{len(names)}</div>", unsafe_allow_html=True)
+                        with nav_right:
+                            if st.button("▶", key=f"{switch_key}_next", use_container_width=True):
+                                st.session_state[switch_key] = names[(pos + 1) % len(names)]
+                                st.rerun()
                     no = f"No.{entry.get('car_number')}  " if entry.get("car_number") else ""
                     st.subheader(f"{no}{entry.get('team', '')}")
                     if entry.get("machine"):
