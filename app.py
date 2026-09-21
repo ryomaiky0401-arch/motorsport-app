@@ -639,6 +639,25 @@ def extract_wec_timing_url(url):
         "19": ("Genesis Magma Racing", "Hypercar"), "94": ("Peugeot Totalenergies", "Hypercar"),
         "17": ("Genesis Magma Racing", "Hypercar"), "93": ("Peugeot Totalenergies", "Hypercar"),
         "8": ("Toyota Racing", "Hypercar"),
+        # 2026 Le Mans LMP2 entries. LMP2 is a Le Mans-only WEC class.
+        "3": ("DKR Engineering", "LMP2"),
+        "4": ("CrowdStrike Racing by APR", "LMP2"),
+        "9": ("Proton Competition", "LMP2"),
+        "14": ("TDS Racing", "LMP2"),
+        "22": ("United Autosports", "LMP2"),
+        "24": ("Nielsen Racing", "LMP2"),
+        "25": ("Algarve Pro Racing", "LMP2"),
+        "26": ("Vector Sport", "LMP2"),
+        "29": ("Forestier Racing by Panis", "LMP2"),
+        "30": ("Duqueine Team", "LMP2"),
+        "43": ("Inter Europol Competition", "LMP2"),
+        "44": ("Proton Competition", "LMP2"),
+        "48": ("RD Limited", "LMP2"),
+        "99": ("AO by TF", "LMP2"),
+        "183": ("AF Corse", "LMP2"),
+        "199": ("AO by TF", "LMP2"),
+        "222": ("United Autosports", "LMP2"),
+        "343": ("Inter Europol Competition", "LMP2"),
         "34": ("Racing Team Turkey by TF", "LMGT3"), "69": ("Team WRT", "LMGT3"),
         "92": ("The Bend Manthey", "LMGT3"), "91": ("Manthey DK Engineering", "LMGT3"),
         "88": ("Proton Competition", "LMGT3"), "61": ("Iron Lynx", "LMGT3"),
@@ -722,7 +741,7 @@ def extract_wec_timing_url(url):
         if parts:
             # 最後のドライバー末尾に付く車種列。
             parts[-1] = re.split(
-                r"\s+(?=(?:BMW|FERRARI|CADILLAC|ASTON|ALPINE|PEUGEOT|TOYOTA|GENESIS|PORSCHE|FORD|LEXUS|MERCEDES|CORVETTE|MCLAREN)\b)",
+                r"\s+(?=(?:BMW|FERRARI|CADILLAC|ASTON|ALPINE|PEUGEOT|TOYOTA|GENESIS|PORSCHE|FORD|LEXUS|MERCEDES|CORVETTE|MCLAREN|ORECA)\b)",
                 parts[-1], maxsplit=1, flags=re.I
             )[0].strip()
             # PDF列の残骸が1文字だけ付くケース (F/C/A/P/G/T/H/M) を除去。
@@ -763,7 +782,7 @@ def extract_wec_timing_url(url):
         if nc_at is not None:
             for line in lines[nc_at + 1:]:
                 low = line.strip().lower()
-                if low == "retired" or low.startswith("lmgt3") or low.startswith("hypercar"):
+                if low == "retired" or low.startswith("lmgt3") or low.startswith("lmp2") or low.startswith("hypercar"):
                     break
                 compact = re.sub(r"\s+", "", line).lower()
                 found = None
