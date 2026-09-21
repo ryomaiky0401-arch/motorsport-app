@@ -238,7 +238,7 @@ def extract_sf_result_url(url):
     text = re.sub(r"\\s+", " ", text)
 
     # 2026の公式ページは「Po. No. Driver Team ／ Engine Lap ...」の順。
-    marker = re.search(r"(?:Po\\.?|Pos\\.?)\\s+No\\.?\\s+Driver\\s+Team", text, flags=re.I)
+    marker = re.search(r"(?:Po\\.?|Pos\\.?)\\s+(?:Gr\\.?\\s+)?No\\.?\\s+Driver\\s+Team", text, flags=re.I)
     if not marker:
         raise ValueError("公式ページのリザルト表を見つけられませんでした。")
 
@@ -281,7 +281,7 @@ def extract_sf_result_url(url):
     race_points = [20, 15, 11, 8, 6, 5, 4, 3, 2, 1]
     qual_points = [3, 2, 1]
     # 「順位 車番」の組を拾う。NOT CLASSIFIED後の順位も同じ形式で取得できる。
-    matches = list(re.finditer(r"(?:^|\\s)(\\d{1,2})\\s+(\\d{1,2})(?=\\s|[^0-9])", result_text))
+    matches = list(re.finditer(r"(?:^|\\s)(\\d{1,2})\\s+(?:[AB]\\s+)?(\\d{1,2})(?=\\s|[^0-9])", result_text))
     seen_ranks = set()
     for m in matches:
         rank, num = int(m.group(1)), m.group(2)
