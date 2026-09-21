@@ -326,12 +326,12 @@ def extract_sf_result_url(url):
                 if num in already_nums:
                     continue
                 # NOT CLASSIFIED部分で「A/B + 車番 + ドライバー名」の並びを確認する。
-                pat = re.compile(r"(?:^|\\s)[AB]\\s+" + re.escape(num) + r"(?=\\s)")
+                pat = re.compile(r"(?:^|\s)[AB]\s+" + re.escape(num) + r"(?=\s)")
                 m_nc = pat.search(nc_text)
                 if not m_nc:
                     continue
                 tail = nc_text[m_nc.end():]
-                next_entry = re.search(r"\\s[AB]\\s+\\d{1,2}(?=\\s)", tail)
+                next_entry = re.search(r"\s[AB]\s+\d{1,2}(?=\s)", tail)
                 chunk = tail[:next_entry.start()] if next_entry else tail
                 driver_parts = [p for p in re.split(r"[ ･・]+", driver) if p]
                 if driver_parts and all(p in chunk for p in driver_parts):
