@@ -783,6 +783,42 @@ def extract_wec_timing_url(url):
             "チーム": team, "ポイント": points, "ステータス": "完走",
         })
 
+    # 予選で失格となり順位番号が消えた車両も結果から落とさない。
+    # 例: 2026 Le Mans LMGT3 #34 (Disqualified)。
+    if session == "予選":
+        seen = {r["カーナンバー"] for rs in rows_by_class.values() for r in rs}
+        for line in lines:
+            low = line.lower()
+            if not any(token in low for token in ["disqualified", "disqualification", "dsq"]):
+                continue
+            compact = re.sub(r"\s+", "", line).lower()
+            for candidate, (candidate_team, candidate_cls) in entries.items():
+                if candidate in seen:
+                    continue
+                team_compact = candidate_team.replace(" ", "").lower()
+                if candidate in compact and team_compact in compact:
+                    dm = driver_pat.search(line)
+                    crew = dm.group(1).strip() if dm else ""
+                    if crew:
+                        first_driver = re.search(r"[A-ZÀ-ÖØ-Þ]\.\s", crew)
+                        if first_driver:
+                            crew = crew[first_driver.start():].strip()
+                        parts = [p.strip() for p in crew.split("/")][:3]
+                        if parts:
+                            parts[-1] = re.split(
+                                r"\s+(?=(?:BMW|FERRARI|CADILLAC|ASTON|ALPINE|PEUGEOT|TOYOTA|GENESIS|PORSCHE|FORD|LEXUS|MERCEDES|CORVETTE|MCLAREN|ORECA)\b)",
+                                parts[-1], maxsplit=1, flags=re.I
+                            )[0].strip()
+                            parts[-1] = re.sub(r"\s+[A-Z]$", "", parts[-1]).strip()
+                            crew = " / ".join(parts)
+                    next_rank = max([r["順位"] for r in rows_by_class[candidate_cls]], default=0) + 1
+                    rows_by_class[candidate_cls].append({
+                        "順位": next_rank, "カーナンバー": candidate, "ドライバー": crew,
+                        "チーム": candidate_team, "ポイント": 0, "ステータス": "DSQ",
+                    })
+                    seen.add(candidate)
+                    break
+
     # 決勝の "Not classified" も別処理する。
     # Spaの#009/#51のように、リタイアではないが分類外で順位番号が無い車両を拾う。
     if session == "決勝":
