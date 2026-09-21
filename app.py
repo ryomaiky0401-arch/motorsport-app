@@ -1117,7 +1117,12 @@ with tab2:
                 cum_pts = []
                 current = 0
                 for p in pts_list:
-                    current += p
+                    # 累計ポイントは絶対に減らさない。0ptなら前セッションの累計を維持する。
+                    try:
+                        session_pts = max(float(p), 0)
+                    except (TypeError, ValueError):
+                        session_pts = 0
+                    current += session_pts
                     cum_pts.append(current)
                 chart_data[team_name] = cum_pts
 
@@ -1173,7 +1178,12 @@ with tab2:
                     current = 0
                     cumulative = []
                     for p in item["pts_list"]:
-                        current += p
+                        # 累計ポイントは絶対に減らさない。0ptなら前セッションの累計を維持する。
+                        try:
+                            session_pts = max(float(p), 0)
+                        except (TypeError, ValueError):
+                            session_pts = 0
+                        current += session_pts
                         cumulative.append(current)
                     driver_chart[item["ドライバー"]] = cumulative
 
