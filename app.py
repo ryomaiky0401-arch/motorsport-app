@@ -402,7 +402,7 @@ with tab3:
 
 # --- F1公式PDFインポート ---
 with st.sidebar.expander("📥 F1公式PDFを読み込む"):
-    st.caption("FIAのRace Classification PDFを選ぶと、順位・ドライバー・チームを読み取ります。まずはプレビューだけなので既存データは変更しません。")
+    st.caption("FIAのRace Classification PDFから順位・ドライバー・チームを読み取り、そのまま登録できます。")
     f1_pdf = st.file_uploader("F1結果PDF", type=["pdf"], key="f1_pdf_import")
     if f1_pdf is not None:
         try:
@@ -410,6 +410,55 @@ with st.sidebar.expander("📥 F1公式PDFを読み込む"):
             if f1_rows:
                 st.success(f"{len(f1_rows)}台を読み取れました！")
                 st.dataframe(pd.DataFrame(f1_rows), use_container_width=True, hide_index=True)
+
+                f1_year = st.selectbox("登録年度", YEARS, key="f1_import_year")
+                f1_round = st.text_input("レース名 / ラウンド", placeholder="例: Rd.3 日本GP", key="f1_import_round")
+                f1_date = st.date_input("開催日", datetime.date.today(), key="f1_import_date")
+                f1_session = st.selectbox("セッション", ["決勝", "予選", "スプリント"], key="f1_import_session")
+
+                if st.button("このF1結果を登録", type="primary", use_container_width=True, key="f1_import_save"):
+                    if not f1_round.strip():
+                        st.error("レース名 / ラウンドを入力してください。")
+                    else:
+                        races = data.setdefault("races", {}).setdefault(f1_year, {}).setdefault("F1", {}).setdefault("総合", [])
+                        duplicate = any(
+                            x.get("round_name") == f1_round.strip()
+                            and x.get("session_type", "決勝") == f1_session
+                            for x in races
+                        )
+                        if duplicate:
+                            st.error(f"「{f1_round.strip()}」の【{f1_session}】はすでに登録されています。")
+                        else:
+                            pts = data.get("points_master", {}).get(
+                                "F1",
+                                {
+                                    "決勝": DEFAULT_PTS_RACE,
+                                    "予選": DEFAULT_PTS_QUALIFY,
+                                    "スプリント": DEFAULT_PTS_SPRINT,
+                                },
+                            ).get(f1_session, DEFAULT_PTS_RACE)
+
+                            teams = [row["チーム"] for row in f1_rows]
+                            drivers = [row["ドライバー"] for row in f1_rows]
+                            races.append({
+                                "round_name": f1_round.strip(),
+                                "race_date": str(f1_date),
+                                "session_type": f1_session,
+                                "is_custom_pts": False,
+                                "points_table": pts,
+                                "results": teams,
+                                "drivers": drivers,
+                            })
+
+                            # PDFに出てきた現在の正式チーム名もマスタへ追加
+                            team_master = data.setdefault("teams", {}).setdefault("F1_総合", [])
+                            for team in teams:
+                                if team not in team_master:
+                                    team_master.append(team)
+
+                            save_data(data)
+                            st.success(f"「{f1_round.strip()} ({f1_session})」を登録しました！")
+                            st.rerun()
             else:
                 st.warning("順位表を読み取れませんでした。このPDFの形式を確認する必要があります。")
         except Exception as e:
