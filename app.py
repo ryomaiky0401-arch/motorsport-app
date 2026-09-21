@@ -2067,7 +2067,7 @@ with tab2:
             # 過去シーズン共通のチームマスターを0pt枠として混ぜない。
             registered = data["teams"].get(f"{r_cat}_{r_cls}", [])
             has_pdf_driver_data = any(r.get("drivers") for r in races)
-            if not (r_cat in ["F1", "F2", "F3", "WEC"] and has_pdf_driver_data):
+            if not (r_cat in ["F1", "F2", "F3", "WEC", "SUPER GT"] and has_pdf_driver_data):
                 for team in registered:
                     team_points_matrix[team] = [0] * len(races)
 
