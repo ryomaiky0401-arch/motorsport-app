@@ -1423,10 +1423,11 @@ with tab2:
         race_headers = [f"{r.get('round_name')} ({r.get('session_type', '決勝')})" for r in races]
 
         team_points_matrix = {}
-        # F1のPDF登録データがある場合は、実際に出場したチームだけをランキング対象にする。
-        # これで旧名称や過去シーズンのマスター登録チームが0ptで混ざらない。
+        # PDF/公式結果からドライバー情報付きで登録されたカテゴリーは、
+        # 過去シーズン共通のチームマスターを0pt枠として混ぜない。
+        # ランキングには「選択中の年度に実際に登録された結果」のチームだけを出す。
         has_pdf_driver_data = any(r.get("drivers") for r in races)
-        if not (r_cat in ["F1", "F2"] and has_pdf_driver_data):
+        if not (r_cat in ["F1", "F2", "F3", "WEC"] and has_pdf_driver_data):
             for team in registered:
                 team_points_matrix[team] = [0] * len(races)
 
