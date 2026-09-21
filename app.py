@@ -1396,7 +1396,6 @@ if s_cat == "WEC":
 
 
 if s_cat == "F1":
-    with st.sidebar.expander("🌐 F1公式PDF URLを読み込む"):
     with st.sidebar.expander("📥 F1公式PDFを読み込む"):
         st.caption("FIAのRace Classification PDFから完走車とリタイア車を読み取り、そのまま登録・更新できます。")
         f1_pdf = st.file_uploader("F1結果PDF", type=["pdf"], key="f1_pdf_import")
@@ -1480,7 +1479,6 @@ if s_cat == "F1":
 
 # --- F2公式PDFインポート ---
 if s_cat == "F2":
-    with st.sidebar.expander("🌐 F2公式PDF URLを読み込む"):
     with st.sidebar.expander("📥 F2公式PDFを読み込む"):
         st.caption("FIAのF2予選・Sprint・Feature Classification PDFを読み取り、登録・更新できます。")
         f2_pdf = st.file_uploader("F2結果PDF", type=["pdf"], key="f2_pdf_import")
@@ -1559,7 +1557,6 @@ if s_cat == "F2":
 
 
 if s_cat == "F3":
-    with st.sidebar.expander("🌐 F3公式PDF URLを読み込む"):
     with st.sidebar.expander("📥 F3公式PDFを読み込む"):
         if st.session_state.get("f3_import_success"):
             st.success(st.session_state.pop("f3_import_success"))
