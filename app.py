@@ -615,7 +615,11 @@ def extract_wec_timing_url(url):
         text = "\n".join((p.extract_text(x_tolerance=2, y_tolerance=2) or "") for p in pdf.pages)
 
     upper = text.upper()
-    if "HYPERPOLE" in upper:
+    if re.search(r"HYPERPOLE\s*2|HYPERPOLE\s*H2|\bHYPERPOLE 2\b", upper):
+        session = "ハイパーポール2"
+    elif re.search(r"HYPERPOLE\s*1|HYPERPOLE\s*H1|\bHYPERPOLE 1\b", upper):
+        session = "ハイパーポール1"
+    elif "HYPERPOLE" in upper:
         session = "ハイパーポール"
     elif "QUALIFYING" in upper:
         session = "予選"
@@ -727,7 +731,7 @@ def extract_wec_timing_url(url):
             crew = " / ".join(parts)
 
         points = 0
-        if session == "ハイパーポール" and rank == 1:
+        if session in ["ハイパーポール", "ハイパーポール2"] and rank == 1:
             points = 1
         elif session == "決勝":
             # WEC公式配点はレース長で変わる。
@@ -2088,7 +2092,7 @@ with tab1:
             if v_cat == "WEC" and sel_session_filter == "予選":
                 wec_qualifying_filter = st.selectbox(
                     "予選セッション",
-                    ["すべて", "予選", "ハイパーポール"],
+                    ["すべて", "予選", "ハイパーポール", "ハイパーポール1", "ハイパーポール2"],
                     key="wec_qualifying_session_filter",
                 )
             elif v_cat == "SUPER GT" and sel_session_filter == "予選":
@@ -2108,7 +2112,7 @@ with tab1:
                 if wec_qualifying_filter in [None, "すべて"]:
                     round_races = [
                         r for r in round_races
-                        if r.get("session_type", "決勝") in ["予選", "ハイパーポール"]
+                        if r.get("session_type", "決勝") in ["予選", "ハイパーポール", "ハイパーポール1", "ハイパーポール2"]
                     ]
                 else:
                     round_races = [
@@ -2140,7 +2144,7 @@ with tab1:
 
         if round_races:
             # 閲覧画面は見やすさ優先で「決勝 → スプリント → 予選」の順に表示
-            view_session_order = {"決勝": 0, "スプリント": 1, "ハイパーポール": 2, "予選": 3, "予選Q2": 3, "予選Q1": 4, "予選Q1 A": 4, "予選Q1 B": 5}
+            view_session_order = {"決勝": 0, "スプリント": 1, "ハイパーポール2": 2, "ハイパーポール": 2, "ハイパーポール1": 3, "予選": 4, "予選Q2": 3, "予選Q1": 4, "予選Q1 A": 4, "予選Q1 B": 5}
             round_races = sorted(
                 round_races,
                 key=lambda x: view_session_order.get(x.get("session_type", "決勝"), 99),
@@ -2294,7 +2298,7 @@ with tab2:
 
         # 日付 → 同一イベント内は「予選 → スプリント → 決勝」の順に固定。
         # PDFを読み込んだ順番には左右されない。
-        session_order = {"予選": 0, "ハイパーポール": 1, "スプリント": 2, "決勝": 3}
+        session_order = {"予選": 0, "ハイパーポール1": 1, "ハイパーポール": 2, "ハイパーポール2": 2, "スプリント": 3, "決勝": 4}
         races = sorted(
             races,
             key=lambda x: (
@@ -2358,7 +2362,7 @@ with tab2:
                         )
                         team_points_matrix[manufacturer][race_idx] += pt
 
-                elif session_type == "ハイパーポール":
+                elif session_type in ["ハイパーポール", "ハイパーポール2"]:
                     # Hyperpoleのポール1点はマニュファクチャラー選手権にも加算。
                     official = r.get("official_points", [])
                     for idx, num in enumerate(car_numbers):
