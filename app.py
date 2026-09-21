@@ -362,7 +362,7 @@ def extract_supergt_result_url(url):
 
     # Q1ではタイム未計測などで順位欄が数値にならない車両が表末尾に出ることがある。
     # 2026年はエントリーマップを使い、結果表から漏れた車両も0ptで残す。
-    if session == "予選Q1":
+    if session in ["予選Q1", "予選Q2"]:
         expected_nums = list(sgt_driver_map_2026.keys())
         seen_nums = {str(x["カーナンバー"]) for x in rows}
         for missing_num in expected_nums:
