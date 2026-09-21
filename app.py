@@ -865,6 +865,7 @@ if s_cat == "WEC":
                                     "points_table": official_points, "results": teams, "drivers": drivers,
                                     "car_numbers": car_numbers, "statuses": statuses,
                                     "official_points": official_points,
+                                    "wec_points_scale": g.get("配点区分"),
                                 }
                                 idx = next((i for i, x in enumerate(races)
                                             if x.get("round_name") == wec_round.strip()
@@ -1317,7 +1318,14 @@ with tab1:
                 st.subheader(
                     f"📍 {sel_round} - 【{target.get('session_type', '決勝')}】"
                 )
-                st.caption(f"📅 開催日: {r_date_str} ｜ 🎯 適用ルール: {pts_label}")
+                wec_scale = target.get("wec_points_scale")
+                if v_cat == "WEC" and target.get("session_type", "決勝") == "決勝" and wec_scale:
+                    scale_names = {"6h": "6時間レース", "8h/10h": "8時間 / 10時間レース", "24h": "24時間レース"}
+                    st.caption(
+                        f"📅 開催日: {r_date_str} ｜ ⏱️ レース区分: {scale_names.get(wec_scale, wec_scale)} ｜ 🎯 適用ルール: {pts_label}"
+                    )
+                else:
+                    st.caption(f"📅 開催日: {r_date_str} ｜ 🎯 適用ルール: {pts_label}")
 
                 # 削除は結果表の右上に小さく配置し、誤操作を減らす
                 _, delete_col = st.columns([5, 1])
