@@ -656,21 +656,34 @@ def extract_wec_timing_url(url):
     rows_by_class = {"Hypercar": [], "LMGT3": []}
 
     for line in lines:
-        # Classificationの実順位・車番は必ず行頭側にある。
-        # 行中のラップ数などを順位/車番と誤認しないよう、再び行頭に固定する。
-        # HPは行頭にある場合と行の途中にある場合があるが、途中のHPは無視してよい。
-        # 007/009はPDFの文字配置上、pdfplumberが "00 7" / "0 09" のように
-        # 車番内部へ空白を入れて抽出することがある。Astonの3桁車番だけ内部空白を許可する。
-        m = re.match(
-            r"^(?:HP\s*)?(?:(\d{1,2})\s+((?:0\s*0\s*[79])|\d{1,3})\s+|(\d{1,2})(00[79]))(.+)$",
-            line,
-        )
-        if not m:
-            continue
-        if m.group(1) is not None:
-            rank, num, rest = int(m.group(1)), re.sub(r"\s+", "", m.group(2)), m.group(5)
+        # 2026 Imola PDFでは "1 34Racing..." のように車番とチーム名の間に
+        # 空白が入らない行がある。また一部はタイム等の後ろに "HP 2 69Team..."
+        # が回り込むため、HP表記がある場合は行中から順位を拾う。
+        hp = re.search(r"\\bHP\\s*(\\d{1,2})\\s+(.+)", line)
+        if hp:
+            rank = int(hp.group(1))
+            tail = hp.group(2)
         else:
-            rank, num, rest = int(m.group(3)), m.group(4), m.group(5)
+            normal = re.match(r"^(\\d{1,2})\\s+(.+)", line)
+            if not normal:
+                continue
+            rank = int(normal.group(1))
+            tail = normal.group(2)
+
+        # 車番は既知の2026エントリーから照合する。
+        # 007/009はPDF抽出時に "00 7" / "0 09" になる場合があるので空白を除去。
+        compact_tail = re.sub(r"\\s+", "", tail)
+        num = next(
+            (candidate for candidate in sorted(entries, key=len, reverse=True)
+             if compact_tail.startswith(candidate)),
+            None,
+        )
+        if not num:
+            continue
+
+        # ドライバー抽出には元の行を使うので、ここではrestをtailとして保持。
+        rest = tail
+
         if num not in entries:
             continue
         team, cls = entries[num]
