@@ -314,6 +314,37 @@ def extract_sf_result_url(url):
         rows.append({"順位": rank, "カーナンバー": num, "ドライバー": driver,
                      "チーム": team, "ポイント": pts, "ステータス": status})
 
+    # 予選のNOT CLASSIFIEDは順位番号が付かないため、通常の順位regexでは拾えない。
+    # 公式ページに掲載された未分類車も末尾へ追加し、24台すべて保持する。
+    if session == "予選":
+        not_classified_pos = result_text.find("NOT CLASSIFIED")
+        if not_classified_pos >= 0:
+            nc_text = result_text[not_classified_pos:]
+            already_nums = {x["カーナンバー"] for x in rows}
+            nc_order = []
+            for num, (driver, team) in sf_entries.items():
+                if num in already_nums:
+                    continue
+                # NOT CLASSIFIED部分で「A/B + 車番 + ドライバー名」の並びを確認する。
+                driver_compact = driver.replace(" ", "")
+                nc_compact = nc_text.replace(" ", "")
+                pat = re.compile(r"(?:^|\\s)[AB]\\s+" + re.escape(num) + r"(?=\\s|[^0-9])")
+                if pat.search(nc_text) and driver_compact in nc_compact:
+                    pos = nc_text.find(num)
+                    nc_order.append((pos if pos >= 0 else 999999, num, driver, team))
+            nc_order.sort()
+            next_rank = max([x["順位"] for x in rows], default=0) + 1
+            for _, num, driver, team in nc_order:
+                rows.append({
+                    "順位": next_rank,
+                    "カーナンバー": num,
+                    "ドライバー": driver,
+                    "チーム": team,
+                    "ポイント": 0,
+                    "ステータス": "予選未分類",
+                })
+                next_rank += 1
+
     rows.sort(key=lambda x: x["順位"])
     if not rows:
         raise ValueError("順位データを取得できませんでした。")
