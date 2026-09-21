@@ -639,6 +639,7 @@ def extract_wec_timing_url(url):
         "19": ("Genesis Magma Racing", "Hypercar"), "94": ("Peugeot Totalenergies", "Hypercar"),
         "17": ("Genesis Magma Racing", "Hypercar"), "93": ("Peugeot Totalenergies", "Hypercar"),
         "8": ("Toyota Racing", "Hypercar"),
+        "101": ("Cadillac WTR", "Hypercar"),
         # 2026 Le Mans LMP2 entries. LMP2 is a Le Mans-only WEC class.
         "3": ("DKR Engineering", "LMP2"),
         "4": ("CrowdStrike Racing by APR", "LMP2"),
