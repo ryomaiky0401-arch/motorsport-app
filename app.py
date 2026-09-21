@@ -205,14 +205,34 @@ def save_data(data):
         json.dump(data, f, ensure_ascii=False, indent=2)
 
 
-def extract_wec_pdf(uploaded_pdf):
-    """画像ベースのFIA WEC公式Classification PDFをOCRして抽出する。"""
+def extract_wec_timing_url(url):
+    """Al Kamel Timing Resultsのテキスト入りClassification PDFを直接解析する。OCRは使わない。"""
     import io
     import re
-    import fitz
-    import pytesseract
-    from PIL import Image
+    import requests
+    import pdfplumber
 
+    if "fiawec.alkamelsystems.com/Results/" not in url or not url.lower().endswith(".pdf"):
+        raise ValueError("Al Kamel Timing ResultsのPDF URLを入力してください。")
+
+    response = requests.get(url, timeout=20)
+    response.raise_for_status()
+    pdf_bytes = io.BytesIO(response.content)
+
+    with pdfplumber.open(pdf_bytes) as pdf:
+        text = "\n".join((p.extract_text(x_tolerance=2, y_tolerance=2) or "") for p in pdf.pages)
+
+    upper = text.upper()
+    if "HYPERPOLE" in upper:
+        session = "ハイパーポール"
+    elif "QUALIFYING" in upper:
+        session = "予選"
+    elif "RACE" in upper:
+        session = "決勝"
+    else:
+        raise ValueError("Race / Qualifying / Hyperpoleを判定できませんでした。")
+
+    # 2026年の車番→チーム。PDF本文からドライバーは直接取得する。
     entries = {
         "15": ("BMW M Team WRT", "Hypercar"), "51": ("Ferrari AF Corse", "Hypercar"),
         "12": ("Cadillac Hertz Team Jota", "Hypercar"), "38": ("Cadillac Hertz Team Jota", "Hypercar"),
@@ -234,115 +254,57 @@ def extract_wec_pdf(uploaded_pdf):
         "54": ("Vista AF Corse", "LMGT3"), "23": ("Heart of Racing Team", "LMGT3"),
     }
 
-    uploaded_pdf.seek(0)
-    doc = fitz.open(stream=uploaded_pdf.read(), filetype="pdf")
-    # WEC PDFは同じ順位表の重複ページが多い。
-    # 全ページを3倍でOCRすると非常に遅いため、必要なページだけ2倍で読む。
-    # Race(2p): 2ページ目のクラス別結果だけ
-    # Qualifying(9p): LMGT3 Q/HP, Hypercar Q/HP の4ページだけ
-    if len(doc) == 2:
-        page_indices = [1]
-        is_race = True
-    elif len(doc) >= 9:
-        page_indices = [1, 3, 5, 7]
-        is_race = False
-    else:
-        page_indices = list(range(len(doc)))
-        is_race = False
+    # 行の並びがPDF内部で前後することがあるので、順位+車番を全文から探す。
+    # ドライバー列は「A. NAME / B. NAME ...」の形を独立して取得。
+    driver_pat = re.compile(
+        r"([A-ZÀ-ÖØ-Þ]\.?\s*[A-ZÀ-ÖØ-Þ][A-ZÀ-ÖØ-öø-ÿ' .-]+"
+        r"(?:\s*/\s*[A-ZÀ-ÖØ-Þ]\.?\s*[A-ZÀ-ÖØ-Þ][A-ZÀ-ÖØ-öø-ÿ' .-]+){1,2})"
+    )
 
-    page_texts = []
-    for page_idx in page_indices:
-        page = doc[page_idx]
-        # 順位表はページ上半分にあるので下部の余白・署名をOCRしない
-        rect = page.rect
-        clip = fitz.Rect(rect.x0, rect.y0, rect.x1, rect.y0 + rect.height * 0.62)
-        pix = page.get_pixmap(matrix=fitz.Matrix(2, 2), clip=clip, alpha=False)
-        img = Image.frombytes("RGB", [pix.width, pix.height], pix.samples)
-        text = pytesseract.image_to_string(
-            img,
-            config="--psm 6 -c preserve_interword_spaces=1"
-        )
-        page_texts.append(text)
+    lines = [re.sub(r"\s+", " ", x).strip() for x in text.splitlines() if x.strip()]
+    rows_by_class = {"Hypercar": [], "LMGT3": []}
+
+    for line in lines:
+        # HPが先頭に付く予選にも対応
+        m = re.match(r"^(?:HP\s+)?(\d{1,2})\s+(007|009|\d{1,3})\s+(.+)$", line)
+        if not m:
+            continue
+        rank, num, rest = int(m.group(1)), m.group(2), m.group(3)
+        if num not in entries:
+            continue
+        team, cls = entries[num]
+
+        dm = driver_pat.search(rest)
+        crew = dm.group(1).strip() if dm else ""
+
+        # pdfplumberの内部順序でドライバーが行末側に来るケースもある。
+        if not crew:
+            dm = driver_pat.search(line)
+            crew = dm.group(1).strip() if dm else ""
+
+        points = 0
+        if session == "ハイパーポール" and rank == 1:
+            points = 1
+        elif session == "決勝":
+            points6 = [25, 18, 15, 12, 10, 8, 6, 4, 2, 1]
+            points = points6[rank - 1] if rank <= 10 else 0
+
+        rows_by_class[cls].append({
+            "順位": rank, "カーナンバー": num, "ドライバー": crew,
+            "チーム": team, "ポイント": points, "ステータス": "完走",
+        })
 
     groups = []
-
-    def clean_crew(raw, team, cls):
-        s = raw
-        # チーム名を除去（OCRで多少崩れていても、最初のドライバーらしい頭文字付近から拾う）
-        pos = s.lower().find(team.lower())
-        if pos >= 0:
-            s = s[pos + len(team):]
-        # 車種・カテゴリ以降を落とす
-        cat_pos = s.upper().find("HYPERCAR" if cls == "Hypercar" else "LMGT3")
-        if cat_pos >= 0:
-            before = s[:cat_pos]
-            # 車名が入るため、ドライバー列らしい「/」を含む前半を優先
-            s = before
-        # 末尾の車種語をざっくり除去
-        s = re.split(r"\s+(?:BMW|Ferrari|Cadillac|Alpine|Peugeot|Toyota|Genesis|Aston|Corvette|Porsche|Ford|Mercedes|Lexus|McLaren)\b", s, maxsplit=1, flags=re.I)[0]
-        return re.sub(r"\s+", " ", s).strip(" -_")
-
-    if is_race:
-        # 2ページ目の「Final Classification by Category」を優先
-        text = next((t for t in page_texts if "Classification by Category" in t), page_texts[-1])
-        by_class = {"Hypercar": [], "LMGT3": []}
-        for line in text.splitlines():
-            line = line.strip()
-            # OCRが順位の前に | や I を付けることがあるため除去
-            line = re.sub(r"^[|Il!]+\s*", "", line)
-            m = re.match(r"^(\d{1,2})[.)]?\s+(007|009|\d{1,3})\s+(.*)$", line)
-            if not m:
-                continue
-            rank, num, rest = int(m.group(1)), m.group(2), m.group(3)
-            if num not in entries:
-                continue
-            team, cls = entries[num]
-            crew = clean_crew(rest, team, cls)
-            pts6 = [25, 18, 15, 12, 10, 8, 6, 4, 2, 1]
-            by_class[cls].append({
-                "順位": rank, "カーナンバー": num, "ドライバー": crew,
-                "チーム": team, "ポイント": pts6[rank-1] if rank <= 10 else 0,
-                "ステータス": "完走",
-            })
-        for cls in ["Hypercar", "LMGT3"]:
-            if by_class[cls]:
-                groups.append({"クラス": cls, "セッション": "決勝", "rows": by_class[cls]})
-    else:
-        # 9ページPDFは同内容のby Categoryページを除外し、4つのセッションを抽出
-        for text in page_texts:
-            if "Classification by Category" in text:
-                continue
-            upper = text.upper()
-            if "HYPERPOLE LMGT3" in upper:
-                cls, session = "LMGT3", "ハイパーポール"
-            elif "QUALIFYING LMGT3" in upper:
-                cls, session = "LMGT3", "予選"
-            elif "HYPERPOLE HYPERCAR" in upper:
-                cls, session = "Hypercar", "ハイパーポール"
-            elif "QUALIFYING HYPERCAR" in upper:
-                cls, session = "Hypercar", "予選"
-            else:
-                continue
-            rows = []
-            for line in text.splitlines():
-                line = line.strip()
-                line = re.sub(r"^[|Il!]+\s*", "", line)
-                m = re.match(r"^(?:HP\s+)?(\d{1,2})[.)]?\s+(007|009|\d{1,3})\s+(.*)$", line)
-                if not m:
-                    continue
-                rank, num, rest = int(m.group(1)), m.group(2), m.group(3)
-                if num not in entries or entries[num][1] != cls:
-                    continue
-                team = entries[num][0]
-                crew = clean_crew(rest, team, cls)
-                rows.append({
-                    "順位": rank, "カーナンバー": num, "ドライバー": crew,
-                    "チーム": team, "ポイント": 1 if session == "ハイパーポール" and rank == 1 else 0,
-                    "ステータス": "完走",
-                })
-            if rows:
-                groups.append({"クラス": cls, "セッション": session, "rows": rows})
+    for cls, rows in rows_by_class.items():
+        # 同じ車を重複取得した場合は順位の最初の1件だけ残す
+        unique = {}
+        for row in sorted(rows, key=lambda x: x["順位"]):
+            unique.setdefault(row["カーナンバー"], row)
+        rows = list(unique.values())
+        if rows:
+            groups.append({"クラス": cls, "セッション": session, "rows": rows})
     return groups
+
 
 
 def extract_f1_pdf(uploaded_pdf):
@@ -808,22 +770,26 @@ s_cat = st.sidebar.selectbox(
 # 選択したカテゴリーのPDFインポートだけを表示
 # --- F1公式PDFインポート ---
 if s_cat == "WEC":
-    with st.sidebar.expander("📥 WEC公式PDFを読み込む"):
+    with st.sidebar.expander("🌐 WEC Timing Resultsを読み込む"):
         if st.session_state.get("wec_import_success"):
             st.success(st.session_state.pop("wec_import_success"))
-        st.caption("WEC公式のRace / Qualifying / Hyperpole PDFをOCRし、Hypercar・LMGT3へ自動振り分けします。")
-        wec_pdf = st.file_uploader("WEC結果PDF", type=["pdf"], key="wec_pdf_import")
-        if wec_pdf is not None:
+        st.caption("Al Kamel Timing Resultsの「CLASSIFICATION BY CATEGORY」PDFのURLを貼り付けます。OCRは使いません。")
+        wec_url = st.text_input(
+            "Classification PDF URL",
+            placeholder="https://fiawec.alkamelsystems.com/Results/.../05_ClassificationByCategory_....PDF",
+            key="wec_timing_url",
+        )
+        if wec_url.strip():
             try:
-                with st.spinner("WEC PDFを読み取り中…（画像PDFのため少し時間がかかります）"):
-                    wec_groups = extract_wec_pdf(wec_pdf)
+                with st.spinner("公式Timing Resultsを読み込み中…"):
+                    wec_groups = extract_wec_timing_url(wec_url.strip())
                 if wec_groups:
                     for g in wec_groups:
                         st.markdown(f"**{g['クラス']} / {g['セッション']} — {len(g['rows'])}台**")
                         st.dataframe(pd.DataFrame(g["rows"]), use_container_width=True, hide_index=True)
 
                     wec_year = st.selectbox("登録年度", YEARS, key="wec_import_year")
-                    wec_round = st.text_input("レース名 / ラウンド", placeholder="例: Rd.5 サンパウロ6時間", key="wec_import_round")
+                    wec_round = st.text_input("レース名 / ラウンド", placeholder="例: Rd.4 サンパウロ6時間", key="wec_import_round")
                     wec_date = st.date_input("開催日", datetime.date.today(), key="wec_import_date")
 
                     if st.button("このWEC結果を登録 / 更新", type="primary", use_container_width=True, key="wec_import_save"):
@@ -859,12 +825,12 @@ if s_cat == "WEC":
                                         master.append(team)
                                 saved += 1
                             save_data(data)
-                            st.session_state["wec_import_success"] = f"✅ WEC結果を{saved}セッション登録 / 更新しました！"
+                            st.session_state["wec_import_success"] = f"✅ WEC結果を{saved}クラス登録 / 更新しました！"
                             st.rerun()
                 else:
-                    st.warning("WECの順位表を読み取れませんでした。PDF形式を確認します。")
+                    st.warning("順位を取得できませんでした。CLASSIFICATION BY CATEGORYのPDF URLか確認してください。")
             except Exception as e:
-                st.error(f"WEC PDFの読み取りに失敗しました: {e}")
+                st.error(f"WEC Timing Resultsの読み込みに失敗しました: {e}")
 
 
 if s_cat == "F1":
