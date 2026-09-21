@@ -373,10 +373,18 @@ def extract_supergt_result_url(url):
                 continue
             if cls == "GT300" and missing_num in {"8","12","14","16","17","19","23","24","36","37","38","39","64","100"}:
                 continue
+            # 順位なし車両でも、公式表の該当行からチーム名を回収する。
+            missing_team = ""
+            for raw in table[header_idx + 1:]:
+                if no_i < len(raw) and raw[no_i].strip() == missing_num and team_i < len(raw):
+                    team_machine = raw[team_i].strip()
+                    tm = re.search(r"チーム\s*(.*?)\s*マシン\s*", team_machine)
+                    missing_team = tm.group(1).strip() if tm else team_machine
+                    break
             rows.append({
                 "順位": len(rows) + 1, "カーナンバー": missing_num,
                 "ドライバー": " / ".join(sgt_driver_map_2026[missing_num]),
-                "チーム": "", "ポイント": 0, "ステータス": "予選未分類", "周回数": None,
+                "チーム": missing_team, "ポイント": 0, "ステータス": "予選未分類", "周回数": None,
             })
 
     if not rows:
