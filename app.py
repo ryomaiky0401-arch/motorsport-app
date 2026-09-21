@@ -739,10 +739,6 @@ if s_cat == "F2":
 
 
 
-    s_year = st.sidebar.selectbox("シーズン年度", YEARS, key="s_year")
-    s_cat = st.sidebar.selectbox(
-        "カテゴリー", list(CATEGORY_CONFIG.keys()), key="s_cat"
-    )
     s_cls = st.sidebar.selectbox("クラス", CATEGORY_CONFIG[s_cat], key="s_cls")
     session_type = st.sidebar.radio(
         "セッション種別", ["決勝", "予選", "スプリント"], key="session_type_input"
