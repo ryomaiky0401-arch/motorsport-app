@@ -3,6 +3,7 @@ import urllib.parse
 import datetime
 import json
 import os
+import io
 import re
 import pandas as pd
 import streamlit as st
@@ -591,7 +592,7 @@ def extract_sf_result_url(url):
 
 def extract_wec_timing_url(url):
     """Al Kamel Timing Resultsのテキスト入りClassification PDFを直接解析する。OCRは使わない。"""
-        import re
+    import re
     import requests
     import pdfplumber
 
