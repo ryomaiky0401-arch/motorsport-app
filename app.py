@@ -419,86 +419,73 @@ def extract_f3_pdf(uploaded_pdf):
         elif "Race 2 (Feature)" in full_text or "Feature Race Final Classification" in full_text:
             session = "決勝"
 
-        for page in pdf.pages:
-            for table in (page.extract_tables() or []):
-                if not table:
+        # F3の実物PDFはテキスト抽出が安定しているため、表セル位置ではなく行テキストを解析する。
+        team_names = [
+            "Van Amersfoort Racing", "ART Grand Prix", "Rodin Motorsport",
+            "PREMA Racing", "Campos Racing", "DAMS Lucas Oil",
+            "MP Motorsport", "AIX Racing", "TRIDENT", "Hitech",
+        ]
+        lines = [line.strip() for line in full_text.splitlines() if line.strip()]
+        not_classified = False
+
+        for line in lines:
+            upper = line.upper()
+            if upper.startswith("NOT CLASSIFIED"):
+                not_classified = True
+                continue
+            if upper.startswith(("OVERALL FASTEST", "FASTEST LAP", "* PENALTIES", "TIMEKEEPER")):
+                if not_classified and not upper.startswith("FASTEST LAP ELIGIBLE"):
+                    # NOT CLASSIFIED欄の終了
+                    pass
+                continue
+
+            team = next((t for t in team_names if t.lower() in line.lower()), None)
+            if not team:
+                continue
+
+            # 行頭は、分類済みなら「順位 車番」、NOT CLASSIFIEDなら「車番」。
+            if not_classified:
+                m = re.match(r"^(\d+)\s+(.+?)\s+" + re.escape(team) + r"\b", line, re.I)
+                if not m:
                     continue
+                driver = m.group(2).replace(" *", "").strip()
+                status = "DNS" if " DNS" in upper else ("DSQ" if " DSQ" in upper else "リタイア")
+                rows.append({
+                    "順位": status,
+                    "ドライバー": driver,
+                    "チーム": team,
+                    "ポイント": 0,
+                    "ステータス": status,
+                })
+                continue
 
-                is_not_classified = any(
-                    row and str(row[0] or "").strip() == "NOT CLASSIFIED"
-                    for row in table
-                )
+            m = re.match(r"^(\d+)\s+(\d+)\s+(.+?)\s+" + re.escape(team) + r"\b(.*)$", line, re.I)
+            if not m:
+                continue
+            rank = int(m.group(1))
+            driver = m.group(3).replace(" *", "").strip()
+            tail = m.group(4).strip()
 
-                for row in table:
-                    cells = [str(x).replace("\n", " ").strip() if x is not None else "" for x in row]
+            official_pts = 0
+            if session != "予選":
+                # Sprint / Featureは最終列PTS。PTSなしの行は0。
+                parts = tail.split()
+                if parts and re.fullmatch(r"\d+(?:\.\d+)?", parts[-1]):
+                    # 最終値がPTSかどうかは、レース行にタイム/周回情報が十分ある場合のみ判定。
+                    # 公式PTSは最大25なので、それを超える値（速度等）は除外。
+                    val = float(parts[-1])
+                    if val <= 25:
+                        official_pts = int(val) if val.is_integer() else val
 
-                    # F3予選はTEAM列が7列目。ポールポジションの2ptを保存。
-                    if (
-                        session == "予選"
-                        and len(cells) >= 14
-                        and re.fullmatch(r"\d+", cells[0])
-                        and re.fullmatch(r"\d+", cells[1])
-                    ):
-                        rank = int(cells[0])
-                        driver = cells[2].replace(" *", "").strip()
-                        team = cells[6]
-                        if driver and team:
-                            rows.append({
-                                "順位": rank,
-                                "ドライバー": driver,
-                                "チーム": team,
-                                "ポイント": 0,
-                                "ステータス": "完走",
-                            })
-
-                    # F3 Sprint / Featureの分類表はF1決勝と同じ14列構成。
-                    elif (
-                        session != "予選"
-                        and not is_not_classified
-                        and len(cells) >= 14
-                        and re.fullmatch(r"\d+", cells[0])
-                        and re.fullmatch(r"\d+", cells[1])
-                    ):
-                        rank = int(cells[0])
-                        driver = cells[2].replace(" *", "").strip()
-                        team = cells[5]
-                        pts_text = cells[13].replace(",", ".")
-                        try:
-                            official_pts = float(pts_text) if pts_text else 0.0
-                        except ValueError:
-                            official_pts = 0.0
-                        if official_pts.is_integer():
-                            official_pts = int(official_pts)
-                        if driver and team:
-                            rows.append({
-                                "順位": rank,
-                                "ドライバー": driver,
-                                "チーム": team,
-                                "ポイント": official_pts,
-                                "ステータス": "完走",
-                            })
-
-                    elif (
-                        session != "予選"
-                        and is_not_classified
-                        and len(cells) >= 5
-                        and re.fullmatch(r"\d+", cells[0])
-                    ):
-                        driver = cells[1].replace(" *", "").strip()
-                        team = cells[4]
-                        status_text = " ".join(cells).upper()
-                        status = "DNS" if "DNS" in status_text else ("DSQ" if "DSQ" in status_text else "リタイア")
-                        if driver and team:
-                            rows.append({
-                                "順位": status,
-                                "ドライバー": driver,
-                                "チーム": team,
-                                "ポイント": 0,
-                                "ステータス": status,
-                            })
+            rows.append({
+                "順位": rank,
+                "ドライバー": driver,
+                "チーム": team,
+                "ポイント": official_pts,
+                "ステータス": "完走",
+            })
 
     return rows, session
-
 
 st.set_page_config(
     page_title="モータースポーツ総合結果 & ランキング",
