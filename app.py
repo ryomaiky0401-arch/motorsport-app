@@ -648,6 +648,8 @@ def extract_wec_timing_url(url):
         "24": ("Nielsen Racing", "LMP2"),
         "25": ("Algarve Pro Racing", "LMP2"),
         "26": ("Vector Sport", "LMP2"),
+        "28": ("IDEC SPORT", "LMP2"),
+        "37": ("CLX Motorsport", "LMP2"),
         "29": ("Forestier Racing by Panis", "LMP2"),
         "30": ("Duqueine Team", "LMP2"),
         "43": ("Inter Europol Competition", "LMP2"),
