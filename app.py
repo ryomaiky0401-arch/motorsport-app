@@ -206,30 +206,27 @@ def save_data(data):
 
 
 def extract_f1_pdf(uploaded_pdf):
-    """FIA F1 timing PDFから順位・ドライバー・チームを抽出する。"""
+    """FIA F1 Race Classification PDFから順位・ドライバー・チームを抽出する。"""
     import pdfplumber
     import re
 
     rows = []
     with pdfplumber.open(uploaded_pdf) as pdf:
         for page in pdf.pages:
-            tables = page.extract_tables() or []
-            for table in tables:
+            for table in (page.extract_tables() or []):
                 if not table:
                     continue
                 for row in table:
                     cells = [str(x).replace("\\n", " ").strip() if x is not None else "" for x in row]
-                    if len(cells) < 4:
-                        continue
-                    # FIA timing sheetは先頭列が順位、次が「車番 Driver」、その後に国籍・Entrantが並ぶ
-                    if re.fullmatch(r"\\d+", cells[0]) and cells[1]:
+                    # Final Classification本表は14列:
+                    # POS, NO, DRIVER, NAT(画像のため空欄), ENTRANT, LAPS, ...
+                    if len(cells) >= 14 and re.fullmatch(r"\\d+", cells[0]) and re.fullmatch(r"\\d+", cells[1]):
                         rank = int(cells[0])
-                        driver = re.sub(r"^\\d+\\s+", "", cells[1]).strip()
-                        team = cells[3].strip()
+                        driver = cells[2]
+                        team = cells[5]
                         if 1 <= rank <= 30 and driver and team:
                             rows.append({"順位": rank, "ドライバー": driver, "チーム": team})
 
-    # 同じ行が複数ページ等から拾われても順位ごとに1件にする
     unique = {}
     for row in rows:
         unique.setdefault(row["順位"], row)
