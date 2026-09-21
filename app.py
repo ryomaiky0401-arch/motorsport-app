@@ -206,7 +206,7 @@ def save_data(data):
 
 
 def extract_f1_pdf(uploaded_pdf):
-    """FIA F1決勝・予選Classification PDFを抽出する。"""
+    """FIA F1の決勝・予選・スプリントClassification PDFを抽出する。"""
     import pdfplumber
     import re
 
@@ -233,7 +233,6 @@ def extract_f1_pdf(uploaded_pdf):
                 for row in table:
                     cells = [str(x).replace("\n", " ").strip() if x is not None else "" for x in row]
 
-                    # 予選: POS, NO, DRIVER, NAT(空欄), ENTRANT, Q1..., Q2..., Q3...
                     if (
                         session == "予選"
                         and len(cells) >= 16
@@ -245,14 +244,10 @@ def extract_f1_pdf(uploaded_pdf):
                         team = cells[5]
                         if driver and team:
                             rows.append({
-                                "順位": rank,
-                                "ドライバー": driver,
-                                "チーム": team,
-                                "ポイント": 0,
-                                "ステータス": "完走",
+                                "順位": rank, "ドライバー": driver, "チーム": team,
+                                "ポイント": 0, "ステータス": "完走",
                             })
 
-                    # 決勝/スプリント本表
                     elif (
                         session != "予選"
                         and not is_not_classified
@@ -272,32 +267,41 @@ def extract_f1_pdf(uploaded_pdf):
                             official_pts = int(official_pts)
                         if 1 <= rank <= 30 and driver and team:
                             rows.append({
-                                "順位": rank,
-                                "ドライバー": driver,
-                                "チーム": team,
-                                "ポイント": official_pts,
-                                "ステータス": "完走",
+                                "順位": rank, "ドライバー": driver, "チーム": team,
+                                "ポイント": official_pts, "ステータス": "完走",
                             })
 
                     elif (
                         session != "予選"
                         and is_not_classified
-                        and len(cells) >= 8
+                        and len(cells) >= 5
                         and re.fullmatch(r"\d+", cells[0])
-                        and cells[1]
-                        and len(cells) > 4
-                        and cells[4]
                     ):
-                        rows.append({
-                            "順位": "リタイア",
-                            "ドライバー": cells[1],
-                            "チーム": cells[4],
-                            "ポイント": 0,
-                            "ステータス": "リタイア",
-                        })
+                        # NOT CLASSIFIED表は通常 NO, DRIVER, NAT(空欄), ENTRANT, LAPS, STATUS...
+                        driver = cells[1]
+                        team = cells[4] if len(cells) > 4 else ""
+                        # PDFによってNAT列が省略され、ENTRANTが3列目になる場合にも対応
+                        if not team or re.fullmatch(r"\d+", team):
+                            team = cells[3] if len(cells) > 3 else ""
+                        status_text = " ".join(cells).upper()
+                        if "DNS" in status_text:
+                            status = "DNS"
+                        elif "DSQ" in status_text:
+                            status = "DSQ"
+                        elif "DNF" in status_text:
+                            status = "リタイア"
+                        else:
+                            status = "リタイア"
+                        if driver and team:
+                            rows.append({
+                                "順位": status,
+                                "ドライバー": driver,
+                                "チーム": team,
+                                "ポイント": 0,
+                                "ステータス": status,
+                            })
 
     return rows, session
-
 
 st.set_page_config(
     page_title="モータースポーツ総合結果 & ランキング",
@@ -721,7 +725,7 @@ with tab1:
                 drivers = target.get("drivers", [])
                 df_data = {
                     "順位": [
-                        "リタイア" if i < len(statuses) and statuses[i] == "リタイア" else f"P{i+1}"
+                        statuses[i] if i < len(statuses) and statuses[i] in ["リタイア", "DNS", "DSQ"] else f"P{i+1}"
                         for i in range(len(target["results"]))
                     ],
                     "獲得ポイント": [
@@ -729,7 +733,7 @@ with tab1:
                         if i < len(target.get("official_points", []))
                         else (
                             "0 pt"
-                            if i < len(statuses) and statuses[i] == "リタイア"
+                            if i < len(statuses) and statuses[i] in ["リタイア", "DNS", "DSQ"]
                             else (f"{pts_table[i]} pt" if i < len(pts_table) else "0 pt")
                         )
                         for i in range(len(target["results"]))
@@ -833,7 +837,7 @@ with tab2:
             pts_table = r.get("points_table", DEFAULT_PTS_RACE)
             statuses = r.get("statuses", [])
             for rank_idx, team in enumerate(r["results"]):
-                is_retired = rank_idx < len(statuses) and statuses[rank_idx] == "リタイア"
+                is_retired = rank_idx < len(statuses) and statuses[rank_idx] in ["リタイア", "DNS", "DSQ"]
                 official = r.get("official_points", [])
                 pt = (
                     official[rank_idx]
