@@ -667,6 +667,15 @@ def extract_wec_timing_url(url):
         "27": ("Heart of Racing Team", "LMGT3"), "78": ("Akkodis ASP Team", "LMGT3"),
         "79": ("Iron Lynx", "LMGT3"), "10": ("Garage 59", "LMGT3"),
         "54": ("Vista AF Corse", "LMGT3"), "23": ("Heart of Racing Team", "LMGT3"),
+        # 2026 Le Mans additional LMGT3 entries.
+        "2": ("TF Sport", "LMGT3"),
+        "13": ("13 Autosport", "LMGT3"),
+        "57": ("Kessel Racing", "LMGT3"),
+        "59": ("Racing Spirit of Leman", "LMGT3"),
+        "62": ("Team Qatar by Iron Lynx", "LMGT3"),
+        "63": ("Team Qatar by Iron Lynx", "LMGT3"),
+        "74": ("Kessel Racing", "LMGT3"),
+        "150": ("Richard Mille AF Corse", "LMGT3"),
     }
 
     # 行の並びがPDF内部で前後することがあるので、順位+車番を全文から探す。
