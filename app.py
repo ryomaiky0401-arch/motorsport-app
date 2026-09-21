@@ -1190,7 +1190,7 @@ with tab_entry:
                             st.image(image_options[selected_livery], use_container_width=True)
                         except Exception:
                             st.caption("画像を表示できませんでした")
-                    # 切替UIは画像の下に置き、画像上端とカード本文の位置を他車と揃える
+                    # 全カードで同じ高さのカラーリング操作エリアを確保して本文位置を揃える
                     if len(image_options) > 1:
                         names = list(image_options.keys())
                         pos = names.index(selected_livery)
@@ -1205,6 +1205,9 @@ with tab_entry:
                             if st.button("▶", key=f"{switch_key}_next", use_container_width=True):
                                 st.session_state[switch_key] = names[(pos + 1) % len(names)]
                                 st.rerun()
+                    else:
+                        # 複数カラーがない車にも同じ高さだけ透明スペースを置く
+                        st.markdown("<div style='height:40px;'></div>", unsafe_allow_html=True)
                     no = f"No.{entry.get('car_number')}  " if entry.get("car_number") else ""
                     st.subheader(f"{no}{entry.get('team', '')}")
                     if entry.get("machine"):
