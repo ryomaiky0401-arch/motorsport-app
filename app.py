@@ -232,23 +232,23 @@ def extract_sf_result_url(url):
         raise ValueError("予選 / 決勝をURLから判定できませんでした。")
 
     # script/styleを除去し、HTMLをプレーンテキスト化。
-    html = re.sub(r"<script[\\s\\S]*?</script>", " ", response.text, flags=re.I)
-    html = re.sub(r"<style[\\s\\S]*?</style>", " ", html, flags=re.I)
+    html = re.sub(r"<script[\s\\S]*?</script>", " ", response.text, flags=re.I)
+    html = re.sub(r"<style[\s\\S]*?</style>", " ", html, flags=re.I)
     text = unescape(re.sub(r"<[^>]+>", " ", html))
-    text = re.sub(r"\\s+", " ", text)
+    text = re.sub(r"\s+", " ", text)
 
     # 2026の公式ページは「Po. No. Driver Team ／ Engine Lap ...」の順。
     # 公式HTMLではヘッダーの区切りが装飾要素で崩れる場合があるため、
     # 厳密な1本の正規表現ではなく No. / Driver / Team の位置関係で結果開始点を探す。
-    marker = re.search(r"No\\.?\\s+Driver\\s+Team", text, flags=re.I)
+    marker = re.search(r"No\\.?\s+Driver\s+Team", text, flags=re.I)
     if not marker:
         # さらに装飾文字を無視したフォールバック。
         compact = re.sub(r"[^A-Za-z0-9一-龥ぁ-んァ-ヶ]+", " ", text)
-        marker2 = re.search(r"No\\s+Driver\\s+Team", compact, flags=re.I)
+        marker2 = re.search(r"No\s+Driver\s+Team", compact, flags=re.I)
         if not marker2:
             raise ValueError("公式ページの結果ヘッダーを見つけられませんでした。")
         # compact側の位置は元HTML本文に対応しないので、最初の2026エントリー順位列を直接探す。
-        start = re.search(r"\\b1\\s+[AB]\\s+\\d{1,2}\\s+", text) if session == "予選" else re.search(r"\\b1\\s+\\d{1,2}\\s+", text)
+        start = re.search(r"\b1\s+[AB]\s+\d{1,2}\s+", text) if session == "予選" else re.search(r"\b1\s+\d{1,2}\s+", text)
         if not start:
             raise ValueError("公式ページの順位データ開始位置を見つけられませんでした。")
         result_text = text[start.start():]
@@ -292,7 +292,7 @@ def extract_sf_result_url(url):
     race_points = [20, 15, 11, 8, 6, 5, 4, 3, 2, 1]
     qual_points = [3, 2, 1]
     # 「順位 車番」の組を拾う。NOT CLASSIFIED後の順位も同じ形式で取得できる。
-    matches = list(re.finditer(r"(?:^|\\s)(\\d{1,2})\\s+(?:[AB]\\s+)?(\\d{1,2})(?=\\s|[^0-9])", result_text))
+    matches = list(re.finditer(r"(?:^|\s)(\d{1,2})\s+(?:[AB]\s+)?(\d{1,2})(?=\s|[^0-9])", result_text))
     seen_ranks = set()
     for m in matches:
         rank, num = int(m.group(1)), m.group(2)
