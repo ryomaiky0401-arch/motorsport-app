@@ -1206,8 +1206,11 @@ with tab_entry:
                                 st.session_state[switch_key] = names[(pos + 1) % len(names)]
                                 st.rerun()
                     else:
-                        # 複数カラーがない車にも同じ高さだけ透明スペースを置く
-                        st.markdown("<div style='height:40px;'></div>", unsafe_allow_html=True)
+                        # Streamlit標準ボタン行と同じ高さを確保する。margin分も含めて揃える。
+                        st.markdown(
+                            "<div style='height:52px; margin-bottom:0.25rem;'></div>",
+                            unsafe_allow_html=True,
+                        )
                     no = f"No.{entry.get('car_number')}  " if entry.get("car_number") else ""
                     st.subheader(f"{no}{entry.get('team', '')}")
                     if entry.get("machine"):
