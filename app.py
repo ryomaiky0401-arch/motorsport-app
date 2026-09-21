@@ -1013,9 +1013,9 @@ with tab2:
         races = sorted(
             races,
             key=lambda x: (
-                x.get("round_name", ""),
                 session_order.get(x.get("session_type", "決勝"), 99),
                 x.get("race_date", ""),
+                x.get("round_name", ""),
             ),
         )
 
@@ -1110,23 +1110,19 @@ with tab2:
             # 累計ポイント推移の折れ線グラフ
             st.subheader("📈 累計ポイント推移グラフ")
 
-            chart_data = {}
-            for item in summary_list:
-                team_name = item["チーム / 車両"]
-                pts_list = item["pts_list"]
-                cum_pts = []
-                current = 0
-                for p in pts_list:
-                    # 累計ポイントは絶対に減らさない。0ptなら前セッションの累計を維持する。
-                    try:
-                        session_pts = max(float(p), 0)
-                    except (TypeError, ValueError):
-                        session_pts = 0
-                    current += session_pts
-                    cum_pts.append(current)
-                chart_data[team_name] = cum_pts
-
-            df_chart = pd.DataFrame(chart_data, index=race_headers)
+            # 各セッションの獲得ポイント表を作り、行方向にcumsumして「累計」にする。
+            # 0ptのセッションでは前の累計値がそのまま維持される。
+            session_points_df = pd.DataFrame(
+                {
+                    item["チーム / 車両"]: [
+                        max(float(p), 0) if p is not None else 0
+                        for p in item["pts_list"]
+                    ]
+                    for item in summary_list
+                },
+                index=race_headers,
+            ).fillna(0)
+            df_chart = session_points_df.cumsum(axis=0)
             st.line_chart(df_chart)
 
 
@@ -1173,21 +1169,17 @@ with tab2:
 
                 st.markdown("---")
                 st.subheader("📈 ドライバー累計ポイント推移")
-                driver_chart = {}
-                for item in driver_summary:
-                    current = 0
-                    cumulative = []
-                    for p in item["pts_list"]:
-                        # 累計ポイントは絶対に減らさない。0ptなら前セッションの累計を維持する。
-                        try:
-                            session_pts = max(float(p), 0)
-                        except (TypeError, ValueError):
-                            session_pts = 0
-                        current += session_pts
-                        cumulative.append(current)
-                    driver_chart[item["ドライバー"]] = cumulative
-
-                st.line_chart(pd.DataFrame(driver_chart, index=race_headers))
+                driver_session_points_df = pd.DataFrame(
+                    {
+                        item["ドライバー"]: [
+                            max(float(p), 0) if p is not None else 0
+                            for p in item["pts_list"]
+                        ]
+                        for item in driver_summary
+                    },
+                    index=race_headers,
+                ).fillna(0)
+                st.line_chart(driver_session_points_df.cumsum(axis=0))
 
     else:
         st.info(f"{r_year} {r_cat} ({r_cls}) の集計対象データがまだありません。")
