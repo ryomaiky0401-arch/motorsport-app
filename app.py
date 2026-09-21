@@ -238,7 +238,7 @@ def extract_sf_result_url(url):
     text = re.sub(r"\\s+", " ", text)
 
     # 2026の公式ページは「Po. No. Driver Team ／ Engine Lap ...」の順。
-    marker = re.search(r"(?:Po\\.?|Pos\\.?)\\s+(?:Gr\\.?\\s+)?No\\.?\\s+Driver\\s+Team", text, flags=re.I)
+    marker = re.search(r"(?:Po\\.?|Pos\\.?)\\s+(?:Gr\\.?\\s+)?No\\.?\\s+Driver\\s+Team(?:\\s*/\\s*Engine)?", text, flags=re.I)
     if not marker:
         raise ValueError("公式ページのリザルト表を見つけられませんでした。")
 
