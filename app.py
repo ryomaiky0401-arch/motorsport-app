@@ -289,17 +289,6 @@ def extract_wec_timing_url(url):
             dm = driver_pat.search(line)
             crew = dm.group(1).strip() if dm else ""
 
-        # Aston Martin Valkyrieは2026年予選PDFで2名表記になる場合があり、
-        # 従来のdriver_pat（2本の "/" を前提）では #007/#009 だけ落ちる。
-        # 車番は行頭から既に取得できているので、Astonだけ2名crewを明示的に拾う。
-        if not crew and num in ("007", "009"):
-            aston_dm = re.search(
-                r"([A-ZÀ-ÖØ-Þ]\.\s*[A-ZÀ-ÖØ-Þ][A-ZÀ-ÖØ-öø-ÿ'’-]*(?:\s+[A-ZÀ-ÖØ-Þ][A-ZÀ-ÖØ-öø-ÿ'’-]*)*"
-                r"\s*/\s*[A-ZÀ-ÖØ-Þ]\.\s*[A-ZÀ-ÖØ-Þ][A-ZÀ-ÖØ-öø-ÿ'’-]*(?:\s+[A-ZÀ-ÖØ-Þ][A-ZÀ-ÖØ-öø-ÿ'’-]*)*)",
-                rest,
-            )
-            crew = aston_dm.group(1).strip() if aston_dm else ""
-
         # pdfplumberでは車種列の一部がドライバー列の前後に連結される。
         # 例: "WRT K. MAGNUSSEN / ... / D. VANTHOOR BMW M H"
         #      "... / A. GIOVINAZZI F"
@@ -330,6 +319,35 @@ def extract_wec_timing_url(url):
         rows_by_class[cls].append({
             "順位": rank, "カーナンバー": num, "ドライバー": crew,
             "チーム": team, "ポイント": points, "ステータス": "完走",
+        })
+
+    # pdfplumberが列順を崩した行も取りこぼさないため、Aston #007/#009は
+    # 全文から順位・車番を直接確認して不足時だけ補完する。
+    # ドライバー人数には依存しない（Cadillac #12など2名表記も通常処理対象）。
+    existing_hypercar = {r["カーナンバー"] for r in rows_by_class["Hypercar"]}
+    for aston_num in ("007", "009"):
+        if aston_num in existing_hypercar:
+            continue
+        am = re.search(rf"(?m)^(?:HP\s+)?(\d{{1,2}})\s+{aston_num}\s+(.+)$", text)
+        if not am:
+            continue
+        rank = int(am.group(1))
+        rest = re.sub(r"\s+", " ", am.group(2)).strip()
+        dm = driver_pat.search(rest)
+        crew = dm.group(1).strip() if dm else ""
+        if crew:
+            first_driver = re.search(r"[A-ZÀ-ÖØ-Þ]\.\s", crew)
+            if first_driver:
+                crew = crew[first_driver.start():].strip()
+            parts = [p.strip() for p in crew.split("/")][:3]
+            if parts:
+                parts[-1] = re.split(r"\s+(?=ASTON\b)", parts[-1], maxsplit=1, flags=re.I)[0].strip()
+                parts[-1] = re.sub(r"\s+[A-Z]$", "", parts[-1]).strip()
+                crew = " / ".join(parts)
+        points = 1 if session == "ハイパーポール" and rank == 1 else 0
+        rows_by_class["Hypercar"].append({
+            "順位": rank, "カーナンバー": aston_num, "ドライバー": crew,
+            "チーム": "Aston Martin Thor Team", "ポイント": points, "ステータス": "完走",
         })
 
     groups = []
