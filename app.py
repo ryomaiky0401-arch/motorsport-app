@@ -206,12 +206,20 @@ def save_data(data):
 
 
 def extract_f1_pdf(uploaded_pdf):
-    """FIA F1 Classification PDFから順位・ドライバー・チーム・公式PTSを抽出する。"""
+    """FIA F1決勝・予選Classification PDFを抽出する。"""
     import pdfplumber
     import re
 
     rows = []
+    session = "決勝"
+
     with pdfplumber.open(uploaded_pdf) as pdf:
+        full_text = "\n".join((page.extract_text() or "") for page in pdf.pages)
+        if "Qualifying Session Final Classification" in full_text:
+            session = "予選"
+        elif "Sprint" in full_text and "Classification" in full_text:
+            session = "スプリント"
+
         for page in pdf.pages:
             for table in (page.extract_tables() or []):
                 if not table:
@@ -225,8 +233,29 @@ def extract_f1_pdf(uploaded_pdf):
                 for row in table:
                     cells = [str(x).replace("\n", " ").strip() if x is not None else "" for x in row]
 
+                    # 予選: POS, NO, DRIVER, NAT(空欄), ENTRANT, Q1..., Q2..., Q3...
                     if (
-                        not is_not_classified
+                        session == "予選"
+                        and len(cells) >= 16
+                        and re.fullmatch(r"\d+", cells[0])
+                        and re.fullmatch(r"\d+", cells[1])
+                    ):
+                        rank = int(cells[0])
+                        driver = cells[2]
+                        team = cells[5]
+                        if driver and team:
+                            rows.append({
+                                "順位": rank,
+                                "ドライバー": driver,
+                                "チーム": team,
+                                "ポイント": 0,
+                                "ステータス": "完走",
+                            })
+
+                    # 決勝/スプリント本表
+                    elif (
+                        session != "予選"
+                        and not is_not_classified
                         and len(cells) >= 14
                         and re.fullmatch(r"\d+", cells[0])
                         and re.fullmatch(r"\d+", cells[1])
@@ -251,7 +280,8 @@ def extract_f1_pdf(uploaded_pdf):
                             })
 
                     elif (
-                        is_not_classified
+                        session != "予選"
+                        and is_not_classified
                         and len(cells) >= 8
                         and re.fullmatch(r"\d+", cells[0])
                         and cells[1]
@@ -266,7 +296,7 @@ def extract_f1_pdf(uploaded_pdf):
                             "ステータス": "リタイア",
                         })
 
-    return rows
+    return rows, session
 
 
 st.set_page_config(
@@ -442,15 +472,22 @@ with st.sidebar.expander("📥 F1公式PDFを読み込む"):
     f1_pdf = st.file_uploader("F1結果PDF", type=["pdf"], key="f1_pdf_import")
     if f1_pdf is not None:
         try:
-            f1_rows = extract_f1_pdf(f1_pdf)
+            f1_rows, detected_session = extract_f1_pdf(f1_pdf)
             if f1_rows:
-                st.success(f"{len(f1_rows)}台を読み取れました！")
+                st.success(f"{len(f1_rows)}台を読み取れました！ セッション: {detected_session}")
                 st.dataframe(pd.DataFrame(f1_rows), use_container_width=True, hide_index=True)
 
                 f1_year = st.selectbox("登録年度", YEARS, key="f1_import_year")
                 f1_round = st.text_input("レース名 / ラウンド", placeholder="例: Rd.3 日本GP", key="f1_import_round")
                 f1_date = st.date_input("開催日", datetime.date.today(), key="f1_import_date")
-                f1_session = st.selectbox("セッション", ["決勝", "予選", "スプリント"], key="f1_import_session")
+                session_options = ["決勝", "予選", "スプリント"]
+                detected_index = session_options.index(detected_session) if detected_session in session_options else 0
+                f1_session = st.selectbox(
+                    "セッション",
+                    session_options,
+                    index=detected_index,
+                    key="f1_import_session",
+                )
 
                 if st.button("このF1結果を登録 / 更新", type="primary", use_container_width=True, key="f1_import_save"):
                     if not f1_round.strip():
