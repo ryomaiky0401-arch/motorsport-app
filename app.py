@@ -1060,7 +1060,7 @@ def country_code(country):
         "中国":"cn","China":"cn","韓国":"kr","South Korea":"kr","Korea":"kr","タイ":"th","Thailand":"th",
         "インドネシア":"id","Indonesia":"id","マレーシア":"my","Malaysia":"my","モナコ":"mc","Monaco":"mc",
         "ポーランド":"pl","Poland":"pl","フィンランド":"fi","Finland":"fi","スウェーデン":"se","Sweden":"se",
-        "ノルウェー":"no","Norway":"no"
+        "ノルウェー":"no","Norway":"no","トルコ":"tr","Türkiye":"tr","Turkey":"tr","カタール":"qa","Qatar":"qa"
     }
     return codes.get(str(country).strip())
 
@@ -1101,7 +1101,9 @@ with tab_entry:
             driver1 = st.text_input("ドライバー 1", value=saved_drivers[0], key=f"entry_driver1_{edit_choice}")
             driver2 = st.text_input("ドライバー 2", value=saved_drivers[1], key=f"entry_driver2_{edit_choice}")
             driver3 = st.text_input("ドライバー 3", value=saved_drivers[2], key=f"entry_driver3_{edit_choice}")
-            image_url = st.text_input("マシン画像URL", value=current.get("image_url", ""), placeholder="https://...", key=f"entry_image_{edit_choice}")
+            image_url = st.text_input("通常カラー画像URL", value=current.get("image_url", ""), placeholder="https://...", key=f"entry_image_{edit_choice}")
+            special_image_label = st.text_input("特別カラー名", value=current.get("special_image_label", ""), placeholder="例: ル・マン", key=f"entry_special_label_{edit_choice}")
+            special_image_url = st.text_input("特別カラー画像URL", value=current.get("special_image_url", ""), placeholder="https://...", key=f"entry_special_image_{edit_choice}")
 
         b1, b2 = st.columns(2)
         with b1:
@@ -1110,7 +1112,7 @@ with tab_entry:
                     st.error("チーム名を入力してください。")
                 else:
                     driver_list = [x.strip() for x in [driver1, driver2, driver3] if x.strip()]
-                    item = {"car_number": car_number.strip(), "machine": machine.strip(), "team": team.strip(), "country": country.strip(), "driver_list": driver_list, "drivers": " / ".join(driver_list), "image_url": image_url.strip()}
+                    item = {"car_number": car_number.strip(), "machine": machine.strip(), "team": team.strip(), "country": country.strip(), "driver_list": driver_list, "drivers": " / ".join(driver_list), "image_url": image_url.strip(), "special_image_label": special_image_label.strip(), "special_image_url": special_image_url.strip()}
                     if edit_idx >= 0:
                         entries[edit_idx] = item
                     else:
@@ -1130,9 +1132,24 @@ with tab_entry:
             cols = st.columns(3)
             for col, entry in zip(cols, entries[i:i + 3]):
                 with col:
+                    image_options = {}
                     if entry.get("image_url"):
+                        image_options["通常カラー"] = entry["image_url"]
+                    if entry.get("special_image_url"):
+                        special_label = entry.get("special_image_label") or "特別カラー"
+                        image_options[special_label] = entry["special_image_url"]
+                    if image_options:
+                        if len(image_options) > 1:
+                            selected_livery = st.selectbox(
+                                "カラーリング",
+                                list(image_options.keys()),
+                                key=f"entry_livery_{e_year}_{entry_key}_{entry.get('car_number', i)}",
+                                label_visibility="collapsed",
+                            )
+                        else:
+                            selected_livery = next(iter(image_options))
                         try:
-                            st.image(entry["image_url"], use_container_width=True)
+                            st.image(image_options[selected_livery], use_container_width=True)
                         except Exception:
                             st.caption("画像を表示できませんでした")
                     no = f"No.{entry.get('car_number')}  " if entry.get("car_number") else ""
