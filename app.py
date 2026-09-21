@@ -2073,14 +2073,43 @@ with tab2:
             for race_idx, r in enumerate(races):
                 pts_table = r.get("points_table", DEFAULT_PTS_RACE)
                 statuses = r.get("statuses", [])
+                session_type = r.get("session_type", "決勝")
+                race_laps = r.get("laps", [])
+
+                # SUPER GTのチーム選手権は予選ポイントを加算せず、
+                # 決勝の順位ポイント + トップからの周回差によるポイントで集計する。
+                sgt_leader_laps = None
+                if r_cat == "SUPER GT" and session_type == "決勝":
+                    numeric_laps = []
+                    for lap in race_laps:
+                        m = re.search(r"\d+", str(lap or ""))
+                        numeric_laps.append(int(m.group()) if m else None)
+                    valid_laps = [x for x in numeric_laps if x is not None]
+                    sgt_leader_laps = max(valid_laps) if valid_laps else None
+
                 for rank_idx, team in enumerate(r["results"]):
                     is_retired = rank_idx < len(statuses) and statuses[rank_idx] in ["リタイア", "DNS", "DSQ"]
                     official = r.get("official_points", [])
-                    pt = (
-                        official[rank_idx]
-                        if rank_idx < len(official)
-                        else (0 if is_retired else (pts_table[rank_idx] if rank_idx < len(pts_table) else 0))
-                    )
+
+                    if r_cat == "SUPER GT" and session_type != "決勝":
+                        pt = 0
+                    else:
+                        pt = (
+                            official[rank_idx]
+                            if rank_idx < len(official)
+                            else (0 if is_retired else (pts_table[rank_idx] if rank_idx < len(pts_table) else 0))
+                        )
+
+                    if r_cat == "SUPER GT" and session_type == "決勝" and not is_retired and sgt_leader_laps is not None:
+                        lap = numeric_laps[rank_idx] if rank_idx < len(numeric_laps) else None
+                        if lap is not None:
+                            lap_down = max(0, sgt_leader_laps - lap)
+                            if r_cls == "GT500":
+                                lap_pt = 3 if lap_down == 0 else 2 if lap_down == 1 else 1 if lap_down == 2 else 0
+                            else:
+                                lap_pt = 3 if lap_down <= 1 else 2 if lap_down == 2 else 1
+                            pt += lap_pt
+
                     if team not in team_points_matrix:
                         team_points_matrix[team] = [0] * len(races)
                     team_points_matrix[team][race_idx] += pt
@@ -2126,12 +2155,11 @@ with tab2:
                     else (0 if is_retired else (pts_table[rank_idx] if rank_idx < len(pts_table) else 0))
                 )
 
-                # WECは1台に2～3名のクルーが乗るため、PDFの "A / B / C" を
-                # 個々のドライバーへ分割し、そのセッションで実際に登録された全員へ加点する。
-                # 欠場・代役があっても、そのラウンドのPDFに載ったメンバーだけが対象になる。
+                # WEC / SUPER GTは1台を複数ドライバーで共有するため、
+                # "A / B / C" を個人別に分割して各ドライバーへ加点する。
                 driver_names = (
                     [name.strip() for name in driver.split("/") if name.strip()]
-                    if r_cat == "WEC"
+                    if r_cat in ["WEC", "SUPER GT"]
                     else [driver.strip()]
                 )
                 for driver_name in driver_names:
