@@ -207,7 +207,7 @@ def save_data(data):
         json.dump(data, f, ensure_ascii=False, indent=2)
 
 
-def extract_supergt_result_url(url, q1_group=None):
+def extract_supergt_result_url(url):
     """SUPER GT公式リザルトページ（GT500/GT300、予選Q1/Q2/決勝）を解析する。"""
     import re
     import requests
@@ -307,12 +307,6 @@ def extract_supergt_result_url(url, q1_group=None):
         if not pm or not num:
             continue
         rank = int(pm.group())
-        # GT300 Q1は順位が A-1 / B-1 のようにグループ別表記。
-        # 選択されたグループだけを読み込む。
-        if cls == "GT300" and session == "予選Q1" and q1_group in ["A", "B"]:
-            pos_text = raw[pos_i].strip().upper()
-            if not pos_text.startswith(q1_group + "-"):
-                continue
         team_machine = raw[team_i].strip()
         # 公式セルは「チーム ... マシン ...」を含む。ランキング用にはチーム名だけを保存。
         tm = re.search(r"チーム\s*(.*?)\s*マシン\s*", team_machine)
@@ -368,7 +362,7 @@ def extract_supergt_result_url(url, q1_group=None):
 
     # Q1ではタイム未計測などで順位欄が数値にならない車両が表末尾に出ることがある。
     # 2026年はエントリーマップを使い、結果表から漏れた車両も0ptで残す。
-    if session in ["予選Q1", "予選Q2"] and not (cls == "GT300" and session == "予選Q1" and q1_group in ["A", "B"]):
+    if session in ["予選Q1", "予選Q2"]:
         expected_nums = list(sgt_driver_map_2026.keys())
         seen_nums = {str(x["カーナンバー"]) for x in rows}
         for missing_num in expected_nums:
@@ -1209,19 +1203,10 @@ if s_cat == "SUPER GT":
             st.success(st.session_state.pop("sgt_import_success"))
         st.caption("SUPER GT公式「順位」ページの予選Q1・Q2または決勝レースURLを貼り付けます。GT500/GT300とセッションはURLから自動判定します。")
         sgt_url = st.text_input("SUPER GT公式リザルトURL", placeholder="https://supergt.net/result?gt_class=gt500&race_num=4&round=Round1&series=2026", key="sgt_result_url")
-        sgt_q1_group = None
-        if "gt_class=gt300" in sgt_url.lower() and "race_num=2" in sgt_url.lower():
-            sgt_q1_group = st.selectbox(
-                "GT300 Q1グループ",
-                ["A", "B"],
-                key="sgt_q1_group",
-            )
         if sgt_url.strip():
             try:
                 with st.spinner("SUPER GT公式リザルトを読み込み中…"):
-                    sgt_rows, sgt_session, sgt_class = extract_supergt_result_url(sgt_url.strip(), sgt_q1_group)
-                    if sgt_class == "GT300" and sgt_session == "予選Q1" and sgt_q1_group:
-                        sgt_session = f"予選Q1 {sgt_q1_group}"
+                    sgt_rows, sgt_session, sgt_class = extract_supergt_result_url(sgt_url.strip())
                 st.success(f"{len(sgt_rows)}台を読み取れました！ {sgt_class} / {sgt_session}")
                 st.dataframe(pd.DataFrame(sgt_rows), use_container_width=True, hide_index=True)
 
