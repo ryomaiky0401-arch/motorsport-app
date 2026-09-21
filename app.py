@@ -1238,7 +1238,7 @@ with tab1:
             sel_round = st.selectbox("ラウンド（大会）を選択", rounds)
         with r_col2:
             sel_session_filter = st.selectbox(
-                "セッション選択", ["すべて", "決勝", "予選", "スプリント"]
+                "セッション選択", (["すべて", "決勝", "ハイパーポール", "予選"] if v_cat == "WEC" else ["すべて", "決勝", "予選", "スプリント"])
             )
 
         round_races = [
@@ -1270,17 +1270,18 @@ with tab1:
                 )
                 st.caption(f"📅 開催日: {r_date_str} ｜ 🎯 適用ルール: {pts_label}")
 
-                # 削除は台数の多いセッションでもすぐ押せるよう、結果表の上に配置
-                if st.button(
-                    "🗑️ このセッション結果を削除",
-                    type="primary",
-                    key=f"del_btn_{sel_round}_{target.get('session_type')}",
-                    use_container_width=True,
-                ):
-                    races_list.remove(target)
-                    save_data(data)
-                    st.warning("データを削除しました。")
-                    st.rerun()
+                # 削除は結果表の右上に小さく配置し、誤操作を減らす
+                _, delete_col = st.columns([5, 1])
+                with delete_col:
+                    if st.button(
+                        "🗑️ 削除",
+                        key=f"del_btn_{sel_round}_{target.get('session_type')}",
+                        help="このセッション結果を削除",
+                    ):
+                        races_list.remove(target)
+                        save_data(data)
+                        st.warning("データを削除しました。")
+                        st.rerun()
 
                 pts_table = target.get("points_table", DEFAULT_PTS_RACE)
 
