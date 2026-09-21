@@ -877,6 +877,7 @@ if s_cat == "F3":
                                 "points_table": pts,
                                 "results": teams,
                                 "drivers": drivers,
+                                "car_numbers": car_numbers,
                                 "statuses": statuses,
                                 "official_points": official_points,
                             }
