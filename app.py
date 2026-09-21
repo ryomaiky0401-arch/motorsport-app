@@ -2499,8 +2499,8 @@ with tab2:
 
             st.markdown("---")
 
-            # 大会ごとの獲得ポイント合計を、従来と同じ折れ線グラフで表示
-            st.subheader("📈 大会別 獲得ポイント")
+            # 大会終了時点の累計ポイントを折れ線グラフで表示
+            st.subheader("📈 大会別 累計獲得ポイント")
 
             event_order = []
             for race in races:
@@ -2518,7 +2518,13 @@ with tab2:
                             totals[event_name] += max(float(item["pts_list"][race_idx]), 0)
                         except (TypeError, ValueError):
                             pass
-                event_points[item["チーム / 車両"]] = [totals[event] for event in event_order]
+                # 各大会終了時点の累計ポイントに変換（累計グラフなので下がらない）
+                running_total = 0
+                cumulative_points = []
+                for event in event_order:
+                    running_total += totals[event]
+                    cumulative_points.append(running_total)
+                event_points[item["チーム / 車両"]] = cumulative_points
 
             st.line_chart(pd.DataFrame(event_points, index=event_order))
 
@@ -2568,7 +2574,7 @@ with tab2:
                 )
 
                 st.markdown("---")
-                st.subheader("📈 ドライバー 大会別獲得ポイント")
+                st.subheader("📈 ドライバー 大会別累計獲得ポイント")
                 driver_event_points = {}
                 for item in driver_summary:
                     totals = {event: 0 for event in event_order}
@@ -2579,7 +2585,13 @@ with tab2:
                                 totals[event_name] += max(float(item["pts_list"][race_idx]), 0)
                             except (TypeError, ValueError):
                                 pass
-                    driver_event_points[item["ドライバー"]] = [totals[event] for event in event_order]
+                    # 各大会終了時点の累計ポイントに変換（累計グラフなので下がらない）
+                    running_total = 0
+                    cumulative_points = []
+                    for event in event_order:
+                        running_total += totals[event]
+                        cumulative_points.append(running_total)
+                    driver_event_points[item["ドライバー"]] = cumulative_points
 
                 st.line_chart(pd.DataFrame(driver_event_points, index=event_order))
 
