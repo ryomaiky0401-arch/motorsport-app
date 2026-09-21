@@ -569,8 +569,16 @@ with tab3:
             st.success(f"{p_cat} の基本ポイント配点を保存しました！")
 
 
+# --- サイドバー：レース結果の入力 ---
+st.sidebar.header("📝 結果入力")
+s_year = st.sidebar.selectbox("シーズン年度", YEARS, key="s_year")
+s_cat = st.sidebar.selectbox(
+    "カテゴリー", list(CATEGORY_CONFIG.keys()), key="s_cat"
+)
+
+# 選択したカテゴリーのPDFインポートだけを表示
 # --- F1公式PDFインポート ---
-with st.sidebar.expander("📥 F1公式PDFを読み込む"):
+if s_cat == "F1":\n        with st.sidebar.expander("📥 F1公式PDFを読み込む"):
     st.caption("FIAのRace Classification PDFから完走車とリタイア車を読み取り、そのまま登録・更新できます。")
     f1_pdf = st.file_uploader("F1結果PDF", type=["pdf"], key="f1_pdf_import")
     if f1_pdf is not None:
@@ -651,7 +659,7 @@ with st.sidebar.expander("📥 F1公式PDFを読み込む"):
             st.error(f"PDFの読み取りに失敗しました: {e}")
 
 # --- F2公式PDFインポート ---
-with st.sidebar.expander("📥 F2公式PDFを読み込む"):
+if s_cat == "F2":\n            with st.sidebar.expander("📥 F2公式PDFを読み込む"):
     st.caption("FIAのF2予選・Sprint・Feature Classification PDFを読み取り、登録・更新できます。")
     f2_pdf = st.file_uploader("F2結果PDF", type=["pdf"], key="f2_pdf_import")
     if f2_pdf is not None:
@@ -728,8 +736,7 @@ with st.sidebar.expander("📥 F2公式PDFを読み込む"):
             st.error(f"PDFの読み取りに失敗しました: {e}")
 
 
-# --- サイドバー：レース結果の入力 ---
-st.sidebar.header("📝 結果入力")
+
 s_year = st.sidebar.selectbox("シーズン年度", YEARS, key="s_year")
 s_cat = st.sidebar.selectbox(
     "カテゴリー", list(CATEGORY_CONFIG.keys()), key="s_cat"
