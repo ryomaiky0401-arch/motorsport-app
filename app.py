@@ -277,11 +277,6 @@ def extract_wec_timing_url(url):
         if not m:
             continue
         rank, num, rest = int(m.group(1)), m.group(2), m.group(3)
-        # Aston Martinの車番は007/009。抽出器によって7/9になる場合はチーム名から復元。
-        if num == "7" and "Aston Martin Thor Team" in rest:
-            num = "007"
-        elif num == "9" and "Aston Martin Thor Team" in rest:
-            num = "009"
         if num not in entries:
             continue
         team, cls = entries[num]
@@ -293,6 +288,17 @@ def extract_wec_timing_url(url):
         if not crew:
             dm = driver_pat.search(line)
             crew = dm.group(1).strip() if dm else ""
+
+        # Aston Martin Valkyrieは2026年予選PDFで2名表記になる場合があり、
+        # 従来のdriver_pat（2本の "/" を前提）では #007/#009 だけ落ちる。
+        # 車番は行頭から既に取得できているので、Astonだけ2名crewを明示的に拾う。
+        if not crew and num in ("007", "009"):
+            aston_dm = re.search(
+                r"([A-ZÀ-ÖØ-Þ]\.\s*[A-ZÀ-ÖØ-Þ][A-ZÀ-ÖØ-öø-ÿ'’-]*(?:\s+[A-ZÀ-ÖØ-Þ][A-ZÀ-ÖØ-öø-ÿ'’-]*)*"
+                r"\s*/\s*[A-ZÀ-ÖØ-Þ]\.\s*[A-ZÀ-ÖØ-Þ][A-ZÀ-ÖØ-öø-ÿ'’-]*(?:\s+[A-ZÀ-ÖØ-Þ][A-ZÀ-ÖØ-öø-ÿ'’-]*)*)",
+                rest,
+            )
+            crew = aston_dm.group(1).strip() if aston_dm else ""
 
         # pdfplumberでは車種列の一部がドライバー列の前後に連結される。
         # 例: "WRT K. MAGNUSSEN / ... / D. VANTHOOR BMW M H"
