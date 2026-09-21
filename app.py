@@ -1237,9 +1237,17 @@ with tab1:
         with r_col1:
             sel_round = st.selectbox("ラウンド（大会）を選択", rounds)
         with r_col2:
-            sel_session_filter = st.selectbox(
-                "セッション選択", (["すべて", "決勝", "ハイパーポール", "予選"] if v_cat == "WEC" else ["すべて", "決勝", "予選", "スプリント"])
-            )
+            # WECではHyperpoleを「予選」グループの中にまとめる
+            session_options = ["すべて", "決勝", "予選"] if v_cat == "WEC" else ["すべて", "決勝", "予選", "スプリント"]
+            sel_session_filter = st.selectbox("セッション選択", session_options)
+
+            wec_qualifying_filter = None
+            if v_cat == "WEC" and sel_session_filter == "予選":
+                wec_qualifying_filter = st.selectbox(
+                    "予選セッション",
+                    ["すべて", "予選", "ハイパーポール"],
+                    key="wec_qualifying_session_filter",
+                )
 
         round_races = [
             r
@@ -1247,11 +1255,23 @@ with tab1:
             if r.get("round_name", r.get("race_name")) == sel_round
         ]
         if sel_session_filter != "すべて":
-            round_races = [
-                r
-                for r in round_races
-                if r.get("session_type", "決勝") == sel_session_filter
-            ]
+            if v_cat == "WEC" and sel_session_filter == "予選":
+                if wec_qualifying_filter in [None, "すべて"]:
+                    round_races = [
+                        r for r in round_races
+                        if r.get("session_type", "決勝") in ["予選", "ハイパーポール"]
+                    ]
+                else:
+                    round_races = [
+                        r for r in round_races
+                        if r.get("session_type", "決勝") == wec_qualifying_filter
+                    ]
+            else:
+                round_races = [
+                    r
+                    for r in round_races
+                    if r.get("session_type", "決勝") == sel_session_filter
+                ]
 
         if round_races:
             # 閲覧画面は見やすさ優先で「決勝 → スプリント → 予選」の順に表示
