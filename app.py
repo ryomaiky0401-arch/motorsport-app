@@ -236,14 +236,35 @@ def extract_wec_pdf(uploaded_pdf):
 
     uploaded_pdf.seek(0)
     doc = fitz.open(stream=uploaded_pdf.read(), filetype="pdf")
+    # WEC PDFは同じ順位表の重複ページが多い。
+    # 全ページを3倍でOCRすると非常に遅いため、必要なページだけ2倍で読む。
+    # Race(2p): 2ページ目のクラス別結果だけ
+    # Qualifying(9p): LMGT3 Q/HP, Hypercar Q/HP の4ページだけ
+    if len(doc) == 2:
+        page_indices = [1]
+        is_race = True
+    elif len(doc) >= 9:
+        page_indices = [1, 3, 5, 7]
+        is_race = False
+    else:
+        page_indices = list(range(len(doc)))
+        is_race = False
+
     page_texts = []
-    for page in doc:
-        pix = page.get_pixmap(matrix=fitz.Matrix(3, 3), alpha=False)
+    for page_idx in page_indices:
+        page = doc[page_idx]
+        # 順位表はページ上半分にあるので下部の余白・署名をOCRしない
+        rect = page.rect
+        clip = fitz.Rect(rect.x0, rect.y0, rect.x1, rect.y0 + rect.height * 0.62)
+        pix = page.get_pixmap(matrix=fitz.Matrix(2, 2), clip=clip, alpha=False)
         img = Image.frombytes("RGB", [pix.width, pix.height], pix.samples)
-        page_texts.append(pytesseract.image_to_string(img, config="--psm 6"))
+        text = pytesseract.image_to_string(
+            img,
+            config="--psm 6 -c preserve_interword_spaces=1"
+        )
+        page_texts.append(text)
 
     groups = []
-    is_race = any("Race" in t and "Final Classification" in t for t in page_texts)
 
     def clean_crew(raw, team, cls):
         s = raw
@@ -267,7 +288,9 @@ def extract_wec_pdf(uploaded_pdf):
         by_class = {"Hypercar": [], "LMGT3": []}
         for line in text.splitlines():
             line = line.strip()
-            m = re.match(r"^(\d{1,2})\s+(007|009|\d{1,3})\s*(.*)$", line)
+            # OCRが順位の前に | や I を付けることがあるため除去
+            line = re.sub(r"^[|Il!]+\s*", "", line)
+            m = re.match(r"^(\d{1,2})[.)]?\s+(007|009|\d{1,3})\s+(.*)$", line)
             if not m:
                 continue
             rank, num, rest = int(m.group(1)), m.group(2), m.group(3)
@@ -303,7 +326,8 @@ def extract_wec_pdf(uploaded_pdf):
             rows = []
             for line in text.splitlines():
                 line = line.strip()
-                m = re.match(r"^(?:HP\s+)?(\d{1,2})\s+(007|009|\d{1,3})\s*(.*)$", line)
+                line = re.sub(r"^[|Il!]+\s*", "", line)
+                m = re.match(r"^(?:HP\s+)?(\d{1,2})[.)]?\s+(007|009|\d{1,3})\s+(.*)$", line)
                 if not m:
                     continue
                 rank, num, rest = int(m.group(1)), m.group(2), m.group(3)
