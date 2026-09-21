@@ -1108,7 +1108,8 @@ with tab_entry:
                 if not team.strip():
                     st.error("チーム名を入力してください。")
                 else:
-                    driver_list = [x.strip() for x in [driver1, driver2, driver3] if x.strip()]\n                    item = {"car_number": car_number.strip(), "machine": machine.strip(), "team": team.strip(), "country": country.strip(), "driver_list": driver_list, "drivers": " / ".join(driver_list), "image_url": image_url.strip()}
+                    driver_list = [x.strip() for x in [driver1, driver2, driver3] if x.strip()]
+                    item = {"car_number": car_number.strip(), "machine": machine.strip(), "team": team.strip(), "country": country.strip(), "driver_list": driver_list, "drivers": " / ".join(driver_list), "image_url": image_url.strip()}
                     if edit_idx >= 0:
                         entries[edit_idx] = item
                     else:
