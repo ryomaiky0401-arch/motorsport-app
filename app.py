@@ -212,10 +212,15 @@ def extract_wec_timing_url(url):
     import requests
     import pdfplumber
 
-    if "fiawec.alkamelsystems.com/Results/" not in url or not url.lower().endswith(".pdf"):
+    from urllib.parse import urlparse
+
+    url = url.strip()
+    parsed = urlparse(url)
+    if parsed.netloc.lower() != "fiawec.alkamelsystems.com" or "/Results/" not in parsed.path or not parsed.path.lower().endswith(".pdf"):
         raise ValueError("Al Kamel Timing ResultsのPDF URLを入力してください。")
 
-    response = requests.get(url, timeout=20)
+    # URL末尾に ?utm_source=... などが付いていても受け付ける
+    response = requests.get(url, timeout=20, headers={"User-Agent": "Mozilla/5.0"})
     response.raise_for_status()
     pdf_bytes = io.BytesIO(response.content)
 
