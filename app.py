@@ -1449,29 +1449,84 @@ with tab2:
         race_headers = [f"{r.get('round_name')} ({r.get('session_type', '決勝')})" for r in races]
 
         team_points_matrix = {}
-        # PDF/公式結果からドライバー情報付きで登録されたカテゴリーは、
-        # 過去シーズン共通のチームマスターを0pt枠として混ぜない。
-        # ランキングには「選択中の年度に実際に登録された結果」のチームだけを出す。
-        has_pdf_driver_data = any(r.get("drivers") for r in races)
-        if not (r_cat in ["F1", "F2", "F3", "WEC"] and has_pdf_driver_data):
-            for team in registered:
-                team_points_matrix[team] = [0] * len(races)
+        # WEC Hypercarのマニュファクチャラー選手権は、各メーカーが指定した2台が対象。
+        # 追加車両（例: Ferrari #83）は対象外にし、対象車だけで順位を詰め直して
+        # その順位に応じた決勝ポイントを2台分合算する。
+        wec_manufacturer_cars = {
+            "15": "BMW", "20": "BMW",
+            "50": "FERRARI", "51": "FERRARI",
+            "12": "CADILLAC", "38": "CADILLAC",
+            "007": "ASTON MARTIN", "009": "ASTON MARTIN",
+            "35": "ALPINE", "36": "ALPINE",
+            "7": "TOYOTA", "8": "TOYOTA",
+            "17": "GENESIS", "19": "GENESIS",
+            "93": "PEUGEOT", "94": "PEUGEOT",
+        }
+        is_wec_manufacturer = r_cat == "WEC" and r_cls == "Hypercar"
 
-        for race_idx, r in enumerate(races):
-            pts_table = r.get("points_table", DEFAULT_PTS_RACE)
-            statuses = r.get("statuses", [])
-            for rank_idx, team in enumerate(r["results"]):
-                is_retired = rank_idx < len(statuses) and statuses[rank_idx] in ["リタイア", "DNS", "DSQ"]
-                official = r.get("official_points", [])
-                pt = (
-                    official[rank_idx]
-                    if rank_idx < len(official)
-                    else (0 if is_retired else (pts_table[rank_idx] if rank_idx < len(pts_table) else 0))
-                )
-                if team not in team_points_matrix:
+        if is_wec_manufacturer:
+            manufacturers = list(dict.fromkeys(wec_manufacturer_cars.values()))
+            for manufacturer in manufacturers:
+                team_points_matrix[manufacturer] = [0] * len(races)
+
+            for race_idx, r in enumerate(races):
+                session_type = r.get("session_type", "決勝")
+                car_numbers = [str(n) for n in r.get("car_numbers", [])]
+
+                if session_type == "決勝":
+                    # 決勝はメーカー選手権対象の2台だけを抜き出し、その中で順位を再計算する。
+                    eligible = []
+                    statuses = r.get("statuses", [])
+                    for original_idx, num in enumerate(car_numbers):
+                        manufacturer = wec_manufacturer_cars.get(num)
+                        if manufacturer:
+                            status = statuses[original_idx] if original_idx < len(statuses) else "完走"
+                            eligible.append((manufacturer, status))
+
+                    scale = r.get("wec_points_scale", "6h")
+                    manufacturer_points = {
+                        "6h": [25, 18, 15, 12, 10, 8, 6, 4, 2, 1],
+                        "8h/10h": [38, 27, 23, 18, 15, 12, 9, 6, 3, 2],
+                        "24h": [50, 36, 30, 24, 20, 16, 12, 8, 4, 2],
+                    }.get(scale, [25, 18, 15, 12, 10, 8, 6, 4, 2, 1])
+
+                    for eligible_rank, (manufacturer, status) in enumerate(eligible):
+                        pt = 0 if status in ["DNS", "DSQ"] else (
+                            manufacturer_points[eligible_rank] if eligible_rank < len(manufacturer_points) else 0
+                        )
+                        team_points_matrix[manufacturer][race_idx] += pt
+
+                elif session_type == "ハイパーポール":
+                    # Hyperpoleのポール1点はマニュファクチャラー選手権にも加算。
+                    official = r.get("official_points", [])
+                    for idx, num in enumerate(car_numbers):
+                        manufacturer = wec_manufacturer_cars.get(num)
+                        pt = official[idx] if idx < len(official) else 0
+                        if manufacturer and pt:
+                            team_points_matrix[manufacturer][race_idx] += pt
+        else:
+            # PDF/公式結果からドライバー情報付きで登録されたカテゴリーは、
+            # 過去シーズン共通のチームマスターを0pt枠として混ぜない。
+            registered = data["teams"].get(f"{r_cat}_{r_cls}", [])
+            has_pdf_driver_data = any(r.get("drivers") for r in races)
+            if not (r_cat in ["F1", "F2", "F3", "WEC"] and has_pdf_driver_data):
+                for team in registered:
                     team_points_matrix[team] = [0] * len(races)
-                # 同一チームの2台分を合算する
-                team_points_matrix[team][race_idx] += pt
+
+            for race_idx, r in enumerate(races):
+                pts_table = r.get("points_table", DEFAULT_PTS_RACE)
+                statuses = r.get("statuses", [])
+                for rank_idx, team in enumerate(r["results"]):
+                    is_retired = rank_idx < len(statuses) and statuses[rank_idx] in ["リタイア", "DNS", "DSQ"]
+                    official = r.get("official_points", [])
+                    pt = (
+                        official[rank_idx]
+                        if rank_idx < len(official)
+                        else (0 if is_retired else (pts_table[rank_idx] if rank_idx < len(pts_table) else 0))
+                    )
+                    if team not in team_points_matrix:
+                        team_points_matrix[team] = [0] * len(races)
+                    team_points_matrix[team][race_idx] += pt
 
         summary_list = []
         for team, pts_list in team_points_matrix.items():
@@ -1530,12 +1585,17 @@ with tab2:
                     if rank_idx < len(race_car_numbers) and race_car_numbers[rank_idx] not in [None, ""]:
                         driver_car_numbers[driver_name] = race_car_numbers[rank_idx]
 
+        team_tab_label = "🏭 マニュファクチャラー" if is_wec_manufacturer else "🏎️ チーム / 車両"
         ranking_tab_team, ranking_tab_driver = st.tabs(
-            ["🏎️ チーム / 車両", "👤 ドライバー"]
+            [team_tab_label, "👤 ドライバー"]
         )
 
         with ranking_tab_team:
-            st.subheader("🥇 ポイントランキング")
+            if is_wec_manufacturer:
+                st.subheader("🥇 マニュファクチャラーランキング")
+                st.caption("WEC Hypercar公式方式：指定2台を対象に順位を詰め直して2台分を合算。Hyperpoleのポール1点も加算。")
+            else:
+                st.subheader("🥇 ポイントランキング")
         
             # スクロールせずに全体を表示するため height を自動調整
             calc_rank_height = (len(df_rank) + 1) * 35 + 3
