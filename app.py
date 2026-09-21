@@ -287,16 +287,20 @@ def extract_wec_timing_url(url):
             dm = driver_pat.search(line)
             crew = dm.group(1).strip() if dm else ""
 
-        # Classification PDFではドライバー列の直後に車種列が続くため、
-        # 正規表現が車種名の先頭（BMW M / Ferrari F / Aston A など）を
-        # 3人目の姓の末尾として拾うことがある。3人の「頭文字. 姓」だけに整形する。
-        driver_name_pat = re.compile(
-            r"[A-ZÀ-ÖØ-Þ]\.\s*[A-ZÀ-ÖØ-Þ][A-ZÀ-ÖØ-öø-ÿ'’-]*(?:\s+[A-ZÀ-ÖØ-Þ][A-ZÀ-ÖØ-öø-ÿ'’-]*)*"
+        # 車種列が3人目の姓の後ろへ連結されるため、まず "/" で3人に分ける。
+        # そのうえで各名前は「頭文字. + 姓」だけを先頭から取得する。
+        # 例: "D. VANTHOOR BMW M H" -> "D. VANTHOOR"
+        name_start_pat = re.compile(
+            r"^\s*([A-ZÀ-ÖØ-Þ]\.\s*(?:[A-ZÀ-ÖØ-Þ][A-ZÀ-ÖØ-öø-ÿ'’-]*)(?:\s+(?:VAN|VON|DE|DEL|DA|DI|DER|DEN|LE|LA)\s+[A-ZÀ-ÖØ-Þ][A-ZÀ-ÖØ-öø-ÿ'’-]*)?)"
         )
-        clean_names = driver_name_pat.findall(crew)
+        parts = [p.strip() for p in crew.split("/")][:3]
+        clean_names = []
+        for part in parts:
+            nm = name_start_pat.match(part)
+            if nm:
+                clean_names.append(nm.group(1).strip())
         if clean_names:
-            # WECは最大3名。余計な車種列由来の断片はここで落ちる。
-            crew = " / ".join(name.strip() for name in clean_names[:3])
+            crew = " / ".join(clean_names)
 
         points = 0
         if session == "ハイパーポール" and rank == 1:
