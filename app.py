@@ -322,8 +322,21 @@ def extract_wec_timing_url(url):
         if session == "ハイパーポール" and rank == 1:
             points = 1
         elif session == "決勝":
-            points6 = [25, 18, 15, 12, 10, 8, 6, 4, 2, 1]
-            points = points6[rank - 1] if rank <= 10 else 0
+            # WEC公式配点はレース長で変わる。
+            # 6h: 通常配点 / 8h・10h・1812km: 1.5倍系 / Le Mans 24h: 2倍。
+            url_upper = urllib.parse.unquote(url).upper()
+            text_upper = text.upper()
+            event_hint = f"{url_upper} {text_upper}"
+            if "LE MANS" in event_hint and "LONE STAR" not in event_hint:
+                race_points = [50, 36, 30, 24, 20, 16, 12, 8, 4, 2]
+                points_scale = "24h"
+            elif any(token in event_hint for token in ["1812", "QATAR", "BAHRAIN", "8 HOURS", "8 HOUR", "10 HOURS", "10 HOUR"]):
+                race_points = [38, 27, 23, 18, 15, 12, 9, 6, 3, 2]
+                points_scale = "8h/10h"
+            else:
+                race_points = [25, 18, 15, 12, 10, 8, 6, 4, 2, 1]
+                points_scale = "6h"
+            points = race_points[rank - 1] if rank <= 10 else 0
 
         rows_by_class[cls].append({
             "順位": rank, "カーナンバー": num, "ドライバー": crew,
@@ -338,7 +351,10 @@ def extract_wec_timing_url(url):
             unique.setdefault(row["カーナンバー"], row)
         rows = list(unique.values())
         if rows:
-            groups.append({"クラス": cls, "セッション": session, "rows": rows})
+            group = {"クラス": cls, "セッション": session, "rows": rows}
+            if session == "決勝":
+                group["配点区分"] = points_scale
+            groups.append(group)
     return groups
 
 
@@ -821,7 +837,8 @@ if s_cat == "WEC":
                     wec_groups = extract_wec_timing_url(wec_url.strip())
                 if wec_groups:
                     for g in wec_groups:
-                        st.markdown(f"**{g['クラス']} / {g['セッション']} — {len(g['rows'])}台**")
+                        scale_note = f" / 配点: {g['配点区分']}" if g.get("配点区分") else ""
+                        st.markdown(f"**{g['クラス']} / {g['セッション']} — {len(g['rows'])}台{scale_note}**")
                         st.dataframe(pd.DataFrame(g["rows"]), use_container_width=True, hide_index=True)
 
                     wec_year = st.selectbox("登録年度", YEARS, key="wec_import_year")
