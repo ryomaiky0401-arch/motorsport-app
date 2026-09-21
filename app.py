@@ -270,8 +270,10 @@ def extract_wec_timing_url(url):
     rows_by_class = {"Hypercar": [], "LMGT3": []}
 
     for line in lines:
-        # HPが先頭に付く予選にも対応
-        m = re.match(r"^(?:HP\s+)?(\d{1,2})\s+(007|009|\d{1,3})\s+(.+)$", line)
+        # PDF内部では行頭にHPや別列の文字が回り込むことがあるため、
+        # 行頭固定にせず「順位 + 車番」の並びを行内から探す。
+        # 特にAston Martin #007/#009の予選行が落ちないよう3桁ゼロ始まりも保持する。
+        m = re.search(r"(?:^|\s)(?:HP\s+)?(\d{1,2})\s+(007|009|\d{1,3})\s+(.+)$", line)
         if not m:
             continue
         rank, num, rest = int(m.group(1)), m.group(2), m.group(3)
