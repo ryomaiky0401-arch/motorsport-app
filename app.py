@@ -238,11 +238,22 @@ def extract_sf_result_url(url):
     text = re.sub(r"\\s+", " ", text)
 
     # 2026の公式ページは「Po. No. Driver Team ／ Engine Lap ...」の順。
-    marker = re.search(r"(?:Po\\.?|Pos\\.?)\\s+(?:Gr\\.?\\s+)?No\\.?\\s+Driver\\s+Team(?:\\s*/\\s*Engine)?", text, flags=re.I)
+    # 公式HTMLではヘッダーの区切りが装飾要素で崩れる場合があるため、
+    # 厳密な1本の正規表現ではなく No. / Driver / Team の位置関係で結果開始点を探す。
+    marker = re.search(r"No\\.?\\s+Driver\\s+Team", text, flags=re.I)
     if not marker:
-        raise ValueError("公式ページのリザルト表を見つけられませんでした。")
-
-    result_text = text[marker.end():]
+        # さらに装飾文字を無視したフォールバック。
+        compact = re.sub(r"[^A-Za-z0-9一-龥ぁ-んァ-ヶ]+", " ", text)
+        marker2 = re.search(r"No\\s+Driver\\s+Team", compact, flags=re.I)
+        if not marker2:
+            raise ValueError("公式ページの結果ヘッダーを見つけられませんでした。")
+        # compact側の位置は元HTML本文に対応しないので、最初の2026エントリー順位列を直接探す。
+        start = re.search(r"\\b1\\s+[AB]\\s+\\d{1,2}\\s+", text) if session == "予選" else re.search(r"\\b1\\s+\\d{1,2}\\s+", text)
+        if not start:
+            raise ValueError("公式ページの順位データ開始位置を見つけられませんでした。")
+        result_text = text[start.start():]
+    else:
+        result_text = text[marker.end():]
     end_markers = ["車両：", "Fastest Lap", "PENALTIES", "GO TO TOP"]
     end_positions = [result_text.find(x) for x in end_markers if result_text.find(x) >= 0]
     if end_positions:
