@@ -448,10 +448,12 @@ def extract_f3_pdf(uploaded_pdf):
                 m = re.match(r"^(\d+)\s+(.+?)\s+" + re.escape(team) + r"\b", line, re.I)
                 if not m:
                     continue
+                car_number = int(m.group(1))
                 driver = m.group(2).replace(" *", "").strip()
                 status = "DNS" if " DNS" in upper else ("DSQ" if " DSQ" in upper else "リタイア")
                 rows.append({
                     "順位": status,
+                    "カーナンバー": car_number,
                     "ドライバー": driver,
                     "チーム": team,
                     "ポイント": 0,
@@ -463,6 +465,7 @@ def extract_f3_pdf(uploaded_pdf):
             if not m:
                 continue
             rank = int(m.group(1))
+            car_number = int(m.group(2))
             driver = m.group(3).replace(" *", "").strip()
             tail = m.group(4).strip()
 
@@ -479,6 +482,7 @@ def extract_f3_pdf(uploaded_pdf):
 
             rows.append({
                 "順位": rank,
+                "カーナンバー": car_number,
                 "ドライバー": driver,
                 "チーム": team,
                 "ポイント": official_pts,
@@ -712,6 +716,7 @@ if s_cat == "F1":
                                 "points_table": pts,
                                 "results": teams,
                                 "drivers": drivers,
+                                "car_numbers": car_numbers,
                                 "statuses": statuses,
                                 "official_points": official_points,
                             }
@@ -825,6 +830,8 @@ if s_cat == "F2":
 
 if s_cat == "F3":
     with st.sidebar.expander("📥 F3公式PDFを読み込む"):
+        if st.session_state.get("f3_import_success"):
+            st.success(st.session_state.pop("f3_import_success"))
         st.caption("FIAのF3予選・Sprint・Feature Classification PDFを読み取り、登録・更新できます。")
         f3_pdf = st.file_uploader("F3結果PDF", type=["pdf"], key="f3_pdf_import")
         if f3_pdf is not None:
@@ -859,6 +866,7 @@ if s_cat == "F3":
                             )
                             teams = [r["チーム"] for r in f3_rows]
                             drivers = [r["ドライバー"] for r in f3_rows]
+                            car_numbers = [r.get("カーナンバー") for r in f3_rows]
                             statuses = [r["ステータス"] for r in f3_rows]
                             official_points = [r["ポイント"] for r in f3_rows]
                             new_race = {
@@ -893,7 +901,7 @@ if s_cat == "F3":
                                     team_master.append(team)
 
                             save_data(data)
-                            st.success(f"「{f3_round.strip()} ({f3_session})」を{action}しました！")
+                            st.session_state["f3_import_success"] = f"✅ 「{f3_round.strip()} ({f3_session})」を{action}しました！"
                             st.rerun()
                 else:
                     st.warning("順位表を読み取れませんでした。このPDFの形式を確認する必要があります。")
