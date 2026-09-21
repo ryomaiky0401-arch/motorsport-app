@@ -846,6 +846,23 @@ if s_cat == "WEC":
                 with st.spinner("公式Timing Resultsを読み込み中…"):
                     wec_groups = extract_wec_timing_url(wec_url.strip())
                 if wec_groups:
+                # 一時デバッグ: Aston #007/#009 がpdfplumberで実際にどう抽出されているか確認
+                if "Qualifying" in wec_url or "QUALIFYING" in wec_url or "qualifying" in wec_url:
+                    try:
+                        dbg_resp = requests.get(wec_url.strip(), timeout=20, headers={"User-Agent": "Mozilla/5.0"})
+                        dbg_pdf = pdfplumber.open(io.BytesIO(dbg_resp.content))
+                        dbg_text = "\n".join((p.extract_text() or "") for p in dbg_pdf.pages)
+                        dbg_pdf.close()
+                        dbg_lines = [
+                            re.sub(r"\s+", " ", ln).strip()
+                            for ln in dbg_text.splitlines()
+                            if any(token in ln.upper() for token in ["007", "009", "TINCKNELL", "GAMBLE", "RIBERAS", "SØRENSEN", "ASTON"])
+                        ]
+                        with st.expander("🔎 Aston読み取りデバッグ"):
+                            st.code("\n".join(dbg_lines) if dbg_lines else "Aston関連の文字列を検出できませんでした")
+                    except Exception as dbg_e:
+                        st.caption(f"デバッグ取得失敗: {dbg_e}")
+
                     for g in wec_groups:
                         st.markdown(f"**{g['クラス']} / {g['セッション']} — {len(g['rows'])}台**")
                         st.dataframe(pd.DataFrame(g["rows"]), use_container_width=True, hide_index=True)
