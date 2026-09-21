@@ -891,6 +891,12 @@ with tab1:
             ]
 
         if round_races:
+            # 閲覧画面は見やすさ優先で「決勝 → スプリント → 予選」の順に表示
+            view_session_order = {"決勝": 0, "スプリント": 1, "予選": 2}
+            round_races = sorted(
+                round_races,
+                key=lambda x: view_session_order.get(x.get("session_type", "決勝"), 99),
+            )
             for target in round_races:
                 r_date_str = target.get("race_date", "日付未設定")
                 is_custom = target.get("is_custom_pts", False)
@@ -1007,9 +1013,9 @@ with tab2:
         races = sorted(
             races,
             key=lambda x: (
-                x.get("race_date", ""),
                 x.get("round_name", ""),
                 session_order.get(x.get("session_type", "決勝"), 99),
+                x.get("race_date", ""),
             ),
         )
 
