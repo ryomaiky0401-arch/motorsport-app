@@ -1231,6 +1231,7 @@ if s_cat == "SUPER GT":
                         statuses = [x["ステータス"] for x in sgt_rows]
                         official_points = [x["ポイント"] for x in sgt_rows]
                         groups = [x.get("グループ", "") for x in sgt_rows]
+                        qualifying_ranks = [x.get("順位") for x in sgt_rows]
                         new_race = {
                             "round_name": sgt_round.strip(), "race_date": str(sgt_date),
                             "session_type": sgt_session, "is_custom_pts": True,
@@ -1238,6 +1239,7 @@ if s_cat == "SUPER GT":
                             "car_numbers": car_numbers, "statuses": statuses,
                             "official_points": official_points,
                             "groups": groups,
+                            "qualifying_ranks": qualifying_ranks,
                             "laps": [x.get("周回数") for x in sgt_rows],
                         }
                         idx = next((i for i, x in enumerate(races)
@@ -1815,7 +1817,12 @@ with tab1:
                 if sgt_qualifying_filter in [None, "すべて"]:
                     round_races = [
                         r for r in round_races
-                        if r.get("session_type", "決勝") in ["予選", "予選Q1", "予選Q1 A", "予選Q1 B", "予選Q2"]
+                        if r.get("session_type", "決勝") in ["予選", "予選Q1", "予選Q2"]
+                    ]
+                elif sgt_qualifying_filter in ["予選Q1 A", "予選Q1 B"]:
+                    round_races = [
+                        r for r in round_races
+                        if r.get("session_type", "決勝") == "予選Q1"
                     ]
                 else:
                     round_races = [
@@ -1872,9 +1879,16 @@ with tab1:
                 drivers = target.get("drivers", [])
                 car_numbers = target.get("car_numbers", [])
                 groups = target.get("groups", [])
+                qualifying_ranks = target.get("qualifying_ranks", [])
                 df_data = {
                     "順位": [
-                        statuses[i] if i < len(statuses) and statuses[i] in ["リタイア", "DNS", "DSQ"] else f"P{i+1}"
+                        statuses[i] if i < len(statuses) and statuses[i] in ["リタイア", "DNS", "DSQ"]
+                        else (
+                            f"P{qualifying_ranks[i]}"
+                            if target.get("session_type") == "予選Q1"
+                            and i < len(qualifying_ranks) and qualifying_ranks[i] not in [None, ""]
+                            else f"P{i+1}"
+                        )
                         for i in range(len(target["results"]))
                     ],
                     "獲得ポイント": [
@@ -1902,6 +1916,17 @@ with tab1:
                     df_data["ドライバー"] = drivers
                 df_data["チーム / 車両"] = target["results"]
                 df_res = pd.DataFrame(df_data)
+
+                # GT300 Q1のA/Bは別セッションではなく、同じQ1結果内のグループ。
+                # 選択時はグループ列で行を絞り込む。
+                if (
+                    v_cat == "SUPER GT"
+                    and target.get("session_type") == "予選Q1"
+                    and sgt_qualifying_filter in ["予選Q1 A", "予選Q1 B"]
+                    and "グループ" in df_res.columns
+                ):
+                    wanted_group = "A組" if sgt_qualifying_filter == "予選Q1 A" else "B組"
+                    df_res = df_res[df_res["グループ"] == wanted_group].reset_index(drop=True)
 
                 # スクロールせずに全体を表示するため height を自動調整
                 calc_height = (len(df_res) + 1) * 35 + 3
