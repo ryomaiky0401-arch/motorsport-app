@@ -1067,13 +1067,22 @@ with tab_entry:
         edit_idx = edit_options.index(edit_choice) - 1
         current = entries[edit_idx] if edit_idx >= 0 else {}
 
+        # 旧データの "Driver A / Driver B" 形式もそのまま編集できるように分解する
+        saved_drivers = current.get("driver_list", [])
+        if not saved_drivers:
+            saved_drivers = [x.strip() for x in current.get("drivers", "").split("/") if x.strip()]
+        saved_drivers = (saved_drivers + ["", "", ""])[:3]
+
         ec1, ec2 = st.columns(2)
         with ec1:
             car_number = st.text_input("カーナンバー", value=current.get("car_number", ""), key=f"entry_no_{edit_choice}")
             machine = st.text_input("マシン名", value=current.get("machine", ""), placeholder="例: Ferrari 499P", key=f"entry_machine_{edit_choice}")
             team = st.text_input("チーム名", value=current.get("team", ""), key=f"entry_team_{edit_choice}")
+            country = st.text_input("国 / 地域", value=current.get("country", ""), placeholder="例: イギリス", key=f"entry_country_{edit_choice}")
         with ec2:
-            drivers = st.text_area("ドライバー名", value=current.get("drivers", ""), placeholder="例: Driver A / Driver B / Driver C", key=f"entry_drivers_{edit_choice}")
+            driver1 = st.text_input("ドライバー 1", value=saved_drivers[0], key=f"entry_driver1_{edit_choice}")
+            driver2 = st.text_input("ドライバー 2", value=saved_drivers[1], key=f"entry_driver2_{edit_choice}")
+            driver3 = st.text_input("ドライバー 3", value=saved_drivers[2], key=f"entry_driver3_{edit_choice}")
             image_url = st.text_input("マシン画像URL", value=current.get("image_url", ""), placeholder="https://...", key=f"entry_image_{edit_choice}")
 
         b1, b2 = st.columns(2)
@@ -1082,7 +1091,7 @@ with tab_entry:
                 if not team.strip():
                     st.error("チーム名を入力してください。")
                 else:
-                    item = {"car_number": car_number.strip(), "machine": machine.strip(), "team": team.strip(), "drivers": drivers.strip(), "image_url": image_url.strip()}
+                    driver_list = [x.strip() for x in [driver1, driver2, driver3] if x.strip()]\n                    item = {"car_number": car_number.strip(), "machine": machine.strip(), "team": team.strip(), "country": country.strip(), "driver_list": driver_list, "drivers": " / ".join(driver_list), "image_url": image_url.strip()}
                     if edit_idx >= 0:
                         entries[edit_idx] = item
                     else:
@@ -1111,8 +1120,11 @@ with tab_entry:
                     st.subheader(f"{no}{entry.get('team', '')}")
                     if entry.get("machine"):
                         st.caption(entry["machine"])
-                    if entry.get("drivers"):
-                        st.write(f"👤 {entry['drivers']}")
+                    if entry.get("country"):
+                        st.write(f"🌍 {entry['country']}")
+                    display_drivers = entry.get("driver_list") or [x.strip() for x in entry.get("drivers", "").split("/") if x.strip()]
+                    for driver in display_drivers:
+                        st.write(f"👤 {driver}")
     else:
         st.info("このカテゴリーのエントリーはまだ登録されていません。上の「エントリーを追加 / 編集」から追加できます。")
 
