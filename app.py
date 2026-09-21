@@ -310,6 +310,13 @@ def extract_supergt_result_url(url):
         tm = re.search(r"チーム\s*(.*?)\s*マシン\s*", team_machine)
         team = tm.group(1).strip() if tm else team_machine
         drivers = raw[driver_i].strip()
+        # 公式HTMLでは複数ドライバー名が連結されるため、既知の姓名境界を区切る。
+        # 例: 「坪井 翔山下 健太」→「坪井 翔 / 山下 健太」
+        drivers = re.sub(
+            r"(?<=[ぁ-んァ-ヶ一-龥A-Za-z])(?=(?:山下|小林|大嶋|サッシャ|佐藤|牧野|高星|三宅|野中|阪口|イゴール|ジュリアーノ|ベルトラン|大湯|平峰|福住|関口|千代|名取|塚越|太田|国本|笹原|坪井)\s)",
+            " / ",
+            drivers,
+        )
         drivers = re.sub(r"\s{2,}", " / ", drivers)
         points = 1 if session == "予選" and rank == 1 else (
             race_pts[cls][rank - 1] if session == "決勝" and rank <= len(race_pts[cls]) else 0
