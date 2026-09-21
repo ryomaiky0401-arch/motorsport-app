@@ -36,7 +36,7 @@ def _result_rows(race, result_key):
 
 
 def fetch_f1_season(season):
-    """Return F1 race, qualifying and sprint sessions in the app's simple format."""
+    """F1の決勝・予選・スプリント結果をアプリ用形式で取得する。"""
     schedule_payload = _get_json(f"{season}")
     races = _race_list(schedule_payload)
     imported = []
@@ -62,11 +62,16 @@ def fetch_f1_season(season):
                 continue
 
             results = []
+            points_table = []
             for row in rows:
                 constructor = row.get("Constructor", {}).get("constructorId", "")
                 team_name = TEAM_NAMES.get(constructor, constructor)
                 if team_name:
                     results.append(team_name)
+                    try:
+                        points_table.append(float(row.get("points", 0)))
+                    except (TypeError, ValueError):
+                        points_table.append(0)
 
             if results:
                 imported.append({
@@ -75,6 +80,7 @@ def fetch_f1_season(season):
                     "session_type": session_type,
                     "is_custom_pts": False,
                     "results": results,
+                    "points_table": points_table,
                     "source": "Jolpica F1 API",
                 })
 
@@ -82,7 +88,7 @@ def fetch_f1_season(season):
 
 
 def merge_f1_results(data, season, imported):
-    """Merge imported sessions without creating duplicates."""
+    """重複を避けながら取得結果を追加する。"""
     year_key = f"{season}年"
     data.setdefault("races", {}).setdefault(year_key, {}).setdefault("F1", {}).setdefault("総合", [])
     target = data["races"][year_key]["F1"]["総合"]
@@ -96,7 +102,6 @@ def merge_f1_results(data, season, imported):
         key = (item.get("round_name"), item.get("session_type", "決勝"))
         if key in existing_keys:
             continue
-        item["points_table"] = []
         target.append(item)
         existing_keys.add(key)
         added += 1
