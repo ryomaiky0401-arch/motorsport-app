@@ -1485,13 +1485,23 @@ with tab2:
                     if rank_idx < len(official)
                     else (0 if is_retired else (pts_table[rank_idx] if rank_idx < len(pts_table) else 0))
                 )
-                if driver not in driver_points:
-                    driver_points[driver] = [0] * len(races)
-                driver_points[driver][race_idx] = pt
-                if rank_idx < len(race_teams) and race_teams[rank_idx]:
-                    driver_teams[driver] = race_teams[rank_idx]
-                if rank_idx < len(race_car_numbers) and race_car_numbers[rank_idx] not in [None, ""]:
-                    driver_car_numbers[driver] = race_car_numbers[rank_idx]
+
+                # WECは1台に2～3名のクルーが乗るため、PDFの "A / B / C" を
+                # 個々のドライバーへ分割し、そのセッションで実際に登録された全員へ加点する。
+                # 欠場・代役があっても、そのラウンドのPDFに載ったメンバーだけが対象になる。
+                driver_names = (
+                    [name.strip() for name in driver.split("/") if name.strip()]
+                    if r_cat == "WEC"
+                    else [driver.strip()]
+                )
+                for driver_name in driver_names:
+                    if driver_name not in driver_points:
+                        driver_points[driver_name] = [0] * len(races)
+                    driver_points[driver_name][race_idx] += pt
+                    if rank_idx < len(race_teams) and race_teams[rank_idx]:
+                        driver_teams[driver_name] = race_teams[rank_idx]
+                    if rank_idx < len(race_car_numbers) and race_car_numbers[rank_idx] not in [None, ""]:
+                        driver_car_numbers[driver_name] = race_car_numbers[rank_idx]
 
         ranking_tab_team, ranking_tab_driver = st.tabs(
             ["🏎️ チーム / 車両", "👤 ドライバー"]
