@@ -752,39 +752,115 @@ with tab2:
             for i, item in enumerate(summary_list)
         ])
 
-        st.subheader("🥇 ポイントランキング")
-        
-        # スクロールせずに全体を表示するため height を自動調整
-        calc_rank_height = (len(df_rank) + 1) * 35 + 3
-        st.dataframe(df_rank, use_container_width=True, height=calc_rank_height)
+        # PDFインポートで保存されたドライバー情報から年間ランキングを集計
+        driver_points = {}
+        has_driver_data = False
+        for race_idx, race in enumerate(races):
+            drivers = race.get("drivers", [])
+            if drivers:
+                has_driver_data = True
+            pts_table = race.get("points_table", DEFAULT_PTS_RACE)
+            for rank_idx, driver in enumerate(drivers):
+                if not driver:
+                    continue
+                pt = pts_table[rank_idx] if rank_idx < len(pts_table) else 0
+                if driver not in driver_points:
+                    driver_points[driver] = [0] * len(races)
+                driver_points[driver][race_idx] = pt
 
-        csv_rank = df_rank.to_csv(index=False).encode("utf-8_sig")
-        st.download_button(
-            label="📥 ランキング（CSV）をダウンロード",
-            data=csv_rank,
-            file_name=f"{r_year}_{r_cat}_{r_cls}_ranking.csv",
-            mime="text/csv",
-            use_container_width=True,
+        ranking_tab_team, ranking_tab_driver = st.tabs(
+            ["🏎️ チーム / 車両", "👤 ドライバー"]
         )
 
-        st.markdown("---")
+        with ranking_tab_team:
+            st.subheader("🥇 ポイントランキング")
+            
+            # スクロールせずに全体を表示するため height を自動調整
+            calc_rank_height = (len(df_rank) + 1) * 35 + 3
+            st.dataframe(df_rank, use_container_width=True, height=calc_rank_height)
+    
+            csv_rank = df_rank.to_csv(index=False).encode("utf-8_sig")
+            st.download_button(
+                label="📥 ランキング（CSV）をダウンロード",
+                data=csv_rank,
+                file_name=f"{r_year}_{r_cat}_{r_cls}_ranking.csv",
+                mime="text/csv",
+                use_container_width=True,
+            )
+    
+            st.markdown("---")
+    
+            # 累計ポイント推移の折れ線グラフ
+            st.subheader("📈 累計ポイント推移グラフ")
+    
+            chart_data = {}
+            for item in summary_list:
+                team_name = item["チーム / 車両"]
+                pts_list = item["pts_list"]
+                cum_pts = []
+                current = 0
+                for p in pts_list:
+                    current += p
+                    cum_pts.append(current)
+                chart_data[team_name] = cum_pts
+    
+            df_chart = pd.DataFrame(chart_data, index=race_headers)
+            st.line_chart(df_chart)
+    
+    
 
-        # 累計ポイント推移の折れ線グラフ
-        st.subheader("📈 累計ポイント推移グラフ")
+        with ranking_tab_driver:
+            if not has_driver_data:
+                st.info("ドライバーデータがまだありません。PDFから登録したレース結果で表示されます。")
+            else:
+                driver_summary = []
+                for driver, pts_list in driver_points.items():
+                    driver_summary.append({
+                        "ドライバー": driver,
+                        "合計ポイント": sum(pts_list),
+                        "pts_list": pts_list,
+                    })
+                driver_summary.sort(key=lambda x: x["合計ポイント"], reverse=True)
 
-        chart_data = {}
-        for item in summary_list:
-            team_name = item["チーム / 車両"]
-            pts_list = item["pts_list"]
-            cum_pts = []
-            current = 0
-            for p in pts_list:
-                current += p
-                cum_pts.append(current)
-            chart_data[team_name] = cum_pts
+                df_driver_rank = pd.DataFrame([
+                    {
+                        "順位": f"P{i+1}",
+                        "ドライバー": item["ドライバー"],
+                        "合計ポイント": item["合計ポイント"],
+                    }
+                    for i, item in enumerate(driver_summary)
+                ])
 
-        df_chart = pd.DataFrame(chart_data, index=race_headers)
-        st.line_chart(df_chart)
+                st.subheader("👤 ドライバーランキング")
+                driver_height = (len(df_driver_rank) + 1) * 35 + 3
+                st.dataframe(
+                    df_driver_rank,
+                    use_container_width=True,
+                    height=driver_height,
+                    hide_index=True,
+                )
+
+                driver_csv = df_driver_rank.to_csv(index=False).encode("utf-8_sig")
+                st.download_button(
+                    label="📥 ドライバーランキング（CSV）をダウンロード",
+                    data=driver_csv,
+                    file_name=f"{r_year}_{r_cat}_{r_cls}_driver_ranking.csv",
+                    mime="text/csv",
+                    use_container_width=True,
+                )
+
+                st.markdown("---")
+                st.subheader("📈 ドライバー累計ポイント推移")
+                driver_chart = {}
+                for item in driver_summary:
+                    current = 0
+                    cumulative = []
+                    for p in item["pts_list"]:
+                        current += p
+                        cumulative.append(current)
+                    driver_chart[item["ドライバー"]] = cumulative
+
+                st.line_chart(pd.DataFrame(driver_chart, index=race_headers))
 
     else:
         st.info(f"{r_year} {r_cat} ({r_cls}) の集計対象データがまだありません。")
