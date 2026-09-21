@@ -759,7 +759,7 @@ def extract_wec_timing_url(url):
             for line in lines[retired_at + 1:]:
                 if "Circuit Best Laps" in line or "Published at:" in line:
                     break
-                compact = re.sub(r"\\s+", "", line).lower()
+                compact = re.sub(r"\s+", "", line).lower()
                 found = None
                 for candidate, (candidate_team, candidate_cls) in entries.items():
                     if candidate in seen:
@@ -774,13 +774,13 @@ def extract_wec_timing_url(url):
                 dm = driver_pat.search(line)
                 crew = dm.group(1).strip() if dm else ""
                 if crew:
-                    first_driver = re.search(r"[A-ZÀ-ÖØ-Þ]\\.\\s", crew)
+                    first_driver = re.search(r"[A-ZÀ-ÖØ-Þ]\.\s", crew)
                     if first_driver:
                         crew = crew[first_driver.start():].strip()
                     parts = [p.strip() for p in crew.split("/")][:3]
                     if parts:
                         parts[-1] = re.split(
-                            r"\\s+(?=(?:BMW|FERRARI|CADILLAC|ASTON|ALPINE|PEUGEOT|TOYOTA|GENESIS|PORSCHE|FORD|LEXUS|MERCEDES|CORVETTE|MCLAREN)\\b)",
+                            r"\s+(?=(?:BMW|FERRARI|CADILLAC|ASTON|ALPINE|PEUGEOT|TOYOTA|GENESIS|PORSCHE|FORD|LEXUS|MERCEDES|CORVETTE|MCLAREN)\b)",
                             parts[-1], maxsplit=1, flags=re.I
                         )[0].strip()
                         crew = " / ".join(parts)
