@@ -307,6 +307,12 @@ def extract_supergt_result_url(url):
         if not pm or not num:
             continue
         rank = int(pm.group())
+        group = ""
+        if cls == "GT300" and session == "予選Q1":
+            pos_text = raw[pos_i].strip().upper()
+            gm = re.search(r"([AB])\s*[-－]?\s*\d+", pos_text)
+            if gm:
+                group = gm.group(1) + "組"
         team_machine = raw[team_i].strip()
         # 公式セルは「チーム ... マシン ...」を含む。ランキング用にはチーム名だけを保存。
         tm = re.search(r"チーム\s*(.*?)\s*マシン\s*", team_machine)
@@ -355,7 +361,7 @@ def extract_supergt_result_url(url):
             lm = re.search(r"\d+", raw[lap_i])
             laps = int(lm.group()) if lm else None
         rows.append({
-            "順位": rank, "カーナンバー": num, "ドライバー": drivers,
+            "順位": rank, "グループ": group, "カーナンバー": num, "ドライバー": drivers,
             "チーム": team, "ポイント": points, "ステータス": "完走",
             "周回数": laps,
         })
@@ -1224,12 +1230,14 @@ if s_cat == "SUPER GT":
                         car_numbers = [x["カーナンバー"] for x in sgt_rows]
                         statuses = [x["ステータス"] for x in sgt_rows]
                         official_points = [x["ポイント"] for x in sgt_rows]
+                        groups = [x.get("グループ", "") for x in sgt_rows]
                         new_race = {
                             "round_name": sgt_round.strip(), "race_date": str(sgt_date),
                             "session_type": sgt_session, "is_custom_pts": True,
                             "points_table": official_points, "results": teams, "drivers": drivers,
                             "car_numbers": car_numbers, "statuses": statuses,
                             "official_points": official_points,
+                            "groups": groups,
                             "laps": [x.get("周回数") for x in sgt_rows],
                         }
                         idx = next((i for i, x in enumerate(races)
@@ -1863,6 +1871,7 @@ with tab1:
                 statuses = target.get("statuses", ["完走"] * len(target["results"]))
                 drivers = target.get("drivers", [])
                 car_numbers = target.get("car_numbers", [])
+                groups = target.get("groups", [])
                 df_data = {
                     "順位": [
                         statuses[i] if i < len(statuses) and statuses[i] in ["リタイア", "DNS", "DSQ"] else f"P{i+1}"
@@ -1879,6 +1888,11 @@ with tab1:
                         for i in range(len(target["results"]))
                     ],
                 }
+                if groups and any(groups):
+                    df_data["グループ"] = [
+                        groups[i] if i < len(groups) and groups[i] else "-"
+                        for i in range(len(target["results"]))
+                    ]
                 if car_numbers:
                     df_data["カーナンバー"] = [
                         f"#{car_numbers[i]}" if i < len(car_numbers) and car_numbers[i] not in [None, ""] else "-"
