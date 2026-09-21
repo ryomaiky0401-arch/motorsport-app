@@ -326,12 +326,16 @@ def extract_sf_result_url(url):
                 if num in already_nums:
                     continue
                 # NOT CLASSIFIED部分で「A/B + 車番 + ドライバー名」の並びを確認する。
-                driver_compact = driver.replace(" ", "")
-                nc_compact = nc_text.replace(" ", "")
-                pat = re.compile(r"(?:^|\\s)[AB]\\s+" + re.escape(num) + r"(?=\\s|[^0-9])")
-                if pat.search(nc_text) and driver_compact in nc_compact:
-                    pos = nc_text.find(num)
-                    nc_order.append((pos if pos >= 0 else 999999, num, driver, team))
+                pat = re.compile(r"(?:^|\\s)[AB]\\s+" + re.escape(num) + r"(?=\\s)")
+                m_nc = pat.search(nc_text)
+                if not m_nc:
+                    continue
+                tail = nc_text[m_nc.end():]
+                next_entry = re.search(r"\\s[AB]\\s+\\d{1,2}(?=\\s)", tail)
+                chunk = tail[:next_entry.start()] if next_entry else tail
+                driver_parts = [p for p in re.split(r"[ ･・]+", driver) if p]
+                if driver_parts and all(p in chunk for p in driver_parts):
+                    nc_order.append((m_nc.start(), num, driver, team))
             nc_order.sort()
             next_rank = max([x["順位"] for x in rows], default=0) + 1
             for _, num, driver, team in nc_order:
