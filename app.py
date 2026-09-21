@@ -208,7 +208,7 @@ def save_data(data):
 
 
 def extract_supergt_result_url(url):
-    """SUPER GT公式リザルトページ（GT500/GT300、予選Q2/決勝）を解析する。"""
+    """SUPER GT公式リザルトページ（GT500/GT300、予選Q1/Q2/決勝）を解析する。"""
     import re
     import requests
     from html.parser import HTMLParser
@@ -250,12 +250,14 @@ def extract_supergt_result_url(url):
     race_num = qs.get("race_num", [""])[0]
     if not cls:
         raise ValueError("URLからGT500 / GT300を判定できませんでした。")
-    if race_num == "3":
-        session = "予選"
+    if race_num == "2":
+        session = "予選Q1"
+    elif race_num == "3":
+        session = "予選Q2"
     elif race_num == "4":
         session = "決勝"
     else:
-        raise ValueError("公式予選(Q2)または決勝レースのURLを使用してください。")
+        raise ValueError("公式予選Q1・Q2または決勝レースのURLを使用してください。")
 
     response = requests.get(url, timeout=20, headers={"User-Agent": "Mozilla/5.0"})
     response.raise_for_status()
@@ -344,7 +346,8 @@ def extract_supergt_result_url(url):
             drivers = " / ".join(known_drivers)
         else:
             drivers = re.sub(r"\s{2,}", " / ", drivers)
-        points = 1 if session == "予選" and rank == 1 else (
+        # 予選ポイントは最終予選(Q2)のポールポジションだけ1pt。Q1は0pt。
+        points = 1 if session == "予選Q2" and rank == 1 else (
             race_pts[cls][rank - 1] if session == "決勝" and rank <= len(race_pts[cls]) else 0
         )
         laps = None
@@ -1171,7 +1174,7 @@ if s_cat == "SUPER GT":
     with st.sidebar.expander("🌐 SUPER GT公式リザルトを読み込む"):
         if st.session_state.get("sgt_import_success"):
             st.success(st.session_state.pop("sgt_import_success"))
-        st.caption("SUPER GT公式「順位」ページの公式予選(Q2)または決勝レースURLを貼り付けます。GT500/GT300はURLから自動判定します。")
+        st.caption("SUPER GT公式「順位」ページの予選Q1・Q2または決勝レースURLを貼り付けます。GT500/GT300とセッションはURLから自動判定します。")
         sgt_url = st.text_input("SUPER GT公式リザルトURL", placeholder="https://supergt.net/result?gt_class=gt500&race_num=4&round=Round1&series=2026", key="sgt_result_url")
         if sgt_url.strip():
             try:
