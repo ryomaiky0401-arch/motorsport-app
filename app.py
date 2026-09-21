@@ -402,6 +402,104 @@ def extract_f2_pdf(uploaded_pdf):
     return rows, session
 
 
+def extract_f3_pdf(uploaded_pdf):
+    """FIA F3の予選・スプリント・フィーチャーレースClassification PDFを抽出する。"""
+    import pdfplumber
+    import re
+
+    rows = []
+    session = "決勝"
+
+    with pdfplumber.open(uploaded_pdf) as pdf:
+        full_text = "\n".join((page.extract_text() or "") for page in pdf.pages)
+        if "F3 Qualifying" in full_text or "Qualifying Session Final Classification" in full_text:
+            session = "予選"
+        elif "Race 1 (Sprint)" in full_text or "Sprint Race Final Classification" in full_text:
+            session = "スプリント"
+        elif "Race 2 (Feature)" in full_text or "Feature Race Final Classification" in full_text:
+            session = "決勝"
+
+        for page in pdf.pages:
+            for table in (page.extract_tables() or []):
+                if not table:
+                    continue
+
+                is_not_classified = any(
+                    row and str(row[0] or "").strip() == "NOT CLASSIFIED"
+                    for row in table
+                )
+
+                for row in table:
+                    cells = [str(x).replace("\n", " ").strip() if x is not None else "" for x in row]
+
+                    # F3予選はTEAM列が7列目。ポールポジションの2ptを保存。
+                    if (
+                        session == "予選"
+                        and len(cells) >= 14
+                        and re.fullmatch(r"\d+", cells[0])
+                        and re.fullmatch(r"\d+", cells[1])
+                    ):
+                        rank = int(cells[0])
+                        driver = cells[2].replace(" *", "").strip()
+                        team = cells[6]
+                        if driver and team:
+                            rows.append({
+                                "順位": rank,
+                                "ドライバー": driver,
+                                "チーム": team,
+                                "ポイント": 0,
+                                "ステータス": "完走",
+                            })
+
+                    # F3 Sprint / Featureの分類表はF1決勝と同じ14列構成。
+                    elif (
+                        session != "予選"
+                        and not is_not_classified
+                        and len(cells) >= 14
+                        and re.fullmatch(r"\d+", cells[0])
+                        and re.fullmatch(r"\d+", cells[1])
+                    ):
+                        rank = int(cells[0])
+                        driver = cells[2].replace(" *", "").strip()
+                        team = cells[5]
+                        pts_text = cells[13].replace(",", ".")
+                        try:
+                            official_pts = float(pts_text) if pts_text else 0.0
+                        except ValueError:
+                            official_pts = 0.0
+                        if official_pts.is_integer():
+                            official_pts = int(official_pts)
+                        if driver and team:
+                            rows.append({
+                                "順位": rank,
+                                "ドライバー": driver,
+                                "チーム": team,
+                                "ポイント": official_pts,
+                                "ステータス": "完走",
+                            })
+
+                    elif (
+                        session != "予選"
+                        and is_not_classified
+                        and len(cells) >= 5
+                        and re.fullmatch(r"\d+", cells[0])
+                    ):
+                        driver = cells[1].replace(" *", "").strip()
+                        team = cells[4]
+                        status_text = " ".join(cells).upper()
+                        status = "DNS" if "DNS" in status_text else ("DSQ" if "DSQ" in status_text else "リタイア")
+                        if driver and team:
+                            rows.append({
+                                "順位": status,
+                                "ドライバー": driver,
+                                "チーム": team,
+                                "ポイント": 0,
+                                "ステータス": status,
+                            })
+
+    return rows, session
+
+
 st.set_page_config(
     page_title="モータースポーツ総合結果 & ランキング",
     layout="wide",
@@ -731,6 +829,84 @@ if s_cat == "F2":
 
                             save_data(data)
                             st.success(f"「{f2_round.strip()} ({f2_session})」を{action}しました！")
+                            st.rerun()
+                else:
+                    st.warning("順位表を読み取れませんでした。このPDFの形式を確認する必要があります。")
+            except Exception as e:
+                st.error(f"PDFの読み取りに失敗しました: {e}")
+
+
+if s_cat == "F3":
+    with st.sidebar.expander("📥 F3公式PDFを読み込む"):
+        st.caption("FIAのF3予選・Sprint・Feature Classification PDFを読み取り、登録・更新できます。")
+        f3_pdf = st.file_uploader("F3結果PDF", type=["pdf"], key="f3_pdf_import")
+        if f3_pdf is not None:
+            try:
+                f3_rows, f3_detected_session = extract_f3_pdf(f3_pdf)
+                if f3_rows:
+                    st.success(f"{len(f3_rows)}台を読み取れました！ セッション: {f3_detected_session}")
+                    st.dataframe(pd.DataFrame(f3_rows), use_container_width=True, hide_index=True)
+
+                    f3_year = st.selectbox("登録年度", YEARS, key="f3_import_year")
+                    f3_round = st.text_input("レース名 / ラウンド", placeholder="例: Rd.4 マイアミ", key="f3_import_round")
+                    f3_date = st.date_input("開催日", datetime.date.today(), key="f3_import_date")
+                    f3_session_options = ["決勝", "予選", "スプリント"]
+                    f3_detected_index = f3_session_options.index(f3_detected_session)
+                    f3_session = st.selectbox(
+                        "セッション",
+                        f3_session_options,
+                        index=f3_detected_index,
+                        key="f3_import_session",
+                    )
+
+                    if st.button("このF3結果を登録 / 更新", type="primary", use_container_width=True, key="f3_import_save"):
+                        if not f3_round.strip():
+                            st.error("レース名 / ラウンドを入力してください。")
+                        else:
+                            races = data.setdefault("races", {}).setdefault(f3_year, {}).setdefault("F3", {}).setdefault("総合", [])
+                            pts = data.get("points_master", {}).get("F3", {}).get(
+                                f3_session,
+                                DEFAULT_PTS_RACE if f3_session == "決勝" else (
+                                    DEFAULT_PTS_SPRINT if f3_session == "スプリント" else DEFAULT_PTS_QUALIFY
+                                ),
+                            )
+                            teams = [r["チーム"] for r in f3_rows]
+                            drivers = [r["ドライバー"] for r in f3_rows]
+                            statuses = [r["ステータス"] for r in f3_rows]
+                            official_points = [r["ポイント"] for r in f3_rows]
+                            new_race = {
+                                "round_name": f3_round.strip(),
+                                "race_date": str(f3_date),
+                                "session_type": f3_session,
+                                "is_custom_pts": False,
+                                "points_table": pts,
+                                "results": teams,
+                                "drivers": drivers,
+                                "statuses": statuses,
+                                "official_points": official_points,
+                            }
+                            existing_idx = next(
+                                (
+                                    i for i, race in enumerate(races)
+                                    if race.get("round_name") == f3_round.strip()
+                                    and race.get("session_type", "決勝") == f3_session
+                                ),
+                                None,
+                            )
+                            if existing_idx is None:
+                                races.append(new_race)
+                                action = "登録"
+                            else:
+                                races[existing_idx] = new_race
+                                action = "更新"
+
+                            team_master = data.setdefault("teams", {}).setdefault("F3_総合", [])
+                            for team in teams:
+                                if team not in team_master:
+                                    team_master.append(team)
+
+                            save_data(data)
+                            st.success(f"「{f3_round.strip()} ({f3_session})」を{action}しました！")
                             st.rerun()
                 else:
                     st.warning("順位表を読み取れませんでした。このPDFの形式を確認する必要があります。")
