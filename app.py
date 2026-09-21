@@ -1082,6 +1082,7 @@ with tab1:
 
                 statuses = target.get("statuses", ["完走"] * len(target["results"]))
                 drivers = target.get("drivers", [])
+                car_numbers = target.get("car_numbers", [])
                 df_data = {
                     "順位": [
                         statuses[i] if i < len(statuses) and statuses[i] in ["リタイア", "DNS", "DSQ"] else f"P{i+1}"
@@ -1098,6 +1099,11 @@ with tab1:
                         for i in range(len(target["results"]))
                     ],
                 }
+                if car_numbers:
+                    df_data["カーナンバー"] = [
+                        f"#{car_numbers[i]}" if i < len(car_numbers) and car_numbers[i] not in [None, ""] else "-"
+                        for i in range(len(target["results"]))
+                    ]
                 if drivers:
                     df_data["ドライバー"] = drivers
                 df_data["チーム / 車両"] = target["results"]
@@ -1235,6 +1241,8 @@ with tab2:
 
         # PDFインポートで保存されたドライバー情報から年間ランキングを集計
         driver_points = {}
+        driver_teams = {}
+        driver_car_numbers = {}
         has_driver_data = False
         for race_idx, race in enumerate(races):
             drivers = race.get("drivers", [])
@@ -1242,6 +1250,8 @@ with tab2:
                 has_driver_data = True
             pts_table = race.get("points_table", DEFAULT_PTS_RACE)
             statuses = race.get("statuses", [])
+            race_teams = race.get("results", [])
+            race_car_numbers = race.get("car_numbers", [])
             for rank_idx, driver in enumerate(drivers):
                 if not driver:
                     continue
@@ -1255,6 +1265,10 @@ with tab2:
                 if driver not in driver_points:
                     driver_points[driver] = [0] * len(races)
                 driver_points[driver][race_idx] = pt
+                if rank_idx < len(race_teams) and race_teams[rank_idx]:
+                    driver_teams[driver] = race_teams[rank_idx]
+                if rank_idx < len(race_car_numbers) and race_car_numbers[rank_idx] not in [None, ""]:
+                    driver_car_numbers[driver] = race_car_numbers[rank_idx]
 
         ranking_tab_team, ranking_tab_driver = st.tabs(
             ["🏎️ チーム / 車両", "👤 ドライバー"]
@@ -1310,6 +1324,8 @@ with tab2:
                 for driver, pts_list in driver_points.items():
                     driver_summary.append({
                         "ドライバー": driver,
+                        "カーナンバー": driver_car_numbers.get(driver),
+                        "チーム": driver_teams.get(driver, "-"),
                         "合計ポイント": sum(pts_list),
                         "pts_list": pts_list,
                     })
@@ -1318,7 +1334,9 @@ with tab2:
                 df_driver_rank = pd.DataFrame([
                     {
                         "順位": f"P{i+1}",
+                        "カーナンバー": f"#{item['カーナンバー']}" if item.get("カーナンバー") not in [None, ""] else "-",
                         "ドライバー": item["ドライバー"],
+                        "チーム": item.get("チーム", "-"),
                         "合計ポイント": item["合計ポイント"],
                     }
                     for i, item in enumerate(driver_summary)
