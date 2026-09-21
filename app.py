@@ -844,15 +844,15 @@ if s_cat == "WEC":
         )
         if wec_url.strip():
             try:
-                            import io
-                            import requests
-                            import pdfplumber
                 with st.spinner("公式Timing Resultsを読み込み中…"):
                     wec_groups = extract_wec_timing_url(wec_url.strip())
                 if wec_groups:
                     # 一時デバッグ: Aston #007/#009 がpdfplumberで実際にどう抽出されているか確認
                     if "Qualifying" in wec_url or "QUALIFYING" in wec_url or "qualifying" in wec_url:
                         try:
+                            import io
+                            import requests
+                            import pdfplumber
                             dbg_resp = requests.get(wec_url.strip(), timeout=20, headers={"User-Agent": "Mozilla/5.0"})
                             dbg_pdf = pdfplumber.open(io.BytesIO(dbg_resp.content))
                             dbg_text = "\n".join((p.extract_text() or "") for p in dbg_pdf.pages)
