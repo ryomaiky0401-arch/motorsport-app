@@ -208,37 +208,11 @@ def save_data(data):
 
 
 def extract_sf_result_url(url):
-    """SUPER FORMULA公式リザルトページから予選/決勝結果を取得する。"""
+    """SUPER FORMULA公式リザルトページを解析する。公式HTMLは通常のtableタグではないため本文構造から取得。"""
     import re
     import requests
-    from html.parser import HTMLParser
+    from html import unescape
     from urllib.parse import urlparse
-
-    class TableParser(HTMLParser):
-        def __init__(self):
-            super().__init__()
-            self.tables, self.table, self.row, self.cell = [], None, None, None
-        def handle_starttag(self, tag, attrs):
-            if tag == "table":
-                self.table = []
-            elif tag == "tr" and self.table is not None:
-                self.row = []
-            elif tag in ("td", "th") and self.row is not None:
-                self.cell = ""
-        def handle_data(self, data):
-            if self.cell is not None:
-                self.cell += data
-        def handle_endtag(self, tag):
-            if tag in ("td", "th") and self.cell is not None:
-                self.row.append(re.sub(r"\\s+", " ", self.cell).strip())
-                self.cell = None
-            elif tag == "tr" and self.row is not None:
-                if self.row:
-                    self.table.append(self.row)
-                self.row = None
-            elif tag == "table" and self.table is not None:
-                self.tables.append(self.table)
-                self.table = None
 
     url = url.strip()
     parsed = urlparse(url)
@@ -250,68 +224,89 @@ def extract_sf_result_url(url):
     response.encoding = response.apparent_encoding or "utf-8"
 
     lower_url = url.lower()
-    if "qf" in lower_url or "qualif" in response.text.lower() or "quarif" in response.text.lower():
+    if "qf" in lower_url:
         session = "予選"
     elif "race" in lower_url:
         session = "決勝"
     else:
         raise ValueError("予選 / 決勝をURLから判定できませんでした。")
 
-    parser = TableParser()
-    parser.feed(response.text)
-    result_table = None
-    header = None
-    for table in parser.tables:
-        for row in table[:3]:
-            normalized = [x.lower().replace(".", "") for x in row]
-            if any(x in ["pos", "po", "position"] for x in normalized) and any(x in ["no", "number"] for x in normalized) and any("driver" in x for x in normalized):
-                result_table, header = table, row
-                break
-        if result_table:
-            break
-    if not result_table:
+    # script/styleを除去し、HTMLをプレーンテキスト化。
+    html = re.sub(r"<script[\\s\\S]*?</script>", " ", response.text, flags=re.I)
+    html = re.sub(r"<style[\\s\\S]*?</style>", " ", html, flags=re.I)
+    text = unescape(re.sub(r"<[^>]+>", " ", html))
+    text = re.sub(r"\\s+", " ", text)
+
+    # 2026の公式ページは「Po. No. Driver Team ／ Engine Lap ...」の順。
+    marker = re.search(r"(?:Po\\.?|Pos\\.?)\\s+No\\.?\\s+Driver\\s+Team", text, flags=re.I)
+    if not marker:
         raise ValueError("公式ページのリザルト表を見つけられませんでした。")
 
-    h = [x.lower().replace(".", "").strip() for x in header]
-    def col(names):
-        for i, x in enumerate(h):
-            if x in names or any(n in x for n in names):
-                return i
-        return None
+    result_text = text[marker.end():]
+    end_markers = ["車両：", "Fastest Lap", "PENALTIES", "GO TO TOP"]
+    end_positions = [result_text.find(x) for x in end_markers if result_text.find(x) >= 0]
+    if end_positions:
+        result_text = result_text[:min(end_positions)]
 
-    pos_i, no_i, driver_i = col(["pos", "po", "position"]), col(["no", "number"]), col(["driver"])
-    team_i = col(["team"])
-    car_i = col(["car"])
-    header_idx = result_table.index(header)
+    # 2026エントリーの車番→ドライバー/チーム。
+    # 日本語名の直後に英語名が連結される公式HTMLなので、車番を境界として各行を切り出す。
+    sf_entries = {
+        "1": ("岩佐 歩夢", "TEAM MUGEN AUTOBACS"),
+        "16": ("野尻 智紀", "TEAM MUGEN AUTOBACS"),
+        "3": ("ルーク･ブラウニング", "REALIZE KONDO RACING"),
+        "4": ("笹原 右京", "REALIZE KONDO RACING"),
+        "5": ("牧野 任祐", "DOCOMO TEAM DANDELION RACING"),
+        "6": ("太田 格之進", "DOCOMO TEAM DANDELION RACING"),
+        "7": ("小林 可夢偉", "KDDI TGMGP TGR-DC"),
+        "28": ("小林 利徠斗", "KDDI TGMGP TGR-DC"),
+        "8": ("山下 健太", "KCMG"),
+        "9": ("野中 誠太", "KCMG"),
+        "10": ("Juju", "HAZAMA ANDO Triple Tree Racing"),
+        "12": ("小出 峻", "ThreeBond Racing"),
+        "14": ("福住 仁嶺", "NTT docomo Business ROOKIE"),
+        "19": ("ザック･オサリバン", "TEAM IMPUL"),
+        "22": ("松下 信治", "DELiGHTWORKS RACING"),
+        "36": ("坪井 翔", "VANTELIN TEAM TOM’S"),
+        "37": ("サッシャ･フェネストラズ", "VANTELIN TEAM TOM’S"),
+        "38": ("阪口 晴南", "SANKI VERTEX PARTNERS CERUMO･INGING"),
+        "39": ("大湯 都史樹", "SANKI VERTEX PARTNERS CERUMO･INGING"),
+        "50": ("野村 勇斗", "San-Ei Gen with B-Max"),
+        "53": ("チャーリー･ブルツ", "TEAM GOH"),
+        "64": ("佐藤 蓮", "PONOS NAKAJIMA RACING"),
+        "65": ("イゴール･オオムラ･フラガ", "PONOS NAKAJIMA RACING"),
+        "97": ("ロマン･スタネック", "Buzz MK RACING"),
+    }
+
     rows = []
     race_points = [20, 15, 11, 8, 6, 5, 4, 3, 2, 1]
     qual_points = [3, 2, 1]
+    # 「順位 車番」の組を拾う。NOT CLASSIFIED後の順位も同じ形式で取得できる。
+    matches = list(re.finditer(r"(?:^|\\s)(\\d{1,2})\\s+(\\d{1,2})(?=\\s|[^0-9])", result_text))
+    seen_ranks = set()
+    for m in matches:
+        rank, num = int(m.group(1)), m.group(2)
+        if rank < 1 or rank > 30 or num not in sf_entries or rank in seen_ranks:
+            continue
+        # 誤検出防止：車番直後の区間に登録ドライバー名が存在することを確認。
+        next_pos = matches[matches.index(m)+1].start() if matches.index(m)+1 < len(matches) else len(result_text)
+        chunk = result_text[m.end():next_pos]
+        driver, team = sf_entries[num]
+        driver_variants = [driver, driver.replace("･", "・"), driver.replace(" ", "")]
+        if not any(v in chunk or v.replace(" ", "") in chunk.replace(" ", "") for v in driver_variants):
+            continue
+        seen_ranks.add(rank)
+        pts = (qual_points[rank - 1] if session == "予選" and rank <= 3
+               else race_points[rank - 1] if session == "決勝" and rank <= 10 else 0)
+        status = "完走"
+        if session == "決勝" and "NOT CLASSIFIED" in result_text[max(0, m.start()-40):m.start()+10]:
+            status = "リタイア"
+        rows.append({"順位": rank, "カーナンバー": num, "ドライバー": driver,
+                     "チーム": team, "ポイント": pts, "ステータス": status})
 
-    for raw in result_table[header_idx + 1:]:
-        if pos_i is None or no_i is None or driver_i is None or max(pos_i, no_i, driver_i) >= len(raw):
-            continue
-        pos_match = re.search(r"\\d+", raw[pos_i])
-        if not pos_match:
-            continue
-        rank = int(pos_match.group())
-        num = raw[no_i].strip()
-        driver = raw[driver_i].strip()
-        team = raw[team_i].strip() if team_i is not None and team_i < len(raw) else (
-            raw[car_i].strip() if car_i is not None and car_i < len(raw) else ""
-        )
-        if not num or not driver:
-            continue
-        pts = (qual_points[rank - 1] if session == "予選" and rank <= len(qual_points)
-               else race_points[rank - 1] if session == "決勝" and rank <= len(race_points) else 0)
-        rows.append({
-            "順位": rank, "カーナンバー": num, "ドライバー": driver,
-            "チーム": team, "ポイント": pts, "ステータス": "完走",
-        })
-
+    rows.sort(key=lambda x: x["順位"])
     if not rows:
         raise ValueError("順位データを取得できませんでした。")
     return rows, session
-
 
 def extract_wec_timing_url(url):
     """Al Kamel Timing Resultsのテキスト入りClassification PDFを直接解析する。OCRは使わない。"""
