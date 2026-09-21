@@ -690,6 +690,9 @@ def extract_wec_timing_url(url):
 
         rest = line
 
+        # 決勝のClassification by Categoryではリタイア車が順位数字ではなく
+        # "NC" / "RET" / "DNF" 等で掲載されることがある。
+        # 数字順位を取れなかった車両は、決勝に限り後段でPDF掲載順から補完する。
         if num not in entries:
             continue
         team, cls = entries[num]
@@ -746,6 +749,33 @@ def extract_wec_timing_url(url):
             "順位": rank, "カーナンバー": num, "ドライバー": crew,
             "チーム": team, "ポイント": points, "ステータス": "完走",
         })
+
+    # 決勝PDFでは分類外/リタイア車に通常の順位番号が付かず、
+    # 上の行パーサーだけでは落ちる。PDF本文に存在する未取得エントリーを
+    # クラスごとの既取得順位の後ろへ掲載順で追加し、ステータスをリタイア扱いにする。
+    if session == "決勝":
+        seen = {row["カーナンバー"] for rows in rows_by_class.values() for row in rows}
+        compact_text = re.sub(r"\\s+", "", text).lower()
+        for cls in ("Hypercar", "LMGT3"):
+            next_rank = max([r["順位"] for r in rows_by_class[cls]], default=0) + 1
+            for num, (team, entry_cls) in entries.items():
+                if entry_cls != cls or num in seen:
+                    continue
+                token = (num + team).replace(" ", "").lower()
+                if token not in compact_text:
+                    continue
+                # その車両が決勝Classification本文に載っていることを確認できたものだけ追加。
+                # ドライバー名は同じ行/周辺抽出が不安定なので空欄でも登録可能にする。
+                rows_by_class[cls].append({
+                    "順位": next_rank,
+                    "カーナンバー": num,
+                    "ドライバー": "",
+                    "チーム": team,
+                    "ポイント": 0,
+                    "ステータス": "リタイア",
+                })
+                seen.add(num)
+                next_rank += 1
 
     groups = []
     for cls, rows in rows_by_class.items():
