@@ -207,6 +207,128 @@ def save_data(data):
         json.dump(data, f, ensure_ascii=False, indent=2)
 
 
+def extract_supergt_result_url(url):
+    """SUPER GT公式リザルトページ（GT500/GT300、予選Q2/決勝）を解析する。"""
+    import re
+    import requests
+    from html.parser import HTMLParser
+    from urllib.parse import urlparse, parse_qs
+
+    class TableParser(HTMLParser):
+        def __init__(self):
+            super().__init__()
+            self.tables, self.table, self.row, self.cell = [], None, None, None
+        def handle_starttag(self, tag, attrs):
+            if tag == "table":
+                self.table = []
+            elif tag == "tr" and self.table is not None:
+                self.row = []
+            elif tag in ("td", "th") and self.row is not None:
+                self.cell = ""
+        def handle_data(self, data):
+            if self.cell is not None:
+                self.cell += data
+        def handle_endtag(self, tag):
+            if tag in ("td", "th") and self.cell is not None:
+                self.row.append(re.sub(r"\s+", " ", self.cell).strip())
+                self.cell = None
+            elif tag == "tr" and self.row is not None:
+                if self.row:
+                    self.table.append(self.row)
+                self.row = None
+            elif tag == "table" and self.table is not None:
+                self.tables.append(self.table)
+                self.table = None
+
+    url = url.strip()
+    parsed = urlparse(url)
+    if parsed.netloc.lower() not in ["supergt.net", "www.supergt.net"] or parsed.path.rstrip("/") != "/result":
+        raise ValueError("SUPER GT公式サイトの「順位 / リザルト」URLを入力してください。")
+    qs = parse_qs(parsed.query)
+    cls_raw = qs.get("gt_class", [""])[0].lower()
+    cls = "GT500" if cls_raw == "gt500" else "GT300" if cls_raw == "gt300" else None
+    race_num = qs.get("race_num", [""])[0]
+    if not cls:
+        raise ValueError("URLからGT500 / GT300を判定できませんでした。")
+    if race_num == "3":
+        session = "予選"
+    elif race_num == "4":
+        session = "決勝"
+    else:
+        raise ValueError("公式予選(Q2)または決勝レースのURLを使用してください。")
+
+    response = requests.get(url, timeout=20, headers={"User-Agent": "Mozilla/5.0"})
+    response.raise_for_status()
+    response.encoding = response.apparent_encoding or "utf-8"
+    parser = TableParser()
+    parser.feed(response.text)
+
+    table = None
+    header = None
+    for t in parser.tables:
+        for row in t[:4]:
+            joined = " ".join(row)
+            if ("順位" in joined or "Pos" in joined) and ("No." in joined or "No" in row) and ("ドライバー" in joined or "Driver" in joined):
+                table, header = t, row
+                break
+        if table:
+            break
+    if not table:
+        raise ValueError("SUPER GT公式ページの結果表を見つけられませんでした。")
+
+    h = [re.sub(r"\s+", "", x).lower() for x in header]
+    def find_col(keys):
+        for i, x in enumerate(h):
+            if any(k in x for k in keys):
+                return i
+        return None
+
+    pos_i = find_col(["順位", "pos"])
+    no_i = find_col(["no.", "no", "車番"])
+    team_i = find_col(["チーム/マシン", "チーム", "team"])
+    driver_i = find_col(["ドライバー", "driver"])
+    lap_i = find_col(["ラップ", "lap"])
+    if None in (pos_i, no_i, team_i, driver_i):
+        raise ValueError("結果表の順位・車番・チーム・ドライバー列を判定できませんでした。")
+
+    race_pts = {
+        "GT500": [20, 15, 11, 8, 6, 5, 4, 3, 2, 1],
+        "GT300": [25, 20, 16, 13, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1],
+    }
+    rows = []
+    header_idx = table.index(header)
+    for raw in table[header_idx + 1:]:
+        if max(pos_i, no_i, team_i, driver_i) >= len(raw):
+            continue
+        pm = re.search(r"\d+", raw[pos_i])
+        num = raw[no_i].strip()
+        if not pm or not num:
+            continue
+        rank = int(pm.group())
+        team_machine = raw[team_i].strip()
+        # 公式セルは「チーム ... マシン ...」を含む。ランキング用にはチーム名だけを保存。
+        tm = re.search(r"チーム\s*(.*?)\s*マシン\s*", team_machine)
+        team = tm.group(1).strip() if tm else team_machine
+        drivers = raw[driver_i].strip()
+        drivers = re.sub(r"\s{2,}", " / ", drivers)
+        points = 1 if session == "予選" and rank == 1 else (
+            race_pts[cls][rank - 1] if session == "決勝" and rank <= len(race_pts[cls]) else 0
+        )
+        laps = None
+        if lap_i is not None and lap_i < len(raw):
+            lm = re.search(r"\d+", raw[lap_i])
+            laps = int(lm.group()) if lm else None
+        rows.append({
+            "順位": rank, "カーナンバー": num, "ドライバー": drivers,
+            "チーム": team, "ポイント": points, "ステータス": "完走",
+            "周回数": laps,
+        })
+
+    if not rows:
+        raise ValueError("SUPER GTの順位データを取得できませんでした。")
+    return rows, session, cls
+
+
 def extract_sf_result_url(url):
     """SUPER FORMULA公式リザルトページを解析する。公式HTMLは通常のtableタグではないため本文構造から取得。"""
     import re
@@ -1011,6 +1133,60 @@ s_cat = st.sidebar.selectbox(
 )
 
 # 選択したカテゴリーのPDFインポートだけを表示
+# --- SUPER GT公式Webリザルトインポート ---
+if s_cat == "SUPER GT":
+    with st.sidebar.expander("🌐 SUPER GT公式リザルトを読み込む"):
+        if st.session_state.get("sgt_import_success"):
+            st.success(st.session_state.pop("sgt_import_success"))
+        st.caption("SUPER GT公式「順位」ページの公式予選(Q2)または決勝レースURLを貼り付けます。GT500/GT300はURLから自動判定します。")
+        sgt_url = st.text_input("SUPER GT公式リザルトURL", placeholder="https://supergt.net/result?gt_class=gt500&race_num=4&round=Round1&series=2026", key="sgt_result_url")
+        if sgt_url.strip():
+            try:
+                with st.spinner("SUPER GT公式リザルトを読み込み中…"):
+                    sgt_rows, sgt_session, sgt_class = extract_supergt_result_url(sgt_url.strip())
+                st.success(f"{len(sgt_rows)}台を読み取れました！ {sgt_class} / {sgt_session}")
+                st.dataframe(pd.DataFrame(sgt_rows), use_container_width=True, hide_index=True)
+
+                sgt_year = st.selectbox("登録年度", YEARS, key="sgt_import_year")
+                sgt_round = st.text_input("レース名 / ラウンド", placeholder="例: Rd.1 岡山", key="sgt_import_round")
+                sgt_date = st.date_input("開催日", datetime.date.today(), key="sgt_import_date")
+
+                if st.button("このSUPER GT結果を登録 / 更新", type="primary", use_container_width=True, key="sgt_import_save"):
+                    if not sgt_round.strip():
+                        st.error("レース名 / ラウンドを入力してください。")
+                    else:
+                        races = data.setdefault("races", {}).setdefault(sgt_year, {}).setdefault("SUPER GT", {}).setdefault(sgt_class, [])
+                        teams = [x["チーム"] for x in sgt_rows]
+                        drivers = [x["ドライバー"] for x in sgt_rows]
+                        car_numbers = [x["カーナンバー"] for x in sgt_rows]
+                        statuses = [x["ステータス"] for x in sgt_rows]
+                        official_points = [x["ポイント"] for x in sgt_rows]
+                        new_race = {
+                            "round_name": sgt_round.strip(), "race_date": str(sgt_date),
+                            "session_type": sgt_session, "is_custom_pts": True,
+                            "points_table": official_points, "results": teams, "drivers": drivers,
+                            "car_numbers": car_numbers, "statuses": statuses,
+                            "official_points": official_points,
+                            "laps": [x.get("周回数") for x in sgt_rows],
+                        }
+                        idx = next((i for i, x in enumerate(races)
+                                    if x.get("round_name") == sgt_round.strip()
+                                    and x.get("session_type", "決勝") == sgt_session), None)
+                        if idx is None:
+                            races.append(new_race)
+                        else:
+                            races[idx] = new_race
+                        master = data.setdefault("teams", {}).setdefault(f"SUPER GT_{sgt_class}", [])
+                        for team in teams:
+                            if team and team not in master:
+                                master.append(team)
+                        save_data(data)
+                        st.session_state["sgt_import_success"] = f"✅ SUPER GT {sgt_class} / {sgt_session}を登録 / 更新しました！"
+                        st.rerun()
+            except Exception as e:
+                st.error(f"SUPER GT公式リザルトの読み込みに失敗しました: {e}")
+
+
 # --- SUPER FORMULA公式Webリザルトインポート ---
 if s_cat == "Super Formula":
     with st.sidebar.expander("🌐 SF公式リザルトを読み込む"):
