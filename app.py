@@ -1102,8 +1102,40 @@ with tab_entry:
             driver2 = st.text_input("ドライバー 2", value=saved_drivers[1], key=f"entry_driver2_{edit_choice}")
             driver3 = st.text_input("ドライバー 3", value=saved_drivers[2], key=f"entry_driver3_{edit_choice}")
             image_url = st.text_input("通常カラー画像URL", value=current.get("image_url", ""), placeholder="https://...", key=f"entry_image_{edit_choice}")
-            special_image_label = st.text_input("特別カラー名", value=current.get("special_image_label", ""), placeholder="例: ル・マン", key=f"entry_special_label_{edit_choice}")
-            special_image_url = st.text_input("特別カラー画像URL", value=current.get("special_image_url", ""), placeholder="https://...", key=f"entry_special_image_{edit_choice}")
+
+        # カラーリングは何種類でも追加可能。旧「特別カラー」データも自動で引き継ぐ。
+        saved_liveries = current.get("liveries", [])
+        if not saved_liveries and current.get("special_image_url"):
+            saved_liveries = [{"name": current.get("special_image_label") or "特別カラー", "url": current.get("special_image_url")}]
+        livery_count = st.number_input(
+            "追加カラーリング数",
+            min_value=0,
+            max_value=20,
+            value=len(saved_liveries),
+            step=1,
+            key=f"entry_livery_count_{edit_choice}",
+        )
+        livery_inputs = []
+        if livery_count:
+            st.caption("大会名や仕様名と画像URLを登録できます。例：ル・マン、カタール、富士")
+            for li in range(int(livery_count)):
+                saved = saved_liveries[li] if li < len(saved_liveries) else {}
+                lc1, lc2 = st.columns([1, 2])
+                with lc1:
+                    lname = st.text_input(
+                        f"カラーリング {li + 1} 名",
+                        value=saved.get("name", ""),
+                        placeholder="例: ル・マン",
+                        key=f"entry_livery_name_{edit_choice}_{li}",
+                    )
+                with lc2:
+                    lurl = st.text_input(
+                        f"カラーリング {li + 1} 画像URL",
+                        value=saved.get("url", ""),
+                        placeholder="https://...",
+                        key=f"entry_livery_url_{edit_choice}_{li}",
+                    )
+                livery_inputs.append((lname, lurl))
 
         b1, b2 = st.columns(2)
         with b1:
@@ -1112,7 +1144,12 @@ with tab_entry:
                     st.error("チーム名を入力してください。")
                 else:
                     driver_list = [x.strip() for x in [driver1, driver2, driver3] if x.strip()]
-                    item = {"car_number": car_number.strip(), "machine": machine.strip(), "team": team.strip(), "country": country.strip(), "driver_list": driver_list, "drivers": " / ".join(driver_list), "image_url": image_url.strip(), "special_image_label": special_image_label.strip(), "special_image_url": special_image_url.strip()}
+                    liveries = [
+                        {"name": name.strip(), "url": url.strip()}
+                        for name, url in livery_inputs
+                        if name.strip() and url.strip()
+                    ]
+                    item = {"car_number": car_number.strip(), "machine": machine.strip(), "team": team.strip(), "country": country.strip(), "driver_list": driver_list, "drivers": " / ".join(driver_list), "image_url": image_url.strip(), "liveries": liveries}
                     if edit_idx >= 0:
                         entries[edit_idx] = item
                     else:
@@ -1134,20 +1171,34 @@ with tab_entry:
                 with col:
                     image_options = {}
                     if entry.get("image_url"):
-                        image_options["通常カラー"] = entry["image_url"]
-                    if entry.get("special_image_url"):
-                        special_label = entry.get("special_image_label") or "特別カラー"
-                        image_options[special_label] = entry["special_image_url"]
-                    if image_options:
-                        if len(image_options) > 1:
-                            selected_livery = st.selectbox(
-                                "カラーリング",
-                                list(image_options.keys()),
-                                key=f"entry_livery_{e_year}_{entry_key}_{entry.get('car_number', i)}",
-                                label_visibility="collapsed",
-                            )
-                        else:
+                        image_options["通常"] = entry["image_url"]
+                    saved_entry_liveries = entry.get("liveries", [])
+                    if not saved_entry_liveries and entry.get("special_image_url"):
+                        saved_entry_liveries = [{"name": entry.get("special_image_label") or "特別", "url": entry.get("special_image_url")}]
+                    for livery in saved_entry_liveries:
+                        if livery.get("name") and livery.get("url"):
+                            image_options[livery["name"]] = livery["url"]
+
+                    selected_livery = "通常" if "通常" in image_options else (next(iter(image_options)) if image_options else None)
+                    if len(image_options) > 1:
+                        switch_key = f"entry_livery_{e_year}_{entry_key}_{entry.get('car_number', i)}"
+                        selected_livery = st.session_state.get(switch_key, selected_livery)
+                        if selected_livery not in image_options:
                             selected_livery = next(iter(image_options))
+                        nav_left, nav_name, nav_right = st.columns([1, 5, 1], vertical_alignment="center")
+                        names = list(image_options.keys())
+                        pos = names.index(selected_livery)
+                        with nav_left:
+                            if st.button("◀", key=f"{switch_key}_prev", use_container_width=True):
+                                st.session_state[switch_key] = names[(pos - 1) % len(names)]
+                                st.rerun()
+                        with nav_name:
+                            st.markdown(f"<div style='text-align:center; font-size:0.85rem;'>🎨 {selected_livery}</div>", unsafe_allow_html=True)
+                        with nav_right:
+                            if st.button("▶", key=f"{switch_key}_next", use_container_width=True):
+                                st.session_state[switch_key] = names[(pos + 1) % len(names)]
+                                st.rerun()
+                    if selected_livery:
                         try:
                             st.image(image_options[selected_livery], use_container_width=True)
                         except Exception:
