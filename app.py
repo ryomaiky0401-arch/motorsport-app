@@ -772,8 +772,12 @@ with tab2:
         race_headers = [f"{r.get('round_name')} ({r.get('session_type', '決勝')})" for r in races]
 
         team_points_matrix = {}
-        for team in registered:
-            team_points_matrix[team] = [0] * len(races)
+        # F1のPDF登録データがある場合は、実際に出場したチームだけをランキング対象にする。
+        # これで旧名称や過去シーズンのマスター登録チームが0ptで混ざらない。
+        has_pdf_driver_data = any(r.get("drivers") for r in races)
+        if not (r_cat == "F1" and has_pdf_driver_data):
+            for team in registered:
+                team_points_matrix[team] = [0] * len(races)
 
         for race_idx, r in enumerate(races):
             pts_table = r.get("points_table", DEFAULT_PTS_RACE)
