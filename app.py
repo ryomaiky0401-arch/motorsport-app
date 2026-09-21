@@ -214,28 +214,6 @@ st.title("🏎️ モータースポーツ ダッシュボード")
 
 data = load_data()
 
-# MANUAL_F1_SYNC_MARKER
-st.sidebar.subheader("🏁 F1データ更新")
-st.sidebar.caption("APIへのアクセスはボタンを押したときだけ行います。")
-
-if st.sidebar.button("F1データを取得・更新", use_container_width=True):
-    with st.spinner("F1のデータを取得しています。少し待ってね…"):
-        try:
-            from f1_sync import fetch_f1_season, merge_f1_results
-
-            imported_f1 = fetch_f1_season(2026)
-            added_f1 = merge_f1_results(data, 2026, imported_f1)
-
-            if added_f1:
-                save_data(data)
-
-            st.sidebar.success(f"F1データ更新完了：{added_f1}件追加")
-
-        except Exception as manual_f1_error:
-            st.sidebar.error(
-                f"F1データ取得に失敗しました: {manual_f1_error}"
-            )
-
 tab1, tab2, tab3, tab4 = st.tabs([
     "🏁 レース結果閲覧・編集",
     "🏆 ポイントランキング",
