@@ -750,32 +750,46 @@ def extract_wec_timing_url(url):
             "チーム": team, "ポイント": points, "ステータス": "完走",
         })
 
-    # 決勝PDFでは分類外/リタイア車に通常の順位番号が付かず、
-    # 上の行パーサーだけでは落ちる。PDF本文に存在する未取得エントリーを
-    # クラスごとの既取得順位の後ろへ掲載順で追加し、ステータスをリタイア扱いにする。
+    # 決勝は "Retired" 見出し以降を別処理する。
+    # ここには順位番号が無いので、掲載順をそのまま完走車の後ろへ追加する。
     if session == "決勝":
-        seen = {row["カーナンバー"] for rows in rows_by_class.values() for row in rows}
-        compact_text = re.sub(r"\\s+", "", text).lower()
-        for cls in ("Hypercar", "LMGT3"):
-            next_rank = max([r["順位"] for r in rows_by_class[cls]], default=0) + 1
-            for num, (team, entry_cls) in entries.items():
-                if entry_cls != cls or num in seen:
+        retired_at = next((i for i, x in enumerate(lines) if x.strip().lower() == "retired"), None)
+        if retired_at is not None:
+            seen = {r["カーナンバー"] for rs in rows_by_class.values() for r in rs}
+            for line in lines[retired_at + 1:]:
+                if "Circuit Best Laps" in line or "Published at:" in line:
+                    break
+                compact = re.sub(r"\\s+", "", line).lower()
+                found = None
+                for candidate, (candidate_team, candidate_cls) in entries.items():
+                    if candidate in seen:
+                        continue
+                    team_compact = candidate_team.replace(" ", "").lower()
+                    if candidate in compact and team_compact in compact:
+                        found = (candidate, candidate_team, candidate_cls)
+                        break
+                if not found:
                     continue
-                token = (num + team).replace(" ", "").lower()
-                if token not in compact_text:
-                    continue
-                # その車両が決勝Classification本文に載っていることを確認できたものだけ追加。
-                # ドライバー名は同じ行/周辺抽出が不安定なので空欄でも登録可能にする。
+                num, team, cls = found
+                dm = driver_pat.search(line)
+                crew = dm.group(1).strip() if dm else ""
+                if crew:
+                    first_driver = re.search(r"[A-ZÀ-ÖØ-Þ]\\.\\s", crew)
+                    if first_driver:
+                        crew = crew[first_driver.start():].strip()
+                    parts = [p.strip() for p in crew.split("/")][:3]
+                    if parts:
+                        parts[-1] = re.split(
+                            r"\\s+(?=(?:BMW|FERRARI|CADILLAC|ASTON|ALPINE|PEUGEOT|TOYOTA|GENESIS|PORSCHE|FORD|LEXUS|MERCEDES|CORVETTE|MCLAREN)\\b)",
+                            parts[-1], maxsplit=1, flags=re.I
+                        )[0].strip()
+                        crew = " / ".join(parts)
+                next_rank = max([r["順位"] for r in rows_by_class[cls]], default=0) + 1
                 rows_by_class[cls].append({
-                    "順位": next_rank,
-                    "カーナンバー": num,
-                    "ドライバー": "",
-                    "チーム": team,
-                    "ポイント": 0,
-                    "ステータス": "リタイア",
+                    "順位": next_rank, "カーナンバー": num, "ドライバー": crew,
+                    "チーム": team, "ポイント": 0, "ステータス": "リタイア",
                 })
                 seen.add(num)
-                next_rank += 1
 
     groups = []
     for cls, rows in rows_by_class.items():
