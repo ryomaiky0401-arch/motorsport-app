@@ -206,7 +206,7 @@ def save_data(data):
 
 
 def extract_f1_pdf(uploaded_pdf):
-    """FIA F1 Race Classification PDFから順位・ドライバー・チームを抽出する。"""
+    """FIA F1 Race Classification PDFから完走車とNOT CLASSIFIEDを抽出する。"""
     import pdfplumber
     import re
 
@@ -216,21 +216,50 @@ def extract_f1_pdf(uploaded_pdf):
             for table in (page.extract_tables() or []):
                 if not table:
                     continue
+
+                is_not_classified = any(
+                    row and str(row[0] or "").strip() == "NOT CLASSIFIED"
+                    for row in table
+                )
+
                 for row in table:
-                    cells = [str(x).replace("\\n", " ").strip() if x is not None else "" for x in row]
-                    # Final Classification本表は14列:
-                    # POS, NO, DRIVER, NAT(画像のため空欄), ENTRANT, LAPS, ...
-                    if len(cells) >= 14 and re.fullmatch(r"\d+", cells[0]) and re.fullmatch(r"\d+", cells[1]):
+                    cells = [str(x).replace("\n", " ").strip() if x is not None else "" for x in row]
+
+                    # Final Classification本表（14列）
+                    if (
+                        not is_not_classified
+                        and len(cells) >= 14
+                        and re.fullmatch(r"\d+", cells[0])
+                        and re.fullmatch(r"\d+", cells[1])
+                    ):
                         rank = int(cells[0])
                         driver = cells[2]
                         team = cells[5]
                         if 1 <= rank <= 30 and driver and team:
-                            rows.append({"順位": rank, "ドライバー": driver, "チーム": team})
+                            rows.append({
+                                "順位": rank,
+                                "ドライバー": driver,
+                                "チーム": team,
+                                "ステータス": "完走",
+                            })
 
-    unique = {}
-    for row in rows:
-        unique.setdefault(row["順位"], row)
-    return [unique[k] for k in sorted(unique)]
+                    # NOT CLASSIFIED表（NO, DRIVER, NAT, ENTRANT, LAPS, ..., DNF, ...）
+                    elif (
+                        is_not_classified
+                        and len(cells) >= 8
+                        and re.fullmatch(r"\d+", cells[0])
+                        and cells[1]
+                        and len(cells) > 4
+                        and cells[4]
+                    ):
+                        rows.append({
+                            "順位": "リタイア",
+                            "ドライバー": cells[1],
+                            "チーム": cells[4],
+                            "ステータス": "リタイア",
+                        })
+
+    return rows
 
 
 st.set_page_config(
@@ -402,7 +431,7 @@ with tab3:
 
 # --- F1公式PDFインポート ---
 with st.sidebar.expander("📥 F1公式PDFを読み込む"):
-    st.caption("FIAのRace Classification PDFから順位・ドライバー・チームを読み取り、そのまま登録できます。")
+    st.caption("FIAのRace Classification PDFから完走車とリタイア車を読み取り、そのまま登録・更新できます。")
     f1_pdf = st.file_uploader("F1結果PDF", type=["pdf"], key="f1_pdf_import")
     if f1_pdf is not None:
         try:
@@ -416,49 +445,57 @@ with st.sidebar.expander("📥 F1公式PDFを読み込む"):
                 f1_date = st.date_input("開催日", datetime.date.today(), key="f1_import_date")
                 f1_session = st.selectbox("セッション", ["決勝", "予選", "スプリント"], key="f1_import_session")
 
-                if st.button("このF1結果を登録", type="primary", use_container_width=True, key="f1_import_save"):
+                if st.button("このF1結果を登録 / 更新", type="primary", use_container_width=True, key="f1_import_save"):
                     if not f1_round.strip():
                         st.error("レース名 / ラウンドを入力してください。")
                     else:
                         races = data.setdefault("races", {}).setdefault(f1_year, {}).setdefault("F1", {}).setdefault("総合", [])
-                        duplicate = any(
-                            x.get("round_name") == f1_round.strip()
-                            and x.get("session_type", "決勝") == f1_session
-                            for x in races
+                        pts = data.get("points_master", {}).get(
+                            "F1",
+                            {
+                                "決勝": DEFAULT_PTS_RACE,
+                                "予選": DEFAULT_PTS_QUALIFY,
+                                "スプリント": DEFAULT_PTS_SPRINT,
+                            },
+                        ).get(f1_session, DEFAULT_PTS_RACE)
+
+                        teams = [row["チーム"] for row in f1_rows]
+                        drivers = [row["ドライバー"] for row in f1_rows]
+                        statuses = [row["ステータス"] for row in f1_rows]
+                        new_race = {
+                            "round_name": f1_round.strip(),
+                            "race_date": str(f1_date),
+                            "session_type": f1_session,
+                            "is_custom_pts": False,
+                            "points_table": pts,
+                            "results": teams,
+                            "drivers": drivers,
+                            "statuses": statuses,
+                        }
+
+                        existing_idx = next(
+                            (
+                                i for i, x in enumerate(races)
+                                if x.get("round_name") == f1_round.strip()
+                                and x.get("session_type", "決勝") == f1_session
+                            ),
+                            None,
                         )
-                        if duplicate:
-                            st.error(f"「{f1_round.strip()}」の【{f1_session}】はすでに登録されています。")
+                        if existing_idx is None:
+                            races.append(new_race)
+                            action = "登録"
                         else:
-                            pts = data.get("points_master", {}).get(
-                                "F1",
-                                {
-                                    "決勝": DEFAULT_PTS_RACE,
-                                    "予選": DEFAULT_PTS_QUALIFY,
-                                    "スプリント": DEFAULT_PTS_SPRINT,
-                                },
-                            ).get(f1_session, DEFAULT_PTS_RACE)
+                            races[existing_idx] = new_race
+                            action = "更新"
 
-                            teams = [row["チーム"] for row in f1_rows]
-                            drivers = [row["ドライバー"] for row in f1_rows]
-                            races.append({
-                                "round_name": f1_round.strip(),
-                                "race_date": str(f1_date),
-                                "session_type": f1_session,
-                                "is_custom_pts": False,
-                                "points_table": pts,
-                                "results": teams,
-                                "drivers": drivers,
-                            })
+                        team_master = data.setdefault("teams", {}).setdefault("F1_総合", [])
+                        for team in teams:
+                            if team not in team_master:
+                                team_master.append(team)
 
-                            # PDFに出てきた現在の正式チーム名もマスタへ追加
-                            team_master = data.setdefault("teams", {}).setdefault("F1_総合", [])
-                            for team in teams:
-                                if team not in team_master:
-                                    team_master.append(team)
-
-                            save_data(data)
-                            st.success(f"「{f1_round.strip()} ({f1_session})」を登録しました！")
-                            st.rerun()
+                        save_data(data)
+                        st.success(f"「{f1_round.strip()} ({f1_session})」を{action}しました！")
+                        st.rerun()
             else:
                 st.warning("順位表を読み取れませんでした。このPDFの形式を確認する必要があります。")
         except Exception as e:
@@ -634,14 +671,24 @@ with tab1:
 
                 pts_table = target.get("points_table", DEFAULT_PTS_RACE)
 
-                df_res = pd.DataFrame({
-                    "順位": [f"P{i+1}" for i in range(len(target["results"]))],
-                    "獲得ポイント": [
-                        f"{pts_table[i]} pt" if i < len(pts_table) else "0 pt"
+                statuses = target.get("statuses", ["完走"] * len(target["results"]))
+                drivers = target.get("drivers", [])
+                df_data = {
+                    "順位": [
+                        "リタイア" if i < len(statuses) and statuses[i] == "リタイア" else f"P{i+1}"
                         for i in range(len(target["results"]))
                     ],
-                    "チーム / 車両": target["results"],
-                })
+                    "獲得ポイント": [
+                        "0 pt"
+                        if i < len(statuses) and statuses[i] == "リタイア"
+                        else (f"{pts_table[i]} pt" if i < len(pts_table) else "0 pt")
+                        for i in range(len(target["results"]))
+                    ],
+                }
+                if drivers:
+                    df_data["ドライバー"] = drivers
+                df_data["チーム / 車両"] = target["results"]
+                df_res = pd.DataFrame(df_data)
 
                 # スクロールせずに全体を表示するため height を自動調整
                 calc_height = (len(df_res) + 1) * 35 + 3
@@ -730,11 +777,14 @@ with tab2:
 
         for race_idx, r in enumerate(races):
             pts_table = r.get("points_table", DEFAULT_PTS_RACE)
+            statuses = r.get("statuses", [])
             for rank_idx, team in enumerate(r["results"]):
-                pt = pts_table[rank_idx] if rank_idx < len(pts_table) else 0
+                is_retired = rank_idx < len(statuses) and statuses[rank_idx] == "リタイア"
+                pt = 0 if is_retired else (pts_table[rank_idx] if rank_idx < len(pts_table) else 0)
                 if team not in team_points_matrix:
                     team_points_matrix[team] = [0] * len(races)
-                team_points_matrix[team][race_idx] = pt
+                # 同一チームの2台分を合算する
+                team_points_matrix[team][race_idx] += pt
 
         summary_list = []
         for team, pts_list in team_points_matrix.items():
@@ -760,10 +810,12 @@ with tab2:
             if drivers:
                 has_driver_data = True
             pts_table = race.get("points_table", DEFAULT_PTS_RACE)
+            statuses = race.get("statuses", [])
             for rank_idx, driver in enumerate(drivers):
                 if not driver:
                     continue
-                pt = pts_table[rank_idx] if rank_idx < len(pts_table) else 0
+                is_retired = rank_idx < len(statuses) and statuses[rank_idx] == "リタイア"
+                pt = 0 if is_retired else (pts_table[rank_idx] if rank_idx < len(pts_table) else 0)
                 if driver not in driver_points:
                     driver_points[driver] = [0] * len(races)
                 driver_points[driver][race_idx] = pt
