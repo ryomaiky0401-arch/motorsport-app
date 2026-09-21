@@ -1186,10 +1186,16 @@ with tab_entry:
                         if selected_livery not in image_options:
                             selected_livery = next(iter(image_options))
                     if selected_livery:
-                        try:
-                            st.image(image_options[selected_livery], use_container_width=True)
-                        except Exception:
-                            st.caption("画像を表示できませんでした")
+                        # 元画像の縦横比が違ってもカード内の画像エリアを同じ高さに固定する
+                        image_src = image_options[selected_livery]
+                        st.markdown(
+                            f"""
+                            <div style="height:190px; display:flex; align-items:center; justify-content:center; overflow:hidden;">
+                                <img src="{image_src}" style="width:100%; height:100%; object-fit:contain; object-position:center;" />
+                            </div>
+                            """,
+                            unsafe_allow_html=True,
+                        )
                     # 全カードで同じ高さのカラーリング操作エリアを確保して本文位置を揃える
                     if len(image_options) > 1:
                         names = list(image_options.keys())
