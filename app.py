@@ -13,7 +13,7 @@ DATA_FILE = "race_data_v12.json"
 CATEGORY_CONFIG = {
     "SUPER GT": ["GT500", "GT300"],
     "Super Formula": ["総合"],
-    "WEC": ["Hypercar", "LMGT3"],
+    "WEC": ["Hypercar", "LMP2", "LMGT3"],
     "F1": ["総合"],
     "F2": ["総合"],
     "F3": ["総合"],
@@ -124,6 +124,7 @@ PRESET_TEAMS = {
         "#94 Peugeot TotalEnergies",
         "#99 Proton Competition",
     ],
+    "WEC_LMP2": [],
     "WEC_LMGT3": [
         "#27 Heart of Racing Team (Aston Martin)",
         "#31 Team WRT (BMW)",
@@ -653,7 +654,7 @@ def extract_wec_timing_url(url):
     )
 
     lines = [re.sub(r"\s+", " ", x).strip() for x in text.splitlines() if x.strip()]
-    rows_by_class = {"Hypercar": [], "LMGT3": []}
+    rows_by_class = {"Hypercar": [], "LMP2": [], "LMGT3": []}
 
     for line in lines:
         # Al Kamel PDFは列の内部順序が崩れることがあるので、
