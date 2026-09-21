@@ -1535,10 +1535,11 @@ with tab2:
 
         summary_list.sort(key=lambda x: x["合計ポイント"], reverse=True)
 
+        ranking_name_column = "マニュファクチャラー" if is_wec_manufacturer else "チーム / 車両"
         df_rank = pd.DataFrame([
             {
                 "順位": f"P{i+1}",
-                "チーム / 車両": item["チーム / 車両"],
+                ranking_name_column: item["チーム / 車両"],
                 "合計ポイント": item["合計ポイント"],
             }
             for i, item in enumerate(summary_list)
