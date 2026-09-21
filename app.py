@@ -2106,7 +2106,7 @@ with tab2:
                         if lap is not None:
                             lap_down = max(0, sgt_leader_laps - lap)
                             if r_cls == "GT500":
-                                lap_pt = 3 if lap_down == 0 else 2 if lap_down == 1 else 1 if lap_down == 2 else 0
+                                lap_pt = 3 if lap_down == 0 else 2 if lap_down == 1 else 1
                             else:
                                 lap_pt = 3 if lap_down <= 1 else 2 if lap_down == 2 else 1
                             pt += lap_pt
