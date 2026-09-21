@@ -1060,7 +1060,7 @@ def country_code(country):
         "中国":"cn","China":"cn","韓国":"kr","South Korea":"kr","Korea":"kr","タイ":"th","Thailand":"th",
         "インドネシア":"id","Indonesia":"id","マレーシア":"my","Malaysia":"my","モナコ":"mc","Monaco":"mc",
         "ポーランド":"pl","Poland":"pl","フィンランド":"fi","Finland":"fi","スウェーデン":"se","Sweden":"se",
-        "ノルウェー":"no","Norway":"no","トルコ":"tr","Türkiye":"tr","Turkey":"tr","カタール":"qa","Qatar":"qa"
+        "ノルウェー":"no","Norway":"no","チェコ":"cz","チェコ共和国":"cz","Czechia":"cz","Czech Republic":"cz","トルコ":"tr","Türkiye":"tr","Turkey":"tr","カタール":"qa","Qatar":"qa"
     }
     return codes.get(str(country).strip())
 
