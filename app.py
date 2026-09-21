@@ -739,430 +739,430 @@ if s_cat == "F2":
 
 
 
-    s_cls = st.sidebar.selectbox("クラス", CATEGORY_CONFIG[s_cat], key="s_cls")
-    session_type = st.sidebar.radio(
-        "セッション種別", ["決勝", "予選", "スプリント"], key="session_type_input"
+s_cls = st.sidebar.selectbox("クラス", CATEGORY_CONFIG[s_cat], key="s_cls")
+session_type = st.sidebar.radio(
+    "セッション種別", ["決勝", "予選", "スプリント"], key="session_type_input"
+)
+
+race_date = st.sidebar.date_input(
+    "開催日", datetime.date.today(), key="race_date_input"
+)
+
+race_name = st.sidebar.text_input(
+    "レース名 / ラウンド", placeholder="例: Rd.1 岡山", key="race_name_input"
+)
+
+base_pts = data["points_master"].get(
+    s_cat,
+    {
+        "決勝": DEFAULT_PTS_RACE,
+        "予選": DEFAULT_PTS_QUALIFY,
+        "スプリント": DEFAULT_PTS_SPRINT,
+    },
+).get(session_type, DEFAULT_PTS_RACE)
+
+st.sidebar.markdown("---")
+use_custom_pts = st.sidebar.checkbox(
+    "⚠️ このレース専用のポイントを使う (WEC 24h等)", value=False
+)
+applied_pts = base_pts.copy()
+
+if use_custom_pts:
+    st.sidebar.caption("このレース限定の獲得ポイントを直接設定")
+    applied_pts = []
+    pts_cols = st.sidebar.columns(2)
+    for i in range(10):
+        col = pts_cols[0] if i < 5 else pts_cols[1]
+        val = col.number_input(
+            f"{i+1}位 pt",
+            min_value=0,
+            max_value=200,
+            value=base_pts[i] if i < len(base_pts) else 0,
+            key=f"custom_pts_{i}",
+        )
+        applied_pts.append(val)
+else:
+    st.sidebar.info(
+        f"配点: {base_pts[:5]}... (マスタの「{s_cat}」基本ポイントを自動適用)"
     )
 
-    race_date = st.sidebar.date_input(
-        "開催日", datetime.date.today(), key="race_date_input"
-    )
+st.sidebar.markdown("---")
+team_key = f"{s_cat}_{s_cls}"
+registered_teams = data["teams"].get(team_key, [])
 
-    race_name = st.sidebar.text_input(
-        "レース名 / ラウンド", placeholder="例: Rd.1 岡山", key="race_name_input"
-    )
+st.sidebar.caption("順位順にチームを選択してください")
+selected_results = []
+available_teams = registered_teams.copy()
 
-    base_pts = data["points_master"].get(
-        s_cat,
-        {
-            "決勝": DEFAULT_PTS_RACE,
-            "予選": DEFAULT_PTS_QUALIFY,
-            "スプリント": DEFAULT_PTS_SPRINT,
-        },
-    ).get(session_type, DEFAULT_PTS_RACE)
+if registered_teams:
+    for rank in range(1, len(registered_teams) + 1):
+        options = ["(選択なし)"] + available_teams
+        team = st.sidebar.selectbox(f"{rank}位", options, key=f"rank_select_{rank}")
+        if team != "(選択なし)":
+            selected_results.append(team)
+            if team in available_teams:
+                available_teams.remove(team)
+else:
+    st.sidebar.warning("このクラスのチーム一覧はまだ登録されていません。")
 
-    st.sidebar.markdown("---")
-    use_custom_pts = st.sidebar.checkbox(
-        "⚠️ このレース専用のポイントを使う (WEC 24h等)", value=False
-    )
-    applied_pts = base_pts.copy()
-
-    if use_custom_pts:
-        st.sidebar.caption("このレース限定の獲得ポイントを直接設定")
-        applied_pts = []
-        pts_cols = st.sidebar.columns(2)
-        for i in range(10):
-            col = pts_cols[0] if i < 5 else pts_cols[1]
-            val = col.number_input(
-                f"{i+1}位 pt",
-                min_value=0,
-                max_value=200,
-                value=base_pts[i] if i < len(base_pts) else 0,
-                key=f"custom_pts_{i}",
-            )
-            applied_pts.append(val)
+if st.sidebar.button("結果を保存する", type="primary", use_container_width=True):
+    if not race_name:
+        st.sidebar.error("レース名を入力してください。")
+    elif not selected_results:
+        st.sidebar.error("少なくとも1つ以上の順位を選択してください。")
     else:
-        st.sidebar.info(
-            f"配点: {base_pts[:5]}... (マスタの「{s_cat}」基本ポイントを自動適用)"
+        existing_races = (
+            data.get("races", {}).get(s_year, {}).get(s_cat, {}).get(s_cls, [])
+        )
+        is_already_exist = any(
+            r.get("round_name") == race_name
+            and r.get("session_type", "決勝") == session_type
+            for r in existing_races
         )
 
-    st.sidebar.markdown("---")
-    team_key = f"{s_cat}_{s_cls}"
-    registered_teams = data["teams"].get(team_key, [])
-
-    st.sidebar.caption("順位順にチームを選択してください")
-    selected_results = []
-    available_teams = registered_teams.copy()
-
-    if registered_teams:
-        for rank in range(1, len(registered_teams) + 1):
-            options = ["(選択なし)"] + available_teams
-            team = st.sidebar.selectbox(f"{rank}位", options, key=f"rank_select_{rank}")
-            if team != "(選択なし)":
-                selected_results.append(team)
-                if team in available_teams:
-                    available_teams.remove(team)
-    else:
-        st.sidebar.warning("このクラスのチーム一覧はまだ登録されていません。")
-
-    if st.sidebar.button("結果を保存する", type="primary", use_container_width=True):
-        if not race_name:
-            st.sidebar.error("レース名を入力してください。")
-        elif not selected_results:
-            st.sidebar.error("少なくとも1つ以上の順位を選択してください。")
+        if is_already_exist:
+            st.sidebar.error(
+                f"⚠️ 「{race_name}」の【{session_type}】結果はすでに登録されています！"
+            )
         else:
-            existing_races = (
-                data.get("races", {}).get(s_year, {}).get(s_cat, {}).get(s_cls, [])
+            if s_year not in data["races"]:
+                data["races"][s_year] = {}
+            if s_cat not in data["races"][s_year]:
+                data["races"][s_year][s_cat] = {}
+            if s_cls not in data["races"][s_year][s_cat]:
+                data["races"][s_year][s_cat][s_cls] = []
+
+            data["races"][s_year][s_cat][s_cls].append({
+                "round_name": race_name,
+                "race_date": str(race_date),
+                "session_type": session_type,
+                "is_custom_pts": use_custom_pts,
+                "points_table": applied_pts,
+                "results": selected_results,
+            })
+            save_data(data)
+            st.sidebar.success(
+                f"[{s_year}]「{race_name} ({session_type})」の結果を保存しました！"
             )
-            is_already_exist = any(
-                r.get("round_name") == race_name
-                and r.get("session_type", "決勝") == session_type
-                for r in existing_races
-            )
+            st.rerun()
 
-            if is_already_exist:
-                st.sidebar.error(
-                    f"⚠️ 「{race_name}」の【{session_type}】結果はすでに登録されています！"
-                )
-            else:
-                if s_year not in data["races"]:
-                    data["races"][s_year] = {}
-                if s_cat not in data["races"][s_year]:
-                    data["races"][s_year][s_cat] = {}
-                if s_cls not in data["races"][s_year][s_cat]:
-                    data["races"][s_year][s_cat][s_cls] = []
+# --- タブ1: レース結果閲覧・編集・削除 ---
+with tab1:
+    st.header("🏁 レース結果 閲覧・編集")
 
-                data["races"][s_year][s_cat][s_cls].append({
-                    "round_name": race_name,
-                    "race_date": str(race_date),
-                    "session_type": session_type,
-                    "is_custom_pts": use_custom_pts,
-                    "points_table": applied_pts,
-                    "results": selected_results,
-                })
-                save_data(data)
-                st.sidebar.success(
-                    f"[{s_year}]「{race_name} ({session_type})」の結果を保存しました！"
-                )
-                st.rerun()
+    v_y, v_c1, v_c2 = st.columns([1, 1, 1])
+    with v_y:
+        v_year = st.selectbox("年度", YEARS, key="v_year")
+    with v_c1:
+        v_cat = st.selectbox(
+            "カテゴリー選択", list(CATEGORY_CONFIG.keys()), key="v_cat"
+        )
+    with v_c2:
+        v_cls = st.selectbox("クラス選択", CATEGORY_CONFIG[v_cat], key="v_cls")
 
-    # --- タブ1: レース結果閲覧・編集・削除 ---
-    with tab1:
-        st.header("🏁 レース結果 閲覧・編集")
+    races_list = (
+        data.get("races", {}).get(v_year, {}).get(v_cat, {}).get(v_cls, [])
+    )
 
-        v_y, v_c1, v_c2 = st.columns([1, 1, 1])
-        with v_y:
-            v_year = st.selectbox("年度", YEARS, key="v_year")
-        with v_c1:
-            v_cat = st.selectbox(
-                "カテゴリー選択", list(CATEGORY_CONFIG.keys()), key="v_cat"
-            )
-        with v_c2:
-            v_cls = st.selectbox("クラス選択", CATEGORY_CONFIG[v_cat], key="v_cls")
-
-        races_list = (
-            data.get("races", {}).get(v_year, {}).get(v_cat, {}).get(v_cls, [])
+    if races_list:
+        rounds = sorted(
+            list(set(r.get("round_name", r.get("race_name")) for r in races_list)),
+            reverse=True,
         )
 
-        if races_list:
-            rounds = sorted(
-                list(set(r.get("round_name", r.get("race_name")) for r in races_list)),
-                reverse=True,
+        r_col1, r_col2 = st.columns(2)
+        with r_col1:
+            sel_round = st.selectbox("ラウンド（大会）を選択", rounds)
+        with r_col2:
+            sel_session_filter = st.selectbox(
+                "セッション選択", ["すべて", "決勝", "予選", "スプリント"]
             )
 
-            r_col1, r_col2 = st.columns(2)
-            with r_col1:
-                sel_round = st.selectbox("ラウンド（大会）を選択", rounds)
-            with r_col2:
-                sel_session_filter = st.selectbox(
-                    "セッション選択", ["すべて", "決勝", "予選", "スプリント"]
-                )
-
+        round_races = [
+            r
+            for r in races_list
+            if r.get("round_name", r.get("race_name")) == sel_round
+        ]
+        if sel_session_filter != "すべて":
             round_races = [
                 r
-                for r in races_list
-                if r.get("round_name", r.get("race_name")) == sel_round
+                for r in round_races
+                if r.get("session_type", "決勝") == sel_session_filter
             ]
-            if sel_session_filter != "すべて":
-                round_races = [
-                    r
-                    for r in round_races
-                    if r.get("session_type", "決勝") == sel_session_filter
-                ]
 
-            if round_races:
-                for target in round_races:
-                    r_date_str = target.get("race_date", "日付未設定")
-                    is_custom = target.get("is_custom_pts", False)
-                    pts_label = "⚠️ 特別ポイント" if is_custom else "通常ポイント"
+        if round_races:
+            for target in round_races:
+                r_date_str = target.get("race_date", "日付未設定")
+                is_custom = target.get("is_custom_pts", False)
+                pts_label = "⚠️ 特別ポイント" if is_custom else "通常ポイント"
 
-                    st.subheader(
-                        f"📍 {sel_round} - 【{target.get('session_type', '決勝')}】"
-                    )
-                    st.caption(f"📅 開催日: {r_date_str} ｜ 🎯 適用ルール: {pts_label}")
+                st.subheader(
+                    f"📍 {sel_round} - 【{target.get('session_type', '決勝')}】"
+                )
+                st.caption(f"📅 開催日: {r_date_str} ｜ 🎯 適用ルール: {pts_label}")
 
-                    pts_table = target.get("points_table", DEFAULT_PTS_RACE)
+                pts_table = target.get("points_table", DEFAULT_PTS_RACE)
 
-                    statuses = target.get("statuses", ["完走"] * len(target["results"]))
-                    drivers = target.get("drivers", [])
-                    df_data = {
-                        "順位": [
-                            statuses[i] if i < len(statuses) and statuses[i] in ["リタイア", "DNS", "DSQ"] else f"P{i+1}"
-                            for i in range(len(target["results"]))
-                        ],
-                        "獲得ポイント": [
-                            f"{target.get('official_points', [])[i]} pt"
-                            if i < len(target.get("official_points", []))
-                            else (
-                                "0 pt"
-                                if i < len(statuses) and statuses[i] in ["リタイア", "DNS", "DSQ"]
-                                else (f"{pts_table[i]} pt" if i < len(pts_table) else "0 pt")
-                            )
-                            for i in range(len(target["results"]))
-                        ],
-                    }
-                    if drivers:
-                        df_data["ドライバー"] = drivers
-                    df_data["チーム / 車両"] = target["results"]
-                    df_res = pd.DataFrame(df_data)
-
-                    # スクロールせずに全体を表示するため height を自動調整
-                    calc_height = (len(df_res) + 1) * 35 + 3
-                    st.dataframe(df_res, use_container_width=True, height=calc_height)
-
-                    with st.expander(
-                        f"⚙️ 「{sel_round} ({target.get('session_type', '決勝')})」の編集・削除"
-                    ):
-                        st.write("順位結果の編集:")
-                        edit_results = []
-                        team_options = data["teams"].get(f"{v_cat}_{v_cls}", [])
-                        for idx_r, old_team in enumerate(target["results"]):
-                            opt = (
-                                ["(選択なし)"] + team_options
-                                if old_team in team_options
-                                else ["(選択なし)", old_team] + team_options
-                            )
-                            edit_team = st.selectbox(
-                                f"{idx_r+1}位",
-                                opt,
-                                index=opt.index(old_team) if old_team in opt else 0,
-                                key=f"edit_{sel_round}_{target.get('session_type')}_{idx_r}",
-                            )
-                            if edit_team != "(選択なし)":
-                                edit_results.append(edit_team)
-
-                        e_col1, e_col2 = st.columns(2)
-                        with e_col1:
-                            if st.button(
-                                "変更を保存する",
-                                key=f"save_btn_{sel_round}_{target.get('session_type')}",
-                                use_container_width=True,
-                            ):
-                                target["results"] = edit_results
-                                save_data(data)
-                                st.success("結果を更新しました！")
-                                st.rerun()
-                        with e_col2:
-                            if st.button(
-                                "🗑️ このセッション結果を削除",
-                                type="primary",
-                                key=f"del_btn_{sel_round}_{target.get('session_type')}",
-                                use_container_width=True,
-                            ):
-                                races_list.remove(target)
-                                save_data(data)
-                                st.warning("データを削除しました。")
-                                st.rerun()
-
-                    st.markdown("---")
-            else:
-                st.info(f"「{sel_round}」の【{sel_session_filter}】データはありません。")
-        else:
-            st.info(f"{v_year} のレース結果データはまだありません。")
-
-    # --- タブ2: ポイントランキング・推移グラフ ---
-    with tab2:
-        st.header("🏆 年間ポイントランキング & 累計推移")
-        r_y, r_c1, r_c2 = st.columns([1, 1, 1])
-        with r_y:
-            r_year = st.selectbox("年度", YEARS, key="r_year")
-        with r_c1:
-            r_cat = st.selectbox(
-                "カテゴリー選択", list(CATEGORY_CONFIG.keys()), key="r_cat"
-            )
-        with r_c2:
-            r_cls = st.selectbox("クラス選択", CATEGORY_CONFIG[r_cat], key="r_cls")
-
-        if (
-            r_year in data["races"]
-            and r_cat in data["races"][r_year]
-            and r_cls in data["races"][r_year][r_cat]
-            and data["races"][r_year][r_cat][r_cls]
-        ):
-            races = data["races"][r_year][r_cat][r_cls]
-
-            # 日付やラウンド順に並び替え
-            races = sorted(races, key=lambda x: (x.get("race_date", ""), x.get("round_name", "")))
-
-            registered = data["teams"].get(f"{r_cat}_{r_cls}", [])
-            race_headers = [f"{r.get('round_name')} ({r.get('session_type', '決勝')})" for r in races]
-
-            team_points_matrix = {}
-            # F1のPDF登録データがある場合は、実際に出場したチームだけをランキング対象にする。
-            # これで旧名称や過去シーズンのマスター登録チームが0ptで混ざらない。
-            has_pdf_driver_data = any(r.get("drivers") for r in races)
-            if not (r_cat in ["F1", "F2"] and has_pdf_driver_data):
-                for team in registered:
-                    team_points_matrix[team] = [0] * len(races)
-
-            for race_idx, r in enumerate(races):
-                pts_table = r.get("points_table", DEFAULT_PTS_RACE)
-                statuses = r.get("statuses", [])
-                for rank_idx, team in enumerate(r["results"]):
-                    is_retired = rank_idx < len(statuses) and statuses[rank_idx] in ["リタイア", "DNS", "DSQ"]
-                    official = r.get("official_points", [])
-                    pt = (
-                        official[rank_idx]
-                        if rank_idx < len(official)
-                        else (0 if is_retired else (pts_table[rank_idx] if rank_idx < len(pts_table) else 0))
-                    )
-                    if team not in team_points_matrix:
-                        team_points_matrix[team] = [0] * len(races)
-                    # 同一チームの2台分を合算する
-                    team_points_matrix[team][race_idx] += pt
-
-            summary_list = []
-            for team, pts_list in team_points_matrix.items():
-                total_pt = sum(pts_list)
-                summary_list.append({"チーム / 車両": team, "合計ポイント": total_pt, "pts_list": pts_list})
-
-            summary_list.sort(key=lambda x: x["合計ポイント"], reverse=True)
-
-            df_rank = pd.DataFrame([
-                {
-                    "順位": f"P{i+1}",
-                    "チーム / 車両": item["チーム / 車両"],
-                    "合計ポイント": item["合計ポイント"],
+                statuses = target.get("statuses", ["完走"] * len(target["results"]))
+                drivers = target.get("drivers", [])
+                df_data = {
+                    "順位": [
+                        statuses[i] if i < len(statuses) and statuses[i] in ["リタイア", "DNS", "DSQ"] else f"P{i+1}"
+                        for i in range(len(target["results"]))
+                    ],
+                    "獲得ポイント": [
+                        f"{target.get('official_points', [])[i]} pt"
+                        if i < len(target.get("official_points", []))
+                        else (
+                            "0 pt"
+                            if i < len(statuses) and statuses[i] in ["リタイア", "DNS", "DSQ"]
+                            else (f"{pts_table[i]} pt" if i < len(pts_table) else "0 pt")
+                        )
+                        for i in range(len(target["results"]))
+                    ],
                 }
-                for i, item in enumerate(summary_list)
-            ])
-
-            # PDFインポートで保存されたドライバー情報から年間ランキングを集計
-            driver_points = {}
-            has_driver_data = False
-            for race_idx, race in enumerate(races):
-                drivers = race.get("drivers", [])
                 if drivers:
-                    has_driver_data = True
-                pts_table = race.get("points_table", DEFAULT_PTS_RACE)
-                statuses = race.get("statuses", [])
-                for rank_idx, driver in enumerate(drivers):
-                    if not driver:
-                        continue
-                    is_retired = rank_idx < len(statuses) and statuses[rank_idx] == "リタイア"
-                    official = race.get("official_points", [])
-                    pt = (
-                        official[rank_idx]
-                        if rank_idx < len(official)
-                        else (0 if is_retired else (pts_table[rank_idx] if rank_idx < len(pts_table) else 0))
-                    )
-                    if driver not in driver_points:
-                        driver_points[driver] = [0] * len(races)
-                    driver_points[driver][race_idx] = pt
+                    df_data["ドライバー"] = drivers
+                df_data["チーム / 車両"] = target["results"]
+                df_res = pd.DataFrame(df_data)
 
-            ranking_tab_team, ranking_tab_driver = st.tabs(
-                ["🏎️ チーム / 車両", "👤 ドライバー"]
+                # スクロールせずに全体を表示するため height を自動調整
+                calc_height = (len(df_res) + 1) * 35 + 3
+                st.dataframe(df_res, use_container_width=True, height=calc_height)
+
+                with st.expander(
+                    f"⚙️ 「{sel_round} ({target.get('session_type', '決勝')})」の編集・削除"
+                ):
+                    st.write("順位結果の編集:")
+                    edit_results = []
+                    team_options = data["teams"].get(f"{v_cat}_{v_cls}", [])
+                    for idx_r, old_team in enumerate(target["results"]):
+                        opt = (
+                            ["(選択なし)"] + team_options
+                            if old_team in team_options
+                            else ["(選択なし)", old_team] + team_options
+                        )
+                        edit_team = st.selectbox(
+                            f"{idx_r+1}位",
+                            opt,
+                            index=opt.index(old_team) if old_team in opt else 0,
+                            key=f"edit_{sel_round}_{target.get('session_type')}_{idx_r}",
+                        )
+                        if edit_team != "(選択なし)":
+                            edit_results.append(edit_team)
+
+                    e_col1, e_col2 = st.columns(2)
+                    with e_col1:
+                        if st.button(
+                            "変更を保存する",
+                            key=f"save_btn_{sel_round}_{target.get('session_type')}",
+                            use_container_width=True,
+                        ):
+                            target["results"] = edit_results
+                            save_data(data)
+                            st.success("結果を更新しました！")
+                            st.rerun()
+                    with e_col2:
+                        if st.button(
+                            "🗑️ このセッション結果を削除",
+                            type="primary",
+                            key=f"del_btn_{sel_round}_{target.get('session_type')}",
+                            use_container_width=True,
+                        ):
+                            races_list.remove(target)
+                            save_data(data)
+                            st.warning("データを削除しました。")
+                            st.rerun()
+
+                st.markdown("---")
+        else:
+            st.info(f"「{sel_round}」の【{sel_session_filter}】データはありません。")
+    else:
+        st.info(f"{v_year} のレース結果データはまだありません。")
+
+# --- タブ2: ポイントランキング・推移グラフ ---
+with tab2:
+    st.header("🏆 年間ポイントランキング & 累計推移")
+    r_y, r_c1, r_c2 = st.columns([1, 1, 1])
+    with r_y:
+        r_year = st.selectbox("年度", YEARS, key="r_year")
+    with r_c1:
+        r_cat = st.selectbox(
+            "カテゴリー選択", list(CATEGORY_CONFIG.keys()), key="r_cat"
+        )
+    with r_c2:
+        r_cls = st.selectbox("クラス選択", CATEGORY_CONFIG[r_cat], key="r_cls")
+
+    if (
+        r_year in data["races"]
+        and r_cat in data["races"][r_year]
+        and r_cls in data["races"][r_year][r_cat]
+        and data["races"][r_year][r_cat][r_cls]
+    ):
+        races = data["races"][r_year][r_cat][r_cls]
+
+        # 日付やラウンド順に並び替え
+        races = sorted(races, key=lambda x: (x.get("race_date", ""), x.get("round_name", "")))
+
+        registered = data["teams"].get(f"{r_cat}_{r_cls}", [])
+        race_headers = [f"{r.get('round_name')} ({r.get('session_type', '決勝')})" for r in races]
+
+        team_points_matrix = {}
+        # F1のPDF登録データがある場合は、実際に出場したチームだけをランキング対象にする。
+        # これで旧名称や過去シーズンのマスター登録チームが0ptで混ざらない。
+        has_pdf_driver_data = any(r.get("drivers") for r in races)
+        if not (r_cat in ["F1", "F2"] and has_pdf_driver_data):
+            for team in registered:
+                team_points_matrix[team] = [0] * len(races)
+
+        for race_idx, r in enumerate(races):
+            pts_table = r.get("points_table", DEFAULT_PTS_RACE)
+            statuses = r.get("statuses", [])
+            for rank_idx, team in enumerate(r["results"]):
+                is_retired = rank_idx < len(statuses) and statuses[rank_idx] in ["リタイア", "DNS", "DSQ"]
+                official = r.get("official_points", [])
+                pt = (
+                    official[rank_idx]
+                    if rank_idx < len(official)
+                    else (0 if is_retired else (pts_table[rank_idx] if rank_idx < len(pts_table) else 0))
+                )
+                if team not in team_points_matrix:
+                    team_points_matrix[team] = [0] * len(races)
+                # 同一チームの2台分を合算する
+                team_points_matrix[team][race_idx] += pt
+
+        summary_list = []
+        for team, pts_list in team_points_matrix.items():
+            total_pt = sum(pts_list)
+            summary_list.append({"チーム / 車両": team, "合計ポイント": total_pt, "pts_list": pts_list})
+
+        summary_list.sort(key=lambda x: x["合計ポイント"], reverse=True)
+
+        df_rank = pd.DataFrame([
+            {
+                "順位": f"P{i+1}",
+                "チーム / 車両": item["チーム / 車両"],
+                "合計ポイント": item["合計ポイント"],
+            }
+            for i, item in enumerate(summary_list)
+        ])
+
+        # PDFインポートで保存されたドライバー情報から年間ランキングを集計
+        driver_points = {}
+        has_driver_data = False
+        for race_idx, race in enumerate(races):
+            drivers = race.get("drivers", [])
+            if drivers:
+                has_driver_data = True
+            pts_table = race.get("points_table", DEFAULT_PTS_RACE)
+            statuses = race.get("statuses", [])
+            for rank_idx, driver in enumerate(drivers):
+                if not driver:
+                    continue
+                is_retired = rank_idx < len(statuses) and statuses[rank_idx] == "リタイア"
+                official = race.get("official_points", [])
+                pt = (
+                    official[rank_idx]
+                    if rank_idx < len(official)
+                    else (0 if is_retired else (pts_table[rank_idx] if rank_idx < len(pts_table) else 0))
+                )
+                if driver not in driver_points:
+                    driver_points[driver] = [0] * len(races)
+                driver_points[driver][race_idx] = pt
+
+        ranking_tab_team, ranking_tab_driver = st.tabs(
+            ["🏎️ チーム / 車両", "👤 ドライバー"]
+        )
+
+        with ranking_tab_team:
+            st.subheader("🥇 ポイントランキング")
+        
+            # スクロールせずに全体を表示するため height を自動調整
+            calc_rank_height = (len(df_rank) + 1) * 35 + 3
+            st.dataframe(df_rank, use_container_width=True, height=calc_rank_height)
+
+            csv_rank = df_rank.to_csv(index=False).encode("utf-8_sig")
+            st.download_button(
+                label="📥 ランキング（CSV）をダウンロード",
+                data=csv_rank,
+                file_name=f"{r_year}_{r_cat}_{r_cls}_ranking.csv",
+                mime="text/csv",
+                use_container_width=True,
             )
 
-            with ranking_tab_team:
-                st.subheader("🥇 ポイントランキング")
-            
-                # スクロールせずに全体を表示するため height を自動調整
-                calc_rank_height = (len(df_rank) + 1) * 35 + 3
-                st.dataframe(df_rank, use_container_width=True, height=calc_rank_height)
-    
-                csv_rank = df_rank.to_csv(index=False).encode("utf-8_sig")
+            st.markdown("---")
+
+            # 累計ポイント推移の折れ線グラフ
+            st.subheader("📈 累計ポイント推移グラフ")
+
+            chart_data = {}
+            for item in summary_list:
+                team_name = item["チーム / 車両"]
+                pts_list = item["pts_list"]
+                cum_pts = []
+                current = 0
+                for p in pts_list:
+                    current += p
+                    cum_pts.append(current)
+                chart_data[team_name] = cum_pts
+
+            df_chart = pd.DataFrame(chart_data, index=race_headers)
+            st.line_chart(df_chart)
+
+
+
+        with ranking_tab_driver:
+            if not has_driver_data:
+                st.info("ドライバーデータがまだありません。PDFから登録したレース結果で表示されます。")
+            else:
+                driver_summary = []
+                for driver, pts_list in driver_points.items():
+                    driver_summary.append({
+                        "ドライバー": driver,
+                        "合計ポイント": sum(pts_list),
+                        "pts_list": pts_list,
+                    })
+                driver_summary.sort(key=lambda x: x["合計ポイント"], reverse=True)
+
+                df_driver_rank = pd.DataFrame([
+                    {
+                        "順位": f"P{i+1}",
+                        "ドライバー": item["ドライバー"],
+                        "合計ポイント": item["合計ポイント"],
+                    }
+                    for i, item in enumerate(driver_summary)
+                ])
+
+                st.subheader("👤 ドライバーランキング")
+                driver_height = (len(df_driver_rank) + 1) * 35 + 3
+                st.dataframe(
+                    df_driver_rank,
+                    use_container_width=True,
+                    height=driver_height,
+                    hide_index=True,
+                )
+
+                driver_csv = df_driver_rank.to_csv(index=False).encode("utf-8_sig")
                 st.download_button(
-                    label="📥 ランキング（CSV）をダウンロード",
-                    data=csv_rank,
-                    file_name=f"{r_year}_{r_cat}_{r_cls}_ranking.csv",
+                    label="📥 ドライバーランキング（CSV）をダウンロード",
+                    data=driver_csv,
+                    file_name=f"{r_year}_{r_cat}_{r_cls}_driver_ranking.csv",
                     mime="text/csv",
                     use_container_width=True,
                 )
-    
+
                 st.markdown("---")
-    
-                # 累計ポイント推移の折れ線グラフ
-                st.subheader("📈 累計ポイント推移グラフ")
-    
-                chart_data = {}
-                for item in summary_list:
-                    team_name = item["チーム / 車両"]
-                    pts_list = item["pts_list"]
-                    cum_pts = []
+                st.subheader("📈 ドライバー累計ポイント推移")
+                driver_chart = {}
+                for item in driver_summary:
                     current = 0
-                    for p in pts_list:
+                    cumulative = []
+                    for p in item["pts_list"]:
                         current += p
-                        cum_pts.append(current)
-                    chart_data[team_name] = cum_pts
-    
-                df_chart = pd.DataFrame(chart_data, index=race_headers)
-                st.line_chart(df_chart)
-    
-    
+                        cumulative.append(current)
+                    driver_chart[item["ドライバー"]] = cumulative
 
-            with ranking_tab_driver:
-                if not has_driver_data:
-                    st.info("ドライバーデータがまだありません。PDFから登録したレース結果で表示されます。")
-                else:
-                    driver_summary = []
-                    for driver, pts_list in driver_points.items():
-                        driver_summary.append({
-                            "ドライバー": driver,
-                            "合計ポイント": sum(pts_list),
-                            "pts_list": pts_list,
-                        })
-                    driver_summary.sort(key=lambda x: x["合計ポイント"], reverse=True)
+                st.line_chart(pd.DataFrame(driver_chart, index=race_headers))
 
-                    df_driver_rank = pd.DataFrame([
-                        {
-                            "順位": f"P{i+1}",
-                            "ドライバー": item["ドライバー"],
-                            "合計ポイント": item["合計ポイント"],
-                        }
-                        for i, item in enumerate(driver_summary)
-                    ])
-
-                    st.subheader("👤 ドライバーランキング")
-                    driver_height = (len(df_driver_rank) + 1) * 35 + 3
-                    st.dataframe(
-                        df_driver_rank,
-                        use_container_width=True,
-                        height=driver_height,
-                        hide_index=True,
-                    )
-
-                    driver_csv = df_driver_rank.to_csv(index=False).encode("utf-8_sig")
-                    st.download_button(
-                        label="📥 ドライバーランキング（CSV）をダウンロード",
-                        data=driver_csv,
-                        file_name=f"{r_year}_{r_cat}_{r_cls}_driver_ranking.csv",
-                        mime="text/csv",
-                        use_container_width=True,
-                    )
-
-                    st.markdown("---")
-                    st.subheader("📈 ドライバー累計ポイント推移")
-                    driver_chart = {}
-                    for item in driver_summary:
-                        current = 0
-                        cumulative = []
-                        for p in item["pts_list"]:
-                            current += p
-                            cumulative.append(current)
-                        driver_chart[item["ドライバー"]] = cumulative
-
-                    st.line_chart(pd.DataFrame(driver_chart, index=race_headers))
-
-        else:
-            st.info(f"{r_year} {r_cat} ({r_cls}) の集計対象データがまだありません。")
+    else:
+        st.info(f"{r_year} {r_cat} ({r_cls}) の集計対象データがまだありません。")
