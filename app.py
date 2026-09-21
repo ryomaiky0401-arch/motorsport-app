@@ -1107,24 +1107,29 @@ with tab2:
 
             st.markdown("---")
 
-            # 累計ポイント推移の折れ線グラフ
-            st.subheader("📈 累計ポイント推移グラフ")
+            # 大会ごとの獲得ポイント合計グラフ
+            st.subheader("📊 大会別 獲得ポイント")
 
-            # 各セッションの獲得ポイント表を作り、行方向にcumsumして「累計」にする。
-            # 0ptのセッションでは前の累計値がそのまま維持される。
-            session_points_df = pd.DataFrame(
-                {
-                    item["チーム / 車両"]: [
-                        max(float(p), 0) if p is not None else 0
-                        for p in item["pts_list"]
-                    ]
-                    for item in summary_list
-                },
-                index=race_headers,
-            ).fillna(0)
-            df_chart = session_points_df.cumsum(axis=0)
-            st.line_chart(df_chart)
+            event_points = {}
+            event_order = []
+            for race_idx, race in enumerate(races):
+                event_name = race.get("round_name", race.get("race_name", "大会名未設定"))
+                if event_name not in event_order:
+                    event_order.append(event_name)
 
+            for item in summary_list:
+                team_name = item["チーム / 車両"]
+                totals = {event: 0 for event in event_order}
+                for race_idx, race in enumerate(races):
+                    event_name = race.get("round_name", race.get("race_name", "大会名未設定"))
+                    if race_idx < len(item["pts_list"]):
+                        try:
+                            totals[event_name] += max(float(item["pts_list"][race_idx]), 0)
+                        except (TypeError, ValueError):
+                            pass
+                event_points[team_name] = [totals[event] for event in event_order]
+
+            st.bar_chart(pd.DataFrame(event_points, index=event_order))
 
 
         with ranking_tab_driver:
@@ -1168,18 +1173,20 @@ with tab2:
                 )
 
                 st.markdown("---")
-                st.subheader("📈 ドライバー累計ポイント推移")
-                driver_session_points_df = pd.DataFrame(
-                    {
-                        item["ドライバー"]: [
-                            max(float(p), 0) if p is not None else 0
-                            for p in item["pts_list"]
-                        ]
-                        for item in driver_summary
-                    },
-                    index=race_headers,
-                ).fillna(0)
-                st.line_chart(driver_session_points_df.cumsum(axis=0))
+                st.subheader("📊 ドライバー 大会別獲得ポイント")
+                driver_event_points = {}
+                for item in driver_summary:
+                    totals = {event: 0 for event in event_order}
+                    for race_idx, race in enumerate(races):
+                        event_name = race.get("round_name", race.get("race_name", "大会名未設定"))
+                        if race_idx < len(item["pts_list"]):
+                            try:
+                                totals[event_name] += max(float(item["pts_list"][race_idx]), 0)
+                            except (TypeError, ValueError):
+                                pass
+                    driver_event_points[item["ドライバー"]] = [totals[event] for event in event_order]
+
+                st.bar_chart(pd.DataFrame(driver_event_points, index=event_order))
 
     else:
         st.info(f"{r_year} {r_cat} ({r_cls}) の集計対象データがまだありません。")
