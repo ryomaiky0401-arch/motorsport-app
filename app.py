@@ -1129,7 +1129,23 @@ with tab2:
                             pass
                 event_points[team_name] = [totals[event] for event in event_order]
 
-            st.bar_chart(pd.DataFrame(event_points, index=event_order))
+            # 1大会ごとに各チームを別々の棒で比較する（積み上げにはしない）
+            event_rows = []
+            for event in event_order:
+                for team_name, values in event_points.items():
+                    event_rows.append({
+                        "大会": event,
+                        "チーム / 車両": team_name,
+                        "獲得ポイント": values[event_order.index(event)],
+                    })
+            df_event_chart = pd.DataFrame(event_rows)
+            st.bar_chart(
+                df_event_chart,
+                x="チーム / 車両",
+                y="獲得ポイント",
+                color="チーム / 車両",
+                stack=False,
+            )
 
 
         with ranking_tab_driver:
@@ -1186,7 +1202,22 @@ with tab2:
                                 pass
                     driver_event_points[item["ドライバー"]] = [totals[event] for event in event_order]
 
-                st.bar_chart(pd.DataFrame(driver_event_points, index=event_order))
+                driver_event_rows = []
+                for event in event_order:
+                    for driver_name, values in driver_event_points.items():
+                        driver_event_rows.append({
+                            "大会": event,
+                            "ドライバー": driver_name,
+                            "獲得ポイント": values[event_order.index(event)],
+                        })
+                df_driver_event_chart = pd.DataFrame(driver_event_rows)
+                st.bar_chart(
+                    df_driver_event_chart,
+                    x="ドライバー",
+                    y="獲得ポイント",
+                    color="ドライバー",
+                    stack=False,
+                )
 
     else:
         st.info(f"{r_year} {r_cat} ({r_cls}) の集計対象データがまだありません。")
