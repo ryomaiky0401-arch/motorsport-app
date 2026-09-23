@@ -4880,7 +4880,7 @@
             }
           ],
           "drivers": "Prince JEFRI IBRAHIM / Afiq IKHWAN / Ben GREEN",
-          "image_url": "",
+          "image_url": "https://www.fiawec.com/uploads/2026-lm-2-corvette-z06-gt3-r-droite-6a23f4294bf1d831920081.png",
           "liveries": []
         },
         {
@@ -4908,8 +4908,13 @@
             }
           ],
           "drivers": "Antares AU / Thomas FLEMING / Marvin KIRCHHÖFER",
-          "image_url": "",
-          "liveries": []
+          "image_url": "https://www.fiawec.com/uploads/2026-wec-10-mclaren-720s-droit-69ef599b47943959296083.png",
+          "liveries": [
+            {
+              "name": "ルマン",
+              "url": "https://www.fiawec.com/uploads/2026-lm-10-mclaren-720s-droite-6a25890613e58669955443.png"
+            }
+          ]
         },
         {
           "car_number": "13",
@@ -4936,7 +4941,7 @@
             }
           ],
           "drivers": "Orey FIDANI / Lars KERN / Matthew BELL",
-          "image_url": "",
+          "image_url": "https://www.fiawec.com/uploads/2026-lm-13-corvette-z06-gt3-r-droite-6a23f42fa0c19329993615.png",
           "liveries": []
         },
         {
@@ -4964,8 +4969,13 @@
             }
           ],
           "drivers": "François HÉRIAU / Simon MANN / Alessio ROVERA",
-          "image_url": "",
-          "liveries": []
+          "image_url": "https://www.fiawec.com/uploads/2026-wec-21-ferrari-296-gt3-droit-69ef599e2d353428239370.png",
+          "liveries": [
+            {
+              "name": "ルマン",
+              "url": "https://www.fiawec.com/uploads/2026-lm-21-ferrari-296-gt3-droite-6a2677361fb88431988873.png"
+            }
+          ]
         },
         {
           "car_number": "23",
@@ -4992,8 +5002,13 @@
             }
           ],
           "drivers": "Gray NEWELL / Eduardo BARRICHELLO / Jonny ADAM",
-          "image_url": "",
-          "liveries": []
+          "image_url": "https://www.fiawec.com/uploads/2026-wec-23-aston-martin-gt3-droit-69ef599fa93ef563850981.png",
+          "liveries": [
+            {
+              "name": "ルマン",
+              "url": "https://www.fiawec.com/uploads/2026-lm-23-aston-martin-gt3-droite-6a23f4300874d981877522.png"
+            }
+          ]
         },
         {
           "car_number": "27",
@@ -5020,8 +5035,13 @@
             }
           ],
           "drivers": "Ian JAMES / Zacharie ROBICHON / Mattia DRUDI",
-          "image_url": "",
-          "liveries": []
+          "image_url": "https://www.fiawec.com/uploads/2026-wec-27-aston-martin-gt3-droit-69ef599fd7e82541482510.png",
+          "liveries": [
+            {
+              "name": "ルマン",
+              "url": "https://www.fiawec.com/uploads/2026-lm-27-aston-martin-gt3-droite-6a23f4303703d954941083.png"
+            }
+          ]
         },
         {
           "car_number": "32",
@@ -5048,8 +5068,13 @@
             }
           ],
           "drivers": "Darren LEUNG / Sean GELAEL / Augusto FARFUS",
-          "image_url": "",
-          "liveries": []
+          "image_url": "https://www.fiawec.com/uploads/2026-wec-32-bmw-m4-gt3-droit-v2-6aaa401a5d9ca502826207.png",
+          "liveries": [
+            {
+              "name": "ルマン",
+              "url": "https://www.fiawec.com/uploads/2026-lm-32-bmw-m4-gt3-droite-6a23f4306836a616386880.png"
+            }
+          ]
         },
         {
           "car_number": "33",
@@ -5076,8 +5101,13 @@
             }
           ],
           "drivers": "Ben KEATING / Jonny EDGAR / Nicky CATSBURG",
-          "image_url": "",
-          "liveries": []
+          "image_url": "https://www.fiawec.com/uploads/2026-wec-33-corvette-z06-gt3-r-droit-69ef59a03dc10845381441.png",
+          "liveries": [
+            {
+              "name": "ルマン",
+              "url": "https://www.fiawec.com/uploads/2026-lm-33-corvette-z06-gt3-r-droite-6a23f430964ba606961465.png"
+            }
+          ]
         },
         {
           "car_number": "34",
@@ -5104,8 +5134,13 @@
             }
           ],
           "drivers": "Peter DEMPSEY / Salih YOLUÇ / Charlie EASTWOOD",
-          "image_url": "",
-          "liveries": []
+          "image_url": "https://www.fiawec.com/uploads/2026-wec-34-corvette-z06-gt3-r-droit-69ef59a06dbf9223293483.png",
+          "liveries": [
+            {
+              "name": "ルマン",
+              "url": "https://www.fiawec.com/uploads/2026-lm-34-corvette-z06-gt3-r-droite-6a23f430bf7e5476773437.png"
+            }
+          ]
         },
         {
           "car_number": "54",
@@ -5132,8 +5167,13 @@
             }
           ],
           "drivers": "Thomas FLOHR / Francesco CASTELLACCI / Davide RIGON",
-          "image_url": "",
-          "liveries": []
+          "image_url": "https://www.fiawec.com/uploads/2026-wec-54-ferrari-296-gt3-droit-69ef599d8387b905439544.png",
+          "liveries": [
+            {
+              "name": "ルマン",
+              "url": "https://www.fiawec.com/uploads/2026-lm-54-ferrari-296-gt3-droite-6a26773651800372659842.png"
+            }
+          ]
         },
         {
           "car_number": "57",
@@ -5160,7 +5200,7 @@
             }
           ],
           "drivers": "Takeshi KIMURA / Conrad LAURSEN / Daniel SERRA",
-          "image_url": "",
+          "image_url": "https://www.fiawec.com/uploads/2026-lm-57-ferrari-296-gt3-droite-6a267736bfc0a342672034.png",
           "liveries": []
         },
         {
@@ -5188,8 +5228,13 @@
             }
           ],
           "drivers": "Alexander WEST / Finn GEHRSITZ / Benjamin GOETHE",
-          "image_url": "",
-          "liveries": []
+          "image_url": "https://www.fiawec.com/uploads/2026-wec-58-mclaren-720s-droit-69ef59a36ba14571940278.png",
+          "liveries": [
+            {
+              "name": "ルマン",
+              "url": "https://www.fiawec.com/uploads/2026-lm-58-mclaren-720s-droite-6a26fd9583762963365039.png"
+            }
+          ]
         },
         {
           "car_number": "59",
@@ -5216,7 +5261,7 @@
             }
           ],
           "drivers": "Clément MATEU / Marius FOSSARD / Valentin HASSE CLOT",
-          "image_url": "",
+          "image_url": "https://www.fiawec.com/uploads/2026-lm-59-aston-martin-gt3-droite-6a23f4317e0df436852662.png",
           "liveries": []
         },
         {
@@ -5244,8 +5289,13 @@
             }
           ],
           "drivers": "Martin BERRY / Rui ANDRADE / Maxime MARTIN",
-          "image_url": "",
-          "liveries": []
+          "image_url": "https://www.fiawec.com/uploads/2026-wec-61-mercedes-droit-69ef59a3da842531072903.png",
+          "liveries": [
+            {
+              "name": "ルマン",
+              "url": "https://www.fiawec.com/uploads/2026-lm-61-mercedes-droite-6a26fd95c2cb2307651804.png"
+            }
+          ]
         },
         {
           "car_number": "62",
@@ -5272,7 +5322,7 @@
             }
           ],
           "drivers": "Abdulla AL-KHELAIFI / Julian HANSES / Giuliano ALESI",
-          "image_url": "",
+          "image_url": "https://www.fiawec.com/uploads/2026-lm-62-mercedes-droite-6a26fd96018f5327722444.png",
           "liveries": []
         },
         {
@@ -5300,8 +5350,13 @@
             }
           ],
           "drivers": "Anthony MCINTOSH / Parker THOMPSON / Daniel HARPER",
-          "image_url": "",
-          "liveries": []
+          "image_url": "https://www.fiawec.com/uploads/2026-wec-69-bmw-m4-gt3-spa-droit-69fa57b6bd0b9675746254.png",
+          "liveries": [
+            {
+              "name": "ルマン",
+              "url": "https://www.fiawec.com/uploads/2026-lm-69-bmw-m4-gt3-droite-6a23f4321cc92396438838.png"
+            }
+          ]
         },
         {
           "car_number": "74",
@@ -5328,7 +5383,7 @@
             }
           ],
           "drivers": "Dustin BLATTNER / Lorenzo PATRESE / Dennis MARSCHALL",
-          "image_url": "",
+          "image_url": "https://www.fiawec.com/uploads/2026-lm-74-ferrari-296-droite-6a23f4324c257979740144.png",
           "liveries": []
         },
         {
@@ -5356,8 +5411,13 @@
             }
           ],
           "drivers": "Eric POWELL / Ben TUCK / Sebastian PRIAULX",
-          "image_url": "",
-          "liveries": []
+          "image_url": "https://www.fiawec.com/uploads/2026-wec-77-ford-mustang-droit-v2-6a8d9df850ac4232285542.png",
+          "liveries": [
+            {
+              "name": "ルマン",
+              "url": "https://www.fiawec.com/uploads/2026-wec-77-ford-mustang-droit-v2-6aa954c30d69d071084358.png"
+            }
+          ]
         },
         {
           "car_number": "78",
@@ -5384,8 +5444,13 @@
             }
           ],
           "drivers": "Tom VAN ROMPUY / Hadrien DAVID / Jack HAWKSWORTH",
-          "image_url": "",
-          "liveries": []
+          "image_url": "https://www.fiawec.com/uploads/2026-wec-78-lexus-rc-f-lmgt3-droit-69ef59a4b9726258267872.png",
+          "liveries": [
+            {
+              "name": "ルマン",
+              "url": "https://www.fiawec.com/uploads/2026-lm-78-lexus-rc-f-lmgt3-droite-6a23f432aecc1836233522.png"
+            }
+          ]
         },
         {
           "car_number": "79",
@@ -5412,8 +5477,13 @@
             }
           ],
           "drivers": "Johannes ZELGER / Matteo CRESSONI / Lin HODENIUS",
-          "image_url": "",
-          "liveries": []
+          "image_url": "https://www.fiawec.com/uploads/2026-wec-79-mercedes-spa-droite-69fdfd001bbad047429673.png",
+          "liveries": [
+            {
+              "name": "ルマン",
+              "url": "https://www.fiawec.com/uploads/2026-lm-79-mercedes-droite-6a26fd96381b3880699968.png"
+            }
+          ]
         },
         {
           "car_number": "87",
@@ -5440,8 +5510,13 @@
             }
           ],
           "drivers": "Petru UMBRĂRESCU / Clemens SCHMID / José María LÓPEZ",
-          "image_url": "",
-          "liveries": []
+          "image_url": "https://www.fiawec.com/uploads/2026-wec-87-lexus-rc-f-lmgt3-droit-69d608ecdbb90368473377.png",
+          "liveries": [
+            {
+              "name": "ルマン",
+              "url": "https://www.fiawec.com/uploads/2026-lm-87-lexus-rc-f-lmgt3-droite-6a23f46b1adc5624934961.png"
+            }
+          ]
         },
         {
           "car_number": "88",
@@ -5468,8 +5543,13 @@
             }
           ],
           "drivers": "Stefano GATTUSO / Giammarco LEVORATO / Logan SARGEANT",
-          "image_url": "",
-          "liveries": []
+          "image_url": "https://www.fiawec.com/uploads/2026-wec-88-ford-mustang-droit-v2-6a8d9df8d444d186302672.png",
+          "liveries": [
+            {
+              "name": "ルマン",
+              "url": "https://www.fiawec.com/uploads/2026-wec-88-ford-mustang-droit-v2-6aa954c337903091396421.png"
+            }
+          ]
         },
         {
           "car_number": "91",
@@ -5491,8 +5571,13 @@
             }
           ],
           "drivers": "James COTTINGHAM / Timur BOGUSLAVSKIY S Ayhancan GÜVEN",
-          "image_url": "",
-          "liveries": []
+          "image_url": "https://www.fiawec.com/uploads/2026-wec-91-porsche-911-gt3-r-droit-69d6115bd7e17864774223.png",
+          "liveries": [
+            {
+              "name": "ルマン",
+              "url": "https://www.fiawec.com/uploads/2026-lm-91-porsche-911-gt3-r-droite-6a23f46b8d22c882928676.png"
+            }
+          ]
         },
         {
           "car_number": "92",
@@ -5519,8 +5604,13 @@
             }
           ],
           "drivers": "Yasser SHAHIN / Riccardo PERA / Richard LIETZ",
-          "image_url": "",
-          "liveries": []
+          "image_url": "https://www.fiawec.com/uploads/2026-wec-92-porsche-911-gt3-r-droit-69d608ee51ef7314320931.png",
+          "liveries": [
+            {
+              "name": "ルマン",
+              "url": "https://www.fiawec.com/uploads/2026-lm-92-porsche-911-gt3-r-droite-6a23f46bba406303300710.png"
+            }
+          ]
         },
         {
           "car_number": "150",
@@ -5547,7 +5637,7 @@
             }
           ],
           "drivers": "Custodio TOLEDO / Lilou WADOUX / Riccardo AGOSTINI",
-          "image_url": "",
+          "image_url": "https://www.fiawec.com/uploads/2026-lm-150-ferrari-296-droite-6a23f46be93d0061190803.png",
           "liveries": []
         }
       ],
