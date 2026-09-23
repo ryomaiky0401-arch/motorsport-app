@@ -4268,6 +4268,20 @@
             "Tom GAMBLE",
             "Ross GUNN"
           ],
+          "driver_details": [
+            {
+              "name": "Harry TINCKNELL",
+              "country": ""
+            },
+            {
+              "name": "Tom GAMBLE",
+              "country": ""
+            },
+            {
+              "name": "Ross GUNN",
+              "country": ""
+            }
+          ],
           "drivers": "Harry TINCKNELL / Tom GAMBLE / Ross GUNN",
           "image_url": "",
           "liveries": []
@@ -4282,6 +4296,20 @@
             "Marco SØRENSEN",
             "Roman DE ANGELIS"
           ],
+          "driver_details": [
+            {
+              "name": "Alex RIBERAS",
+              "country": ""
+            },
+            {
+              "name": "Marco SØRENSEN",
+              "country": ""
+            },
+            {
+              "name": "Roman DE ANGELIS",
+              "country": ""
+            }
+          ],
           "drivers": "Alex RIBERAS / Marco SØRENSEN / Roman DE ANGELIS",
           "image_url": "",
           "liveries": []
@@ -4292,11 +4320,25 @@
           "team": "TOYOTA RACING",
           "country": "JPN",
           "driver_list": [
-            "HY Mike CONWAY",
+            "Mike CONWAY",
             "Kamui KOBAYASHI",
             "Nyck DE VRIES"
           ],
-          "drivers": "HY Mike CONWAY / Kamui KOBAYASHI / Nyck DE VRIES",
+          "driver_details": [
+            {
+              "name": "Mike CONWAY",
+              "country": ""
+            },
+            {
+              "name": "Kamui KOBAYASHI",
+              "country": ""
+            },
+            {
+              "name": "Nyck DE VRIES",
+              "country": ""
+            }
+          ],
+          "drivers": "Mike CONWAY / Kamui KOBAYASHI / Nyck DE VRIES",
           "image_url": "",
           "liveries": []
         },
@@ -4306,11 +4348,25 @@
           "team": "TOYOTA RACING",
           "country": "JPN",
           "driver_list": [
-            "HY Sébastien BUEMI",
+            "Sébastien BUEMI",
             "Brendon HARTLEY",
             "Ryō HIRAKAWA"
           ],
-          "drivers": "HY Sébastien BUEMI / Brendon HARTLEY / Ryō HIRAKAWA",
+          "driver_details": [
+            {
+              "name": "Sébastien BUEMI",
+              "country": ""
+            },
+            {
+              "name": "Brendon HARTLEY",
+              "country": ""
+            },
+            {
+              "name": "Ryō HIRAKAWA",
+              "country": ""
+            }
+          ],
+          "drivers": "Sébastien BUEMI / Brendon HARTLEY / Ryō HIRAKAWA",
           "image_url": "",
           "liveries": []
         },
@@ -4320,11 +4376,25 @@
           "team": "CADILLAC HERTZ TEAM JOTA",
           "country": "USA",
           "driver_list": [
-            "HY Louis DELÉTRAZ",
+            "Louis DELÉTRAZ",
             "Will STEVENS",
             "Norman NATO"
           ],
-          "drivers": "HY Louis DELÉTRAZ / Will STEVENS / Norman NATO",
+          "driver_details": [
+            {
+              "name": "Louis DELÉTRAZ",
+              "country": ""
+            },
+            {
+              "name": "Will STEVENS",
+              "country": ""
+            },
+            {
+              "name": "Norman NATO",
+              "country": ""
+            }
+          ],
+          "drivers": "Louis DELÉTRAZ / Will STEVENS / Norman NATO",
           "image_url": "",
           "liveries": []
         },
@@ -4334,11 +4404,25 @@
           "team": "BMW M TEAM WRT",
           "country": "GER",
           "driver_list": [
-            "HY Kevin MAGNUSSEN",
+            "Kevin MAGNUSSEN",
             "Raffaele MARCIELLO",
             "Dries VANTHOOR"
           ],
-          "drivers": "HY Kevin MAGNUSSEN / Raffaele MARCIELLO / Dries VANTHOOR",
+          "driver_details": [
+            {
+              "name": "Kevin MAGNUSSEN",
+              "country": ""
+            },
+            {
+              "name": "Raffaele MARCIELLO",
+              "country": ""
+            },
+            {
+              "name": "Dries VANTHOOR",
+              "country": ""
+            }
+          ],
+          "drivers": "Kevin MAGNUSSEN / Raffaele MARCIELLO / Dries VANTHOOR",
           "image_url": "",
           "liveries": []
         },
@@ -4348,11 +4432,25 @@
           "team": "GENESIS MAGMA RACING",
           "country": "KOR",
           "driver_list": [
-            "HY André LOTTERER",
+            "André LOTTERER",
             "Luis Felipe DERANI",
             "Mathys JAUBERT"
           ],
-          "drivers": "HY André LOTTERER / Luis Felipe DERANI / Mathys JAUBERT",
+          "driver_details": [
+            {
+              "name": "André LOTTERER",
+              "country": ""
+            },
+            {
+              "name": "Luis Felipe DERANI",
+              "country": ""
+            },
+            {
+              "name": "Mathys JAUBERT",
+              "country": ""
+            }
+          ],
+          "drivers": "André LOTTERER / Luis Felipe DERANI / Mathys JAUBERT",
           "image_url": "",
           "liveries": []
         },
@@ -4362,11 +4460,25 @@
           "team": "GENESIS MAGMA RACING",
           "country": "KOR",
           "driver_list": [
-            "HY Mathieu JAMINET",
+            "Mathieu JAMINET",
             "Paul-Loup CHATIN",
             "Daniel JUNCADELLA"
           ],
-          "drivers": "HY Mathieu JAMINET / Paul-Loup CHATIN / Daniel JUNCADELLA",
+          "driver_details": [
+            {
+              "name": "Mathieu JAMINET",
+              "country": ""
+            },
+            {
+              "name": "Paul-Loup CHATIN",
+              "country": ""
+            },
+            {
+              "name": "Daniel JUNCADELLA",
+              "country": ""
+            }
+          ],
+          "drivers": "Mathieu JAMINET / Paul-Loup CHATIN / Daniel JUNCADELLA",
           "image_url": "",
           "liveries": []
         },
@@ -4376,11 +4488,25 @@
           "team": "BMW M TEAM WRT",
           "country": "GER",
           "driver_list": [
-            "HY Robin FRIJNS",
+            "Robin FRIJNS",
             "René RAST",
             "Sheldon VAN DER LINDE"
           ],
-          "drivers": "HY Robin FRIJNS / René RAST / Sheldon VAN DER LINDE",
+          "driver_details": [
+            {
+              "name": "Robin FRIJNS",
+              "country": ""
+            },
+            {
+              "name": "René RAST",
+              "country": ""
+            },
+            {
+              "name": "Sheldon VAN DER LINDE",
+              "country": ""
+            }
+          ],
+          "drivers": "Robin FRIJNS / René RAST / Sheldon VAN DER LINDE",
           "image_url": "",
           "liveries": []
         },
@@ -4390,11 +4516,25 @@
           "team": "ALPINE ENDURANCE TEAM",
           "country": "FRA",
           "driver_list": [
-            "HY António FÉLIX DA COSTA",
+            "António FÉLIX DA COSTA",
             "Charles MILESI",
             "Ferdinand HABSBURG"
           ],
-          "drivers": "HY António FÉLIX DA COSTA / Charles MILESI / Ferdinand HABSBURG",
+          "driver_details": [
+            {
+              "name": "António FÉLIX DA COSTA",
+              "country": ""
+            },
+            {
+              "name": "Charles MILESI",
+              "country": ""
+            },
+            {
+              "name": "Ferdinand HABSBURG",
+              "country": ""
+            }
+          ],
+          "drivers": "António FÉLIX DA COSTA / Charles MILESI / Ferdinand HABSBURG",
           "image_url": "",
           "liveries": []
         },
@@ -4404,11 +4544,25 @@
           "team": "ALPINE ENDURANCE TEAM",
           "country": "FRA",
           "driver_list": [
-            "HY Frédéric MAKOWIECKI",
+            "Frédéric MAKOWIECKI",
             "Jules GOUNON",
             "Victor MARTINS"
           ],
-          "drivers": "HY Frédéric MAKOWIECKI / Jules GOUNON / Victor MARTINS",
+          "driver_details": [
+            {
+              "name": "Frédéric MAKOWIECKI",
+              "country": ""
+            },
+            {
+              "name": "Jules GOUNON",
+              "country": ""
+            },
+            {
+              "name": "Victor MARTINS",
+              "country": ""
+            }
+          ],
+          "drivers": "Frédéric MAKOWIECKI / Jules GOUNON / Victor MARTINS",
           "image_url": "",
           "liveries": []
         },
@@ -4418,11 +4572,25 @@
           "team": "CADILLAC HERTZ TEAM JOTA",
           "country": "USA",
           "driver_list": [
-            "HY Sébastien BOURDAIS",
+            "Sébastien BOURDAIS",
             "Earl BAMBER",
             "Jack AITKEN"
           ],
-          "drivers": "HY Sébastien BOURDAIS / Earl BAMBER / Jack AITKEN",
+          "driver_details": [
+            {
+              "name": "Sébastien BOURDAIS",
+              "country": ""
+            },
+            {
+              "name": "Earl BAMBER",
+              "country": ""
+            },
+            {
+              "name": "Jack AITKEN",
+              "country": ""
+            }
+          ],
+          "drivers": "Sébastien BOURDAIS / Earl BAMBER / Jack AITKEN",
           "image_url": "",
           "liveries": []
         },
@@ -4432,11 +4600,25 @@
           "team": "FERRARI AF CORSE",
           "country": "ITA",
           "driver_list": [
-            "HY Antonio FUOCO",
+            "Antonio FUOCO",
             "Nicklas NIELSEN",
             "Miguel MOLINA"
           ],
-          "drivers": "HY Antonio FUOCO / Nicklas NIELSEN / Miguel MOLINA",
+          "driver_details": [
+            {
+              "name": "Antonio FUOCO",
+              "country": ""
+            },
+            {
+              "name": "Nicklas NIELSEN",
+              "country": ""
+            },
+            {
+              "name": "Miguel MOLINA",
+              "country": ""
+            }
+          ],
+          "drivers": "Antonio FUOCO / Nicklas NIELSEN / Miguel MOLINA",
           "image_url": "",
           "liveries": []
         },
@@ -4446,11 +4628,25 @@
           "team": "FERRARI AF CORSE",
           "country": "ITA",
           "driver_list": [
-            "HY Alessandro PIER GUIDI",
+            "Alessandro PIER GUIDI",
             "James CALADO",
             "Antonio GIOVINAZZI"
           ],
-          "drivers": "HY Alessandro PIER GUIDI / James CALADO / Antonio GIOVINAZZI",
+          "driver_details": [
+            {
+              "name": "Alessandro PIER GUIDI",
+              "country": ""
+            },
+            {
+              "name": "James CALADO",
+              "country": ""
+            },
+            {
+              "name": "Antonio GIOVINAZZI",
+              "country": ""
+            }
+          ],
+          "drivers": "Alessandro PIER GUIDI / James CALADO / Antonio GIOVINAZZI",
           "image_url": "",
           "liveries": []
         },
@@ -4460,11 +4656,25 @@
           "team": "AF CORSE",
           "country": "ITA",
           "driver_list": [
-            "HY Yifei YE",
+            "Yifei YE",
             "Robert KUBICA",
             "Philip HANSON"
           ],
-          "drivers": "HY Yifei YE / Robert KUBICA / Philip HANSON",
+          "driver_details": [
+            {
+              "name": "Yifei YE",
+              "country": ""
+            },
+            {
+              "name": "Robert KUBICA",
+              "country": ""
+            },
+            {
+              "name": "Philip HANSON",
+              "country": ""
+            }
+          ],
+          "drivers": "Yifei YE / Robert KUBICA / Philip HANSON",
           "image_url": "",
           "liveries": []
         },
@@ -4474,11 +4684,25 @@
           "team": "PEUGEOT TOTALENERGIES",
           "country": "FRA",
           "driver_list": [
-            "HY Paul DI RESTA",
+            "Paul DI RESTA",
             "Stoffel VANDOORNE",
             "Nick CASSIDY"
           ],
-          "drivers": "HY Paul DI RESTA / Stoffel VANDOORNE / Nick CASSIDY",
+          "driver_details": [
+            {
+              "name": "Paul DI RESTA",
+              "country": ""
+            },
+            {
+              "name": "Stoffel VANDOORNE",
+              "country": ""
+            },
+            {
+              "name": "Nick CASSIDY",
+              "country": ""
+            }
+          ],
+          "drivers": "Paul DI RESTA / Stoffel VANDOORNE / Nick CASSIDY",
           "image_url": "",
           "liveries": []
         },
@@ -4488,11 +4712,25 @@
           "team": "PEUGEOT TOTALENERGIES",
           "country": "FRA",
           "driver_list": [
-            "HY Loïc DUVAL",
+            "Loïc DUVAL",
             "Malthe JAKOBSEN",
             "Théo POURCHAIRE"
           ],
-          "drivers": "HY Loïc DUVAL / Malthe JAKOBSEN / Théo POURCHAIRE",
+          "driver_details": [
+            {
+              "name": "Loïc DUVAL",
+              "country": ""
+            },
+            {
+              "name": "Malthe JAKOBSEN",
+              "country": ""
+            },
+            {
+              "name": "Théo POURCHAIRE",
+              "country": ""
+            }
+          ],
+          "drivers": "Loïc DUVAL / Malthe JAKOBSEN / Théo POURCHAIRE",
           "image_url": "",
           "liveries": []
         },
@@ -4502,11 +4740,25 @@
           "team": "CADILLAC WTR",
           "country": "USA",
           "driver_list": [
-            "HY Ricky TAYLOR",
+            "Ricky TAYLOR",
             "Jordan TAYLOR",
             "Filipe ALBUQUERQUE"
           ],
-          "drivers": "HY Ricky TAYLOR / Jordan TAYLOR / Filipe ALBUQUERQUE",
+          "driver_details": [
+            {
+              "name": "Ricky TAYLOR",
+              "country": ""
+            },
+            {
+              "name": "Jordan TAYLOR",
+              "country": ""
+            },
+            {
+              "name": "Filipe ALBUQUERQUE",
+              "country": ""
+            }
+          ],
+          "drivers": "Ricky TAYLOR / Jordan TAYLOR / Filipe ALBUQUERQUE",
           "image_url": "",
           "liveries": []
         }
@@ -4523,6 +4775,20 @@
             "Afiq IKHWAN",
             "Ben GREEN"
           ],
+          "driver_details": [
+            {
+              "name": "Prince JEFRI IBRAHIM",
+              "country": ""
+            },
+            {
+              "name": "Afiq IKHWAN",
+              "country": ""
+            },
+            {
+              "name": "Ben GREEN",
+              "country": ""
+            }
+          ],
           "drivers": "Prince JEFRI IBRAHIM / Afiq IKHWAN / Ben GREEN",
           "image_url": "",
           "liveries": []
@@ -4536,6 +4802,20 @@
             "Antares AU",
             "Thomas FLEMING",
             "Marvin KIRCHHÖFER"
+          ],
+          "driver_details": [
+            {
+              "name": "Antares AU",
+              "country": ""
+            },
+            {
+              "name": "Thomas FLEMING",
+              "country": ""
+            },
+            {
+              "name": "Marvin KIRCHHÖFER",
+              "country": ""
+            }
           ],
           "drivers": "Antares AU / Thomas FLEMING / Marvin KIRCHHÖFER",
           "image_url": "",
@@ -4551,6 +4831,20 @@
             "Lars KERN",
             "Matthew BELL"
           ],
+          "driver_details": [
+            {
+              "name": "Orey FIDANI",
+              "country": ""
+            },
+            {
+              "name": "Lars KERN",
+              "country": ""
+            },
+            {
+              "name": "Matthew BELL",
+              "country": ""
+            }
+          ],
           "drivers": "Orey FIDANI / Lars KERN / Matthew BELL",
           "image_url": "",
           "liveries": []
@@ -4564,6 +4858,20 @@
             "François HÉRIAU",
             "Simon MANN",
             "Alessio ROVERA"
+          ],
+          "driver_details": [
+            {
+              "name": "François HÉRIAU",
+              "country": ""
+            },
+            {
+              "name": "Simon MANN",
+              "country": ""
+            },
+            {
+              "name": "Alessio ROVERA",
+              "country": ""
+            }
           ],
           "drivers": "François HÉRIAU / Simon MANN / Alessio ROVERA",
           "image_url": "",
@@ -4579,6 +4887,20 @@
             "Eduardo BARRICHELLO",
             "Jonny ADAM"
           ],
+          "driver_details": [
+            {
+              "name": "Gray NEWELL",
+              "country": ""
+            },
+            {
+              "name": "Eduardo BARRICHELLO",
+              "country": ""
+            },
+            {
+              "name": "Jonny ADAM",
+              "country": ""
+            }
+          ],
           "drivers": "Gray NEWELL / Eduardo BARRICHELLO / Jonny ADAM",
           "image_url": "",
           "liveries": []
@@ -4592,6 +4914,20 @@
             "Ian JAMES",
             "Zacharie ROBICHON",
             "Mattia DRUDI"
+          ],
+          "driver_details": [
+            {
+              "name": "Ian JAMES",
+              "country": ""
+            },
+            {
+              "name": "Zacharie ROBICHON",
+              "country": ""
+            },
+            {
+              "name": "Mattia DRUDI",
+              "country": ""
+            }
           ],
           "drivers": "Ian JAMES / Zacharie ROBICHON / Mattia DRUDI",
           "image_url": "",
@@ -4607,6 +4943,20 @@
             "Sean GELAEL",
             "Augusto FARFUS"
           ],
+          "driver_details": [
+            {
+              "name": "Darren LEUNG",
+              "country": ""
+            },
+            {
+              "name": "Sean GELAEL",
+              "country": ""
+            },
+            {
+              "name": "Augusto FARFUS",
+              "country": ""
+            }
+          ],
           "drivers": "Darren LEUNG / Sean GELAEL / Augusto FARFUS",
           "image_url": "",
           "liveries": []
@@ -4620,6 +4970,20 @@
             "Ben KEATING",
             "Jonny EDGAR",
             "Nicky CATSBURG"
+          ],
+          "driver_details": [
+            {
+              "name": "Ben KEATING",
+              "country": ""
+            },
+            {
+              "name": "Jonny EDGAR",
+              "country": ""
+            },
+            {
+              "name": "Nicky CATSBURG",
+              "country": ""
+            }
           ],
           "drivers": "Ben KEATING / Jonny EDGAR / Nicky CATSBURG",
           "image_url": "",
@@ -4635,6 +4999,20 @@
             "Salih YOLUÇ",
             "Charlie EASTWOOD"
           ],
+          "driver_details": [
+            {
+              "name": "Peter DEMPSEY",
+              "country": ""
+            },
+            {
+              "name": "Salih YOLUÇ",
+              "country": ""
+            },
+            {
+              "name": "Charlie EASTWOOD",
+              "country": ""
+            }
+          ],
           "drivers": "Peter DEMPSEY / Salih YOLUÇ / Charlie EASTWOOD",
           "image_url": "",
           "liveries": []
@@ -4648,6 +5026,20 @@
             "Thomas FLOHR",
             "Francesco CASTELLACCI",
             "Davide RIGON"
+          ],
+          "driver_details": [
+            {
+              "name": "Thomas FLOHR",
+              "country": ""
+            },
+            {
+              "name": "Francesco CASTELLACCI",
+              "country": ""
+            },
+            {
+              "name": "Davide RIGON",
+              "country": ""
+            }
           ],
           "drivers": "Thomas FLOHR / Francesco CASTELLACCI / Davide RIGON",
           "image_url": "",
@@ -4663,6 +5055,20 @@
             "Conrad LAURSEN",
             "Daniel SERRA"
           ],
+          "driver_details": [
+            {
+              "name": "Takeshi KIMURA",
+              "country": ""
+            },
+            {
+              "name": "Conrad LAURSEN",
+              "country": ""
+            },
+            {
+              "name": "Daniel SERRA",
+              "country": ""
+            }
+          ],
           "drivers": "Takeshi KIMURA / Conrad LAURSEN / Daniel SERRA",
           "image_url": "",
           "liveries": []
@@ -4676,6 +5082,20 @@
             "Alexander WEST",
             "Finn GEHRSITZ",
             "Benjamin GOETHE"
+          ],
+          "driver_details": [
+            {
+              "name": "Alexander WEST",
+              "country": ""
+            },
+            {
+              "name": "Finn GEHRSITZ",
+              "country": ""
+            },
+            {
+              "name": "Benjamin GOETHE",
+              "country": ""
+            }
           ],
           "drivers": "Alexander WEST / Finn GEHRSITZ / Benjamin GOETHE",
           "image_url": "",
@@ -4691,6 +5111,20 @@
             "Marius FOSSARD",
             "Valentin HASSE CLOT"
           ],
+          "driver_details": [
+            {
+              "name": "Clément MATEU",
+              "country": ""
+            },
+            {
+              "name": "Marius FOSSARD",
+              "country": ""
+            },
+            {
+              "name": "Valentin HASSE CLOT",
+              "country": ""
+            }
+          ],
           "drivers": "Clément MATEU / Marius FOSSARD / Valentin HASSE CLOT",
           "image_url": "",
           "liveries": []
@@ -4704,6 +5138,20 @@
             "Martin BERRY",
             "Rui ANDRADE",
             "Maxime MARTIN"
+          ],
+          "driver_details": [
+            {
+              "name": "Martin BERRY",
+              "country": ""
+            },
+            {
+              "name": "Rui ANDRADE",
+              "country": ""
+            },
+            {
+              "name": "Maxime MARTIN",
+              "country": ""
+            }
           ],
           "drivers": "Martin BERRY / Rui ANDRADE / Maxime MARTIN",
           "image_url": "",
@@ -4719,6 +5167,20 @@
             "Julian HANSES",
             "Giuliano ALESI"
           ],
+          "driver_details": [
+            {
+              "name": "Abdulla AL-KHELAIFI",
+              "country": ""
+            },
+            {
+              "name": "Julian HANSES",
+              "country": ""
+            },
+            {
+              "name": "Giuliano ALESI",
+              "country": ""
+            }
+          ],
           "drivers": "Abdulla AL-KHELAIFI / Julian HANSES / Giuliano ALESI",
           "image_url": "",
           "liveries": []
@@ -4732,6 +5194,20 @@
             "Anthony MCINTOSH",
             "Parker THOMPSON",
             "Daniel HARPER"
+          ],
+          "driver_details": [
+            {
+              "name": "Anthony MCINTOSH",
+              "country": ""
+            },
+            {
+              "name": "Parker THOMPSON",
+              "country": ""
+            },
+            {
+              "name": "Daniel HARPER",
+              "country": ""
+            }
           ],
           "drivers": "Anthony MCINTOSH / Parker THOMPSON / Daniel HARPER",
           "image_url": "",
@@ -4747,6 +5223,20 @@
             "Lorenzo PATRESE",
             "Dennis MARSCHALL"
           ],
+          "driver_details": [
+            {
+              "name": "Dustin BLATTNER",
+              "country": ""
+            },
+            {
+              "name": "Lorenzo PATRESE",
+              "country": ""
+            },
+            {
+              "name": "Dennis MARSCHALL",
+              "country": ""
+            }
+          ],
           "drivers": "Dustin BLATTNER / Lorenzo PATRESE / Dennis MARSCHALL",
           "image_url": "",
           "liveries": []
@@ -4760,6 +5250,20 @@
             "Eric POWELL",
             "Ben TUCK",
             "Sebastian PRIAULX"
+          ],
+          "driver_details": [
+            {
+              "name": "Eric POWELL",
+              "country": ""
+            },
+            {
+              "name": "Ben TUCK",
+              "country": ""
+            },
+            {
+              "name": "Sebastian PRIAULX",
+              "country": ""
+            }
           ],
           "drivers": "Eric POWELL / Ben TUCK / Sebastian PRIAULX",
           "image_url": "",
@@ -4775,6 +5279,20 @@
             "Hadrien DAVID",
             "Jack HAWKSWORTH"
           ],
+          "driver_details": [
+            {
+              "name": "Tom VAN ROMPUY",
+              "country": ""
+            },
+            {
+              "name": "Hadrien DAVID",
+              "country": ""
+            },
+            {
+              "name": "Jack HAWKSWORTH",
+              "country": ""
+            }
+          ],
           "drivers": "Tom VAN ROMPUY / Hadrien DAVID / Jack HAWKSWORTH",
           "image_url": "",
           "liveries": []
@@ -4788,6 +5306,20 @@
             "Johannes ZELGER",
             "Matteo CRESSONI",
             "Lin HODENIUS"
+          ],
+          "driver_details": [
+            {
+              "name": "Johannes ZELGER",
+              "country": ""
+            },
+            {
+              "name": "Matteo CRESSONI",
+              "country": ""
+            },
+            {
+              "name": "Lin HODENIUS",
+              "country": ""
+            }
           ],
           "drivers": "Johannes ZELGER / Matteo CRESSONI / Lin HODENIUS",
           "image_url": "",
@@ -4803,6 +5335,20 @@
             "Clemens SCHMID",
             "José María LÓPEZ"
           ],
+          "driver_details": [
+            {
+              "name": "Petru UMBRĂRESCU",
+              "country": ""
+            },
+            {
+              "name": "Clemens SCHMID",
+              "country": ""
+            },
+            {
+              "name": "José María LÓPEZ",
+              "country": ""
+            }
+          ],
           "drivers": "Petru UMBRĂRESCU / Clemens SCHMID / José María LÓPEZ",
           "image_url": "",
           "liveries": []
@@ -4816,6 +5362,20 @@
             "Stefano GATTUSO",
             "Giammarco LEVORATO",
             "Logan SARGEANT"
+          ],
+          "driver_details": [
+            {
+              "name": "Stefano GATTUSO",
+              "country": ""
+            },
+            {
+              "name": "Giammarco LEVORATO",
+              "country": ""
+            },
+            {
+              "name": "Logan SARGEANT",
+              "country": ""
+            }
           ],
           "drivers": "Stefano GATTUSO / Giammarco LEVORATO / Logan SARGEANT",
           "image_url": "",
@@ -4831,6 +5391,20 @@
             "Timur BOGUSLAVSKIY",
             "Ayhancan GÜVEN"
           ],
+          "driver_details": [
+            {
+              "name": "James COTTINGHAM",
+              "country": ""
+            },
+            {
+              "name": "Timur BOGUSLAVSKIY",
+              "country": ""
+            },
+            {
+              "name": "Ayhancan GÜVEN",
+              "country": ""
+            }
+          ],
           "drivers": "James COTTINGHAM / Timur BOGUSLAVSKIY / Ayhancan GÜVEN",
           "image_url": "",
           "liveries": []
@@ -4844,6 +5418,20 @@
             "Yasser SHAHIN",
             "Riccardo PERA",
             "Richard LIETZ"
+          ],
+          "driver_details": [
+            {
+              "name": "Yasser SHAHIN",
+              "country": ""
+            },
+            {
+              "name": "Riccardo PERA",
+              "country": ""
+            },
+            {
+              "name": "Richard LIETZ",
+              "country": ""
+            }
           ],
           "drivers": "Yasser SHAHIN / Riccardo PERA / Richard LIETZ",
           "image_url": "",
@@ -4859,6 +5447,20 @@
             "Lilou WADOUX",
             "Riccardo AGOSTINI"
           ],
+          "driver_details": [
+            {
+              "name": "Custodio TOLEDO",
+              "country": ""
+            },
+            {
+              "name": "Lilou WADOUX",
+              "country": ""
+            },
+            {
+              "name": "Riccardo AGOSTINI",
+              "country": ""
+            }
+          ],
           "drivers": "Custodio TOLEDO / Lilou WADOUX / Riccardo AGOSTINI",
           "image_url": "",
           "liveries": []
@@ -4871,11 +5473,25 @@
           "team": "DKR ENGINEERING",
           "country": "LUX",
           "driver_list": [
-            "Pro-Am John FARANO",
+            "John FARANO",
             "Sebastian ALVAREZ",
             "Renger VAN DER ZANDE"
           ],
-          "drivers": "Pro-Am John FARANO / Sebastian ALVAREZ / Renger VAN DER ZANDE",
+          "driver_details": [
+            {
+              "name": "John FARANO",
+              "country": ""
+            },
+            {
+              "name": "Sebastian ALVAREZ",
+              "country": ""
+            },
+            {
+              "name": "Renger VAN DER ZANDE",
+              "country": ""
+            }
+          ],
+          "drivers": "John FARANO / Sebastian ALVAREZ / Renger VAN DER ZANDE",
           "image_url": "",
           "liveries": []
         },
@@ -4885,11 +5501,25 @@
           "team": "CROWDSTRIKE RACING BY APR",
           "country": "USA",
           "driver_list": [
-            "Pro-Am George KURTZ",
+            "George KURTZ",
             "Alexander QUINN",
             "Laurin HEINRICH"
           ],
-          "drivers": "Pro-Am George KURTZ / Alexander QUINN / Laurin HEINRICH",
+          "driver_details": [
+            {
+              "name": "George KURTZ",
+              "country": ""
+            },
+            {
+              "name": "Alexander QUINN",
+              "country": ""
+            },
+            {
+              "name": "Laurin HEINRICH",
+              "country": ""
+            }
+          ],
+          "drivers": "George KURTZ / Alexander QUINN / Laurin HEINRICH",
           "image_url": "",
           "liveries": []
         },
@@ -4903,6 +5533,20 @@
             "Kakunoshin OHTA",
             "Harry KING"
           ],
+          "driver_details": [
+            {
+              "name": "Jonas RIED",
+              "country": ""
+            },
+            {
+              "name": "Kakunoshin OHTA",
+              "country": ""
+            },
+            {
+              "name": "Harry KING",
+              "country": ""
+            }
+          ],
           "drivers": "Jonas RIED / Kakunoshin OHTA / Harry KING",
           "image_url": "",
           "liveries": []
@@ -4913,11 +5557,25 @@
           "team": "TDS RACING",
           "country": "FRA",
           "driver_list": [
-            "Pro-Am Tobias LUTKE",
+            "Tobias LUTKE",
             "Mathias BECHE",
             "Kevin ESTRE"
           ],
-          "drivers": "Pro-Am Tobias LUTKE / Mathias BECHE / Kevin ESTRE",
+          "driver_details": [
+            {
+              "name": "Tobias LUTKE",
+              "country": ""
+            },
+            {
+              "name": "Mathias BECHE",
+              "country": ""
+            },
+            {
+              "name": "Kevin ESTRE",
+              "country": ""
+            }
+          ],
+          "drivers": "Tobias LUTKE / Mathias BECHE / Kevin ESTRE",
           "image_url": "",
           "liveries": []
         },
@@ -4930,6 +5588,20 @@
             "Rasmus LINDH",
             "Grégoire SAUCY",
             "Mikkel JENSEN"
+          ],
+          "driver_details": [
+            {
+              "name": "Rasmus LINDH",
+              "country": ""
+            },
+            {
+              "name": "Grégoire SAUCY",
+              "country": ""
+            },
+            {
+              "name": "Mikkel JENSEN",
+              "country": ""
+            }
           ],
           "drivers": "Rasmus LINDH / Grégoire SAUCY / Mikkel JENSEN",
           "image_url": "",
@@ -4945,6 +5617,20 @@
             "Edward PEARSON",
             "Jack DOOHAN"
           ],
+          "driver_details": [
+            {
+              "name": "David HEINEMEIER HANSSON",
+              "country": ""
+            },
+            {
+              "name": "Edward PEARSON",
+              "country": ""
+            },
+            {
+              "name": "Jack DOOHAN",
+              "country": ""
+            }
+          ],
           "drivers": "David HEINEMEIER HANSSON / Edward PEARSON / Jack DOOHAN",
           "image_url": "",
           "liveries": []
@@ -4955,11 +5641,25 @@
           "team": "ALGARVE PRO RACING",
           "country": "POR",
           "driver_list": [
-            "Pro-Am Michael JENSEN",
+            "Michael JENSEN",
             "Enzo TRULLI",
             "Jake HUGHES"
           ],
-          "drivers": "Pro-Am Michael JENSEN / Enzo TRULLI / Jake HUGHES",
+          "driver_details": [
+            {
+              "name": "Michael JENSEN",
+              "country": ""
+            },
+            {
+              "name": "Enzo TRULLI",
+              "country": ""
+            },
+            {
+              "name": "Jake HUGHES",
+              "country": ""
+            }
+          ],
+          "drivers": "Michael JENSEN / Enzo TRULLI / Jake HUGHES",
           "image_url": "",
           "liveries": []
         },
@@ -4972,6 +5672,20 @@
             "Ryan CULLEN",
             "Vladislav LOMKO",
             "Pietro FITTIPALDI"
+          ],
+          "driver_details": [
+            {
+              "name": "Ryan CULLEN",
+              "country": ""
+            },
+            {
+              "name": "Vladislav LOMKO",
+              "country": ""
+            },
+            {
+              "name": "Pietro FITTIPALDI",
+              "country": ""
+            }
           ],
           "drivers": "Ryan CULLEN / Vladislav LOMKO / Pietro FITTIPALDI",
           "image_url": "",
@@ -4987,6 +5701,20 @@
             "Valerio RINICELLA",
             "Job VAN UITERT"
           ],
+          "driver_details": [
+            {
+              "name": "Paul LAFARGUE",
+              "country": ""
+            },
+            {
+              "name": "Valerio RINICELLA",
+              "country": ""
+            },
+            {
+              "name": "Job VAN UITERT",
+              "country": ""
+            }
+          ],
           "drivers": "Paul LAFARGUE / Valerio RINICELLA / Job VAN UITERT",
           "image_url": "",
           "liveries": []
@@ -5000,6 +5728,20 @@
             "Louis ROUSSET",
             "Esteban MASSON",
             "Oliver GRAY"
+          ],
+          "driver_details": [
+            {
+              "name": "Louis ROUSSET",
+              "country": ""
+            },
+            {
+              "name": "Esteban MASSON",
+              "country": ""
+            },
+            {
+              "name": "Oliver GRAY",
+              "country": ""
+            }
           ],
           "drivers": "Louis ROUSSET / Esteban MASSON / Oliver GRAY",
           "image_url": "",
@@ -5015,6 +5757,20 @@
             "Julien ANDLAUER",
             "Richard VERSCHOOR"
           ],
+          "driver_details": [
+            {
+              "name": "Doriane PIN",
+              "country": ""
+            },
+            {
+              "name": "Julien ANDLAUER",
+              "country": ""
+            },
+            {
+              "name": "Richard VERSCHOOR",
+              "country": ""
+            }
+          ],
           "drivers": "Doriane PIN / Julien ANDLAUER / Richard VERSCHOOR",
           "image_url": "",
           "liveries": []
@@ -5028,6 +5784,20 @@
             "Adrien CLOSMENIL",
             "Ian AGUILERA",
             "Theodor JENSEN"
+          ],
+          "driver_details": [
+            {
+              "name": "Adrien CLOSMENIL",
+              "country": ""
+            },
+            {
+              "name": "Ian AGUILERA",
+              "country": ""
+            },
+            {
+              "name": "Theodor JENSEN",
+              "country": ""
+            }
           ],
           "drivers": "Adrien CLOSMENIL / Ian AGUILERA / Theodor JENSEN",
           "image_url": "",
@@ -5043,6 +5813,20 @@
             "Tom DILLMANN",
             "Nicholas YELLOLY"
           ],
+          "driver_details": [
+            {
+              "name": "Jakub SMIECHOWSKI",
+              "country": ""
+            },
+            {
+              "name": "Tom DILLMANN",
+              "country": ""
+            },
+            {
+              "name": "Nicholas YELLOLY",
+              "country": ""
+            }
+          ],
           "drivers": "Jakub SMIECHOWSKI / Tom DILLMANN / Nicholas YELLOLY",
           "image_url": "",
           "liveries": []
@@ -5053,11 +5837,25 @@
           "team": "PROTON COMPETITION",
           "country": "GER",
           "driver_list": [
-            "Pro-Am Horst Jr FELBERMAYR",
+            "Horst Jr FELBERMAYR",
             "Horst Felix FELBERMAYR",
             "Lorenzo FLUXÀ"
           ],
-          "drivers": "Pro-Am Horst Jr FELBERMAYR / Horst Felix FELBERMAYR / Lorenzo FLUXÀ",
+          "driver_details": [
+            {
+              "name": "Horst Jr FELBERMAYR",
+              "country": ""
+            },
+            {
+              "name": "Horst Felix FELBERMAYR",
+              "country": ""
+            },
+            {
+              "name": "Lorenzo FLUXÀ",
+              "country": ""
+            }
+          ],
+          "drivers": "Horst Jr FELBERMAYR / Horst Felix FELBERMAYR / Lorenzo FLUXÀ",
           "image_url": "",
           "liveries": []
         },
@@ -5067,11 +5865,25 @@
           "team": "RD LIMITED",
           "country": "FRA",
           "driver_list": [
-            "Pro-Am Fred POORDAD",
+            "Fred POORDAD",
             "Tristan VAUTIER",
             "Romain DUMAS"
           ],
-          "drivers": "Pro-Am Fred POORDAD / Tristan VAUTIER / Romain DUMAS",
+          "driver_details": [
+            {
+              "name": "Fred POORDAD",
+              "country": ""
+            },
+            {
+              "name": "Tristan VAUTIER",
+              "country": ""
+            },
+            {
+              "name": "Romain DUMAS",
+              "country": ""
+            }
+          ],
+          "drivers": "Fred POORDAD / Tristan VAUTIER / Romain DUMAS",
           "image_url": "",
           "liveries": []
         },
@@ -5081,11 +5893,25 @@
           "team": "AO BY TF",
           "country": "USA",
           "driver_list": [
-            "Pro-Am PJ HYETT",
+            "PJ HYETT",
             "James ALLEN",
             "Dane CAMERON"
           ],
-          "drivers": "Pro-Am PJ HYETT / James ALLEN / Dane CAMERON",
+          "driver_details": [
+            {
+              "name": "PJ HYETT",
+              "country": ""
+            },
+            {
+              "name": "James ALLEN",
+              "country": ""
+            },
+            {
+              "name": "Dane CAMERON",
+              "country": ""
+            }
+          ],
+          "drivers": "PJ HYETT / James ALLEN / Dane CAMERON",
           "image_url": "",
           "liveries": []
         },
@@ -5095,11 +5921,25 @@
           "team": "AF CORSE",
           "country": "ITA",
           "driver_list": [
-            "Pro-Am François PERRODO",
+            "François PERRODO",
             "Matthieu VAXIVIERE",
             "Ben BARNICOAT"
           ],
-          "drivers": "Pro-Am François PERRODO / Matthieu VAXIVIERE / Ben BARNICOAT",
+          "driver_details": [
+            {
+              "name": "François PERRODO",
+              "country": ""
+            },
+            {
+              "name": "Matthieu VAXIVIERE",
+              "country": ""
+            },
+            {
+              "name": "Ben BARNICOAT",
+              "country": ""
+            }
+          ],
+          "drivers": "François PERRODO / Matthieu VAXIVIERE / Ben BARNICOAT",
           "image_url": "",
           "liveries": []
         },
@@ -5109,11 +5949,25 @@
           "team": "UNITED AUTOSPORTS",
           "country": "GBR",
           "driver_list": [
-            "Pro-Am Daniel SCHNEIDER",
+            "Daniel SCHNEIDER",
             "Benjamin HANLEY",
             "Oliver JARVIS"
           ],
-          "drivers": "Pro-Am Daniel SCHNEIDER / Benjamin HANLEY / Oliver JARVIS",
+          "driver_details": [
+            {
+              "name": "Daniel SCHNEIDER",
+              "country": ""
+            },
+            {
+              "name": "Benjamin HANLEY",
+              "country": ""
+            },
+            {
+              "name": "Oliver JARVIS",
+              "country": ""
+            }
+          ],
+          "drivers": "Daniel SCHNEIDER / Benjamin HANLEY / Oliver JARVIS",
           "image_url": "",
           "liveries": []
         },
@@ -5126,6 +5980,20 @@
             "Bijoy GARG",
             "Reshad DE GÉRUS",
             "Nico MÜLLER"
+          ],
+          "driver_details": [
+            {
+              "name": "Bijoy GARG",
+              "country": ""
+            },
+            {
+              "name": "Reshad DE GÉRUS",
+              "country": ""
+            },
+            {
+              "name": "Nico MÜLLER",
+              "country": ""
+            }
           ],
           "drivers": "Bijoy GARG / Reshad DE GÉRUS / Nico MÜLLER",
           "image_url": "",
