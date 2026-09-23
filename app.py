@@ -1573,6 +1573,49 @@ with tab_entry:
                     except Exception as ex:
                         st.error(f"Entry Listの読み込みに失敗しました: {ex}")
 
+    with st.expander("🖼️ マシン画像URLをまとめて登録"):
+        st.caption("1行に「車番 URL」の形式で貼り付けてください。現在選択中のクラスだけ更新します。既存のエントリー情報や追加カラーリングは変更しません。")
+        bulk_image_text = st.text_area(
+            "画像URL一覧",
+            placeholder="007 https://example.com/007.png\n009 https://example.com/009.png\n7 https://example.com/7.png",
+            height=220,
+            key=f"entry_bulk_images_{e_year}_{entry_key}",
+        )
+        if st.button("画像URLを一括登録", use_container_width=True, key=f"entry_bulk_images_save_{e_year}_{entry_key}"):
+            entry_by_no = {str(x.get("car_number", "")).strip(): x for x in entries}
+            updated = []
+            not_found = []
+            invalid = []
+            for line_no, raw_line in enumerate(bulk_image_text.splitlines(), start=1):
+                line = raw_line.strip()
+                if not line:
+                    continue
+                parts = line.split(None, 1)
+                if len(parts) != 2:
+                    invalid.append(str(line_no))
+                    continue
+                car_no, image = parts[0].strip().lstrip("#"), parts[1].strip()
+                if not image.startswith(("http://", "https://")):
+                    invalid.append(str(line_no))
+                    continue
+                target_entry = entry_by_no.get(car_no)
+                if target_entry is None:
+                    not_found.append(car_no)
+                    continue
+                target_entry["image_url"] = image
+                updated.append(car_no)
+            if invalid:
+                st.error("形式を確認してください（行: " + ", ".join(invalid) + "）。「車番 URL」の形式です。")
+            elif not updated:
+                st.warning("更新できる画像URLがありませんでした。")
+            else:
+                save_data(data)
+                msg = f"{len(updated)}台の画像URLを一括登録しました！"
+                if not_found:
+                    msg += " 未登録の車番: " + ", ".join(not_found)
+                st.success(msg)
+                st.rerun()
+
     with st.expander("➕ エントリーを追加 / 編集"):
         edit_options = ["新規追加"] + [f"No.{x.get('car_number', '')} {x.get('team', '')}" for x in entries]
         edit_choice = st.selectbox("編集対象", edit_options, key="entry_edit_choice")
