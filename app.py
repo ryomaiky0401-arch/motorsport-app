@@ -668,6 +668,100 @@ def extract_sf_result_url(url):
         raise ValueError("順位データを取得できませんでした。")
     return rows, session
 
+def extract_wec_entry_list_url(url):
+    """FIA WEC公式のEntry List PDF URLからクラス別エントリーを抽出する。"""
+    import re
+    import requests
+    import pdfplumber
+    from urllib.parse import urlparse
+
+    url = url.strip()
+    parsed = urlparse(url)
+    if parsed.netloc.lower() not in ["fiawec.com", "www.fiawec.com"] or "/race/document/download/" not in parsed.path:
+        raise ValueError("FIA WEC公式のEntry List PDF URL（fiawec.com/en/race/document/download/...）を入力してください。")
+
+    response = requests.get(url, timeout=25, headers={"User-Agent": "Mozilla/5.0"})
+    response.raise_for_status()
+    pdf_bytes = io.BytesIO(response.content)
+    with pdfplumber.open(pdf_bytes) as pdf:
+        text = "\n".join((p.extract_text(x_tolerance=2, y_tolerance=2) or "") for p in pdf.pages)
+
+    upper = text.upper()
+    if "ENTRY LIST" not in upper:
+        raise ValueError("Entry List PDFとして認識できませんでした。")
+
+    # 国籍/タイヤ/ドライバーカテゴリー等の短い列を利用して1台ごとの行を分解する。
+    nat_codes = r"(?:USA|GBR|JPN|GER|DEU|KOR|FRA|ITA|BEL|TUR|CHE|SUI|ESP|PRT|POR|NLD|NED|DNK|DEN|AUT|AUS|NZL|CAN|BRA|ARG|HKG|ROU|SWE|ANG|MCO|MON|POL|CHN)"
+    driver_re = re.compile(r"(.+?)\s*\(([A-Z]{3})\)\s*([PGBS])(?=\s|$)")
+    car_markers = [
+        "Aston Martin Valkyrie", "Toyota TR010 Hybrid", "Toyota GR010 Hybrid",
+        "Cadillac V-Series.R", "BMW M Hybrid V8", "Genesis GMR-001-Hypercar",
+        "Alpine A424", "Ferrari 499P", "Peugeot 9X8",
+        "McLaren 720S LMGT3 Evo", "Ferrari 296 LMGT3 Evo",
+        "Aston Martin Vantage AMR LMGT3", "BMW M4 LMGT3 Evo",
+        "Corvette Z06 LMGT3.R", "Mercedes-AMG LMGT3", "Ford Mustang LMGT3",
+        "Lexus RC F LMGT3", "Porsche 911 GT3 R LMGT3",
+    ]
+
+    rows_by_class = {"Hypercar": [], "LMP2": [], "LMGT3": []}
+    current_cls = None
+    lines = [re.sub(r"\s+", " ", x).strip() for x in text.splitlines() if x.strip()]
+    for line in lines:
+        u = line.upper()
+        if "HYPERCAR COMPETITORS" in u:
+            current_cls = "Hypercar"
+            continue
+        if "LMP2 COMPETITORS" in u:
+            current_cls = "LMP2"
+            continue
+        if "LMGT3 COMPETITORS" in u:
+            current_cls = "LMGT3"
+            continue
+        if not current_cls:
+            continue
+
+        m = re.match(r"^(\d{1,3})\s+(.+?)\s+(" + nat_codes + r")\s+[MG]\s+(.+)$", line, re.I)
+        if not m:
+            continue
+        no, team, nat, rest = m.groups()
+
+        # 車種名は既知のWEC車種を優先。未知車種は最初のドライバーまでの文字列から推定する。
+        machine = next((x for x in car_markers if rest.lower().startswith(x.lower())), "")
+        if machine:
+            tail = rest[len(machine):].strip()
+        else:
+            dm0 = re.search(r"\b[^()]+\s\([A-Z]{3}\)\s*[PGBS]\b", rest)
+            if not dm0:
+                continue
+            machine = rest[:dm0.start()].strip()
+            # HypercarのMISC列 HYなどを除去
+            machine = re.sub(r"\s+HY$", "", machine, flags=re.I).strip()
+            tail = rest[dm0.start():].strip()
+
+        # 車種直後のMISC列(HY等)を除く。
+        tail = re.sub(r"^(?:HY)\s+", "", tail, flags=re.I)
+        drivers = []
+        for dm in driver_re.finditer(tail):
+            name = re.sub(r"\s+", " ", dm.group(1)).strip()
+            # 前ドライバーのカテゴリ記号等が混ざった場合を除去
+            name = re.sub(r"^[PGBS]\s+", "", name).strip()
+            if name and name != "-":
+                drivers.append(name)
+        rows_by_class[current_cls].append({
+            "car_number": no,
+            "machine": machine,
+            "team": team.strip(),
+            "country": nat.upper(),
+            "driver_list": drivers[:3],
+            "drivers": " / ".join(drivers[:3]),
+        })
+
+    groups = {k: v for k, v in rows_by_class.items() if v}
+    if not groups:
+        raise ValueError("Entry Listから車両データを抽出できませんでした。")
+    return groups
+
+
 def extract_wec_timing_url(url):
     """Al Kamel Timing Resultsのテキスト入りClassification PDFを直接解析する。OCRは使わない。"""
     import re
@@ -1361,95 +1455,39 @@ with tab_entry:
     entry_key = f"{e_cat}_{e_cls}"
     entries = data.setdefault("entries", {}).setdefault(e_year, {}).setdefault(entry_key, [])
 
-    # 2026 WECは台数が多いため、公式シーズンエントリー35台を一括作成できる。
-    # 画像URL/追加カラーリングは既存値を必ず保持し、再実行しても消さない。
-    if e_cat == "WEC" and e_year == 2026:
-        wec_2026_entries = {
-            "Hypercar": [
-                ("007", "Aston Martin Valkyrie", "Aston Martin Thor Team", "United States"),
-                ("009", "Aston Martin Valkyrie", "Aston Martin Thor Team", "United States"),
-                ("7", "Toyota GR010 - Hybrid", "Toyota Racing", "Japan"),
-                ("8", "Toyota GR010 - Hybrid", "Toyota Racing", "Japan"),
-                ("12", "Cadillac V-Series.R", "Cadillac Hertz Team Jota", "United States"),
-                ("15", "BMW M Hybrid V8", "BMW M Team WRT", "Germany"),
-                ("17", "Genesis GMR-001-Hypercar", "Genesis Magma Racing", "South Korea"),
-                ("19", "Genesis GMR-001-Hypercar", "Genesis Magma Racing", "South Korea"),
-                ("20", "BMW M Hybrid V8", "BMW M Team WRT", "Germany"),
-                ("35", "Alpine A424", "Alpine Endurance Team", "France"),
-                ("36", "Alpine A424", "Alpine Endurance Team", "France"),
-                ("38", "Cadillac V-Series.R", "Cadillac Hertz Team Jota", "United States"),
-                ("50", "Ferrari 499P", "Ferrari AF Corse", "Italy"),
-                ("51", "Ferrari 499P", "Ferrari AF Corse", "Italy"),
-                ("83", "Ferrari 499P", "AF Corse", "Italy"),
-                ("93", "Peugeot 9X8", "Peugeot Totalenergies", "France"),
-                ("94", "Peugeot 9X8", "Peugeot Totalenergies", "France"),
-            ],
-            "LMGT3": [
-                ("10", "McLaren 720S LMGT3 Evo", "Garage 59", "United Kingdom"),
-                ("21", "Ferrari 296 LMGT3 Evo", "Vista AF Corse", "Italy"),
-                ("23", "Aston Martin Vantage AMR LMGT3", "Heart of Racing Team", "United States"),
-                ("27", "Aston Martin Vantage AMR LMGT3", "Heart of Racing Team", "United States"),
-                ("32", "BMW M4 LMGT3 Evo", "Team WRT", "Belgium"),
-                ("33", "Corvette Z06 LMGT3.R", "TF Sport", "United Kingdom"),
-                ("34", "Corvette Z06 LMGT3.R", "Racing Team Turkey by TF", "Turkey"),
-                ("54", "Ferrari 296 LMGT3 Evo", "Vista AF Corse", "Italy"),
-                ("58", "McLaren 720S LMGT3 Evo", "Garage 59", "United Kingdom"),
-                ("61", "Mercedes-AMG LMGT3", "Iron Lynx", "Italy"),
-                ("69", "BMW M4 LMGT3 Evo", "Team WRT", "Belgium"),
-                ("77", "Ford Mustang LMGT3", "Proton Competition", "Germany"),
-                ("78", "Lexus RC F LMGT3", "Akkodis ASP Team", "France"),
-                ("79", "Mercedes-AMG LMGT3", "Iron Lynx", "Italy"),
-                ("87", "Lexus RC F LMGT3", "Akkodis ASP Team", "France"),
-                ("88", "Ford Mustang LMGT3", "Proton Competition", "Germany"),
-                ("91", "Porsche 911 GT3 R LMGT3", "Manthey DK Engineering", "Germany"),
-                ("92", "Porsche 911 GT3 R LMGT3", "The Bend Manthey", "Germany"),
-            ],
-        }
-
-        def latest_wec_drivers(cls, car_no):
-            """登録済み公式結果から、その車番の最新ドライバー3名を回収する。"""
-            found = []
-            races_for_cls = data.get("races", {}).get(2026, {}).get("WEC", {}).get(cls, [])
-            races_for_cls = sorted(races_for_cls, key=lambda r: (r.get("race_date", ""), r.get("session_type", "")), reverse=True)
-            for race in races_for_cls:
-                nums = [str(x) for x in race.get("car_numbers", [])]
-                if str(car_no) not in nums:
-                    continue
-                idx = nums.index(str(car_no))
-                ds = race.get("drivers", [])
-                if idx < len(ds) and ds[idx]:
-                    found = [x.strip() for x in str(ds[idx]).split("/") if x.strip()]
-                    if found:
-                        return found[:3]
-            return found
-
-        if st.button("⚡ 2026 WEC公式エントリー35台を一括登録 / 更新", use_container_width=True, key="wec_entry_bulk"):
-            for cls, official_rows in wec_2026_entries.items():
-                key = f"WEC_{cls}"
-                target = data.setdefault("entries", {}).setdefault(2026, {}).setdefault(key, [])
-                existing = {str(x.get("car_number", "")): x for x in target}
-                merged = []
-                for no, machine_name, team_name, nat in official_rows:
-                    old = existing.get(no, {})
-                    driver_list = latest_wec_drivers(cls, no)
-                    if not driver_list:
-                        driver_list = old.get("driver_list", [])
-                        if not driver_list:
-                            driver_list = [x.strip() for x in old.get("drivers", "").split("/") if x.strip()]
-                    merged.append({
-                        "car_number": no,
-                        "machine": machine_name,
-                        "team": team_name,
-                        "country": nat,
-                        "driver_list": driver_list[:3],
-                        "drivers": " / ".join(driver_list[:3]),
-                        "image_url": old.get("image_url", ""),
-                        "liveries": old.get("liveries", []),
-                    })
-                data["entries"][2026][key] = merged
-            save_data(data)
-            st.success("2026 WECのHypercar 17台＋LMGT3 18台を登録しました！画像URL・追加カラーリングは既存のものを保持しています。")
-            st.rerun()
+    if e_cat == "WEC":
+        with st.expander("⚡ FIA WEC公式Entry Listから一括登録", expanded=False):
+            st.caption("FIA WEC公式の Entry List PDF URL を貼ると、車番・チーム・車種・ドライバーをクラス別にまとめて登録します。画像URLは後から追加できます。")
+            entry_pdf_url = st.text_input(
+                "Entry List PDF URL",
+                placeholder="https://www.fiawec.com/en/race/document/download/2322",
+                key=f"wec_entry_pdf_{e_year}",
+            )
+            if st.button("Entry Listを読み込んで一括登録", type="primary", use_container_width=True, key=f"wec_entry_import_{e_year}"):
+                if not entry_pdf_url.strip():
+                    st.error("Entry List PDF URLを入力してください。")
+                else:
+                    try:
+                        imported_groups = extract_wec_entry_list_url(entry_pdf_url)
+                        counts = []
+                        for cls, imported in imported_groups.items():
+                            key = f"WEC_{cls}"
+                            target = data.setdefault("entries", {}).setdefault(e_year, {}).setdefault(key, [])
+                            existing = {str(x.get("car_number", "")): x for x in target}
+                            merged = []
+                            for item in imported:
+                                old = existing.get(str(item["car_number"]), {})
+                                # 再取り込み時もユーザーが後から貼った画像/カラーリングは保持。
+                                item["image_url"] = old.get("image_url", "")
+                                item["liveries"] = old.get("liveries", [])
+                                merged.append(item)
+                            data["entries"][e_year][key] = merged
+                            counts.append(f"{cls} {len(merged)}台")
+                        save_data(data)
+                        st.success("一括登録しました！ " + " / ".join(counts) + "。既存の画像URL・追加カラーリングは保持しています。")
+                        st.rerun()
+                    except Exception as ex:
+                        st.error(f"Entry Listの読み込みに失敗しました: {ex}")
 
     with st.expander("➕ エントリーを追加 / 編集"):
         edit_options = ["新規追加"] + [f"No.{x.get('car_number', '')} {x.get('team', '')}" for x in entries]
