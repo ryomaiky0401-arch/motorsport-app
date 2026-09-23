@@ -753,12 +753,12 @@ def extract_wec_entry_list_url(url):
                 prefix = line[:machine_at].strip()
                 # PDFでは "TEAM WEC USA M" と "TEAM USA M" が混在する。
                 # 末尾の NAT + tyre を基準に切り、チーム末尾のWEC表記だけを除去する。
-                pm = re.search(r"\\s+([A-Z]{3})\\s+([MG])\\s*$", prefix, re.I)
+                pm = re.search(r"\s+([A-Z]{3})\s+([MG])\s*$", prefix, re.I)
                 if not pm:
                     raise ValueError(f"No.{no} のチーム名を取得できませんでした: {prefix}")
                 nat = pm.group(1)
                 team = prefix[:pm.start()].strip()
-                team = re.sub(r"\\s+WEC\\s*$", "", team, flags=re.I).strip()
+                team = re.sub(r"\s+WEC\s*$", "", team, flags=re.I).strip()
                 if not team:
                     raise ValueError(f"No.{no} のチーム名が空です。")
                 tail = line[machine_at + len(machine):].strip()
