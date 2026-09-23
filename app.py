@@ -1878,12 +1878,13 @@ with tab_entry:
                     )
                     if entry.get("machine"):
                         if e_cat == "Super Formula":
-                            st.markdown(f"<div style='padding-left:48px; font-size:0.85rem; opacity:0.6; line-height:1.15; margin:0 0 0.15rem 0;'>{entry['machine']}</div>", unsafe_allow_html=True)
+                            if entry.get("engine"):
+                                engine_label = "Honda / M-TEC HR-417E" if str(entry["engine"]).upper().startswith("HONDA") else "Toyota / TGR-D TRD01F"
+                                st.markdown(f"<div style='padding-left:48px; font-size:0.85rem; opacity:0.68; line-height:1.15; margin:0 0 0.2rem 0;'>{entry['machine']}&nbsp;&nbsp;&nbsp;{engine_label}</div>", unsafe_allow_html=True)
+                            else:
+                                st.markdown(f"<div style='padding-left:48px; font-size:0.85rem; opacity:0.6; line-height:1.15; margin:0 0 0.2rem 0;'>{entry['machine']}</div>", unsafe_allow_html=True)
                         else:
                             st.caption(entry["machine"])
-                    if e_cat == "Super Formula" and entry.get("engine"):
-                        engine_label = "HONDA/M-TEC HR-417E" if str(entry["engine"]).upper().startswith("HONDA") else "TOYOTA/TGR-D TRD01F"
-                        st.markdown(f"<div style='padding-left:48px; font-size:0.82rem; opacity:0.78; line-height:1.15; margin:0 0 0.2rem 0;'>⚙️ {engine_label}</div>", unsafe_allow_html=True)
                     if entry.get("country"):
                         code = country_code(entry["country"])
                         if code:
