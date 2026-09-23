@@ -1869,15 +1869,15 @@ with tab_entry:
                     # CSSの数px調整では「実際に見えている写真の左端」と揃わないため、
                     # SFカード本文を画像内の実コンテンツ位置に合わせて大きくインデントする。
                     title_size = "1.0rem" if e_cat == "Super Formula" else "1.25rem"
-                    title_height = "2.2rem" if e_cat == "Super Formula" else "2.9rem"
+                    title_height = "1.45rem" if e_cat == "Super Formula" else "2.9rem"
                     sf_text_inset = "48px" if e_cat == "Super Formula" else "0"
                     st.markdown(
-                        f"<div style='font-size:{title_size}; font-weight:700; line-height:1.25; min-height:{title_height}; margin-top:0.15rem; padding-left:{sf_text_inset};'>{no}{entry.get('team', '')}</div>",
+                        f"<div style='font-size:{title_size}; font-weight:700; line-height:1.15; min-height:{title_height}; margin-top:0.05rem; margin-bottom:0.1rem; padding-left:{sf_text_inset};'>{no}{entry.get('team', '')}</div>",
                         unsafe_allow_html=True,
                     )
                     if entry.get("machine"):
                         if e_cat == "Super Formula":
-                            st.markdown(f"<div style='padding-left:48px; font-size:0.85rem; opacity:0.6; margin-bottom:0.7rem;'>{entry['machine']}</div>", unsafe_allow_html=True)
+                            st.markdown(f"<div style='padding-left:48px; font-size:0.85rem; opacity:0.6; line-height:1.15; margin:0 0 0.15rem 0;'>{entry['machine']}</div>", unsafe_allow_html=True)
                         else:
                             st.caption(entry["machine"])
                     if entry.get("country"):
@@ -1901,7 +1901,7 @@ with tab_entry:
                                 # SFは本文の左端を画像内コンテンツに合わせて48px下げているので、
                                 # 国旗とドライバー名も同じ1行を48pxから開始する。
                                 st.markdown(
-                                    f"<div style='padding-left:48px; display:flex; align-items:center; gap:28px; min-height:38px;'>"
+                                    f"<div style='padding-left:48px; display:flex; align-items:center; gap:28px; min-height:30px; margin:0 0 1.8rem 0;'>"
                                     f"<img src='https://flagcdn.com/w80/{dcode}.png' style='width:24px; height:auto; display:block;' />"
                                     f"<span>{driver}</span></div>",
                                     unsafe_allow_html=True,
