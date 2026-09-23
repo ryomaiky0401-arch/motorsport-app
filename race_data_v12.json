@@ -6202,6 +6202,440 @@
           "image_url": "https://www.fiawec.com/media/cache/resolve/news_card/uploads/2026-lm-343-oreca-07-droite-6a23f4630d96a243964806.png",
           "liveries": []
         }
+      ],
+      "Super Formula_総合": [
+        {
+          "car_number": "1",
+          "machine": "SF23",
+          "team": "TEAM MUGEN AUTOBACS",
+          "country": "",
+          "driver_list": [
+            "岩佐 歩夢"
+          ],
+          "driver_details": [
+            {
+              "name": "岩佐 歩夢",
+              "country": "JPN"
+            }
+          ],
+          "drivers": "岩佐 歩夢",
+          "image_url": "",
+          "liveries": []
+        },
+        {
+          "car_number": "16",
+          "machine": "SF23",
+          "team": "TEAM MUGEN AUTOBACS",
+          "country": "",
+          "driver_list": [
+            "野尻 智紀"
+          ],
+          "driver_details": [
+            {
+              "name": "野尻 智紀",
+              "country": "JPN"
+            }
+          ],
+          "drivers": "野尻 智紀",
+          "image_url": "",
+          "liveries": []
+        },
+        {
+          "car_number": "3",
+          "machine": "SF23",
+          "team": "REALIZE KONDO RACING",
+          "country": "",
+          "driver_list": [
+            "ルーク・ブラウニング"
+          ],
+          "driver_details": [
+            {
+              "name": "ルーク・ブラウニング",
+              "country": "GBR"
+            }
+          ],
+          "drivers": "ルーク・ブラウニング",
+          "image_url": "",
+          "liveries": []
+        },
+        {
+          "car_number": "4",
+          "machine": "SF23",
+          "team": "REALIZE KONDO RACING",
+          "country": "",
+          "driver_list": [
+            "笹原 右京"
+          ],
+          "driver_details": [
+            {
+              "name": "笹原 右京",
+              "country": "JPN"
+            }
+          ],
+          "drivers": "笹原 右京",
+          "image_url": "",
+          "liveries": []
+        },
+        {
+          "car_number": "5",
+          "machine": "SF23",
+          "team": "DOCOMO TEAM DANDELION RACING",
+          "country": "",
+          "driver_list": [
+            "牧野 任祐"
+          ],
+          "driver_details": [
+            {
+              "name": "牧野 任祐",
+              "country": "JPN"
+            }
+          ],
+          "drivers": "牧野 任祐",
+          "image_url": "",
+          "liveries": []
+        },
+        {
+          "car_number": "6",
+          "machine": "SF23",
+          "team": "DOCOMO TEAM DANDELION RACING",
+          "country": "",
+          "driver_list": [
+            "太田 格之進"
+          ],
+          "driver_details": [
+            {
+              "name": "太田 格之進",
+              "country": "JPN"
+            }
+          ],
+          "drivers": "太田 格之進",
+          "image_url": "",
+          "liveries": []
+        },
+        {
+          "car_number": "8",
+          "machine": "SF23",
+          "team": "KCMG",
+          "country": "",
+          "driver_list": [
+            "山下 健太"
+          ],
+          "driver_details": [
+            {
+              "name": "山下 健太",
+              "country": "JPN"
+            }
+          ],
+          "drivers": "山下 健太",
+          "image_url": "",
+          "liveries": []
+        },
+        {
+          "car_number": "9",
+          "machine": "SF23",
+          "team": "KCMG",
+          "country": "",
+          "driver_list": [
+            "ジュリアーノ・アレジ"
+          ],
+          "driver_details": [
+            {
+              "name": "ジュリアーノ・アレジ",
+              "country": "FRA"
+            }
+          ],
+          "drivers": "ジュリアーノ・アレジ",
+          "image_url": "",
+          "liveries": []
+        },
+        {
+          "car_number": "7",
+          "machine": "SF23",
+          "team": "KDDI TGMGP TGR-DC",
+          "country": "",
+          "driver_list": [
+            "小林 可夢偉"
+          ],
+          "driver_details": [
+            {
+              "name": "小林 可夢偉",
+              "country": "JPN"
+            }
+          ],
+          "drivers": "小林 可夢偉",
+          "image_url": "",
+          "liveries": []
+        },
+        {
+          "car_number": "28",
+          "machine": "SF23",
+          "team": "KDDI TGMGP TGR-DC",
+          "country": "",
+          "driver_list": [
+            "小林 利徠斗"
+          ],
+          "driver_details": [
+            {
+              "name": "小林 利徠斗",
+              "country": "JPN"
+            }
+          ],
+          "drivers": "小林 利徠斗",
+          "image_url": "",
+          "liveries": []
+        },
+        {
+          "car_number": "10",
+          "machine": "SF23",
+          "team": "HAZAMA ANDO Triple Tree Racing",
+          "country": "",
+          "driver_list": [
+            "Juju"
+          ],
+          "driver_details": [
+            {
+              "name": "Juju",
+              "country": "JPN"
+            }
+          ],
+          "drivers": "Juju",
+          "image_url": "",
+          "liveries": []
+        },
+        {
+          "car_number": "12",
+          "machine": "SF23",
+          "team": "ThreeBond Racing",
+          "country": "",
+          "driver_list": [
+            "小出 峻"
+          ],
+          "driver_details": [
+            {
+              "name": "小出 峻",
+              "country": "JPN"
+            }
+          ],
+          "drivers": "小出 峻",
+          "image_url": "",
+          "liveries": []
+        },
+        {
+          "car_number": "14",
+          "machine": "SF23",
+          "team": "NTT docomo Business ROOKIE",
+          "country": "",
+          "driver_list": [
+            "福住 仁嶺"
+          ],
+          "driver_details": [
+            {
+              "name": "福住 仁嶺",
+              "country": "JPN"
+            }
+          ],
+          "drivers": "福住 仁嶺",
+          "image_url": "",
+          "liveries": []
+        },
+        {
+          "car_number": "19",
+          "machine": "SF23",
+          "team": "TEAM IMPUL",
+          "country": "",
+          "driver_list": [
+            "ザック・オサリバン"
+          ],
+          "driver_details": [
+            {
+              "name": "ザック・オサリバン",
+              "country": "GBR"
+            }
+          ],
+          "drivers": "ザック・オサリバン",
+          "image_url": "",
+          "liveries": []
+        },
+        {
+          "car_number": "22",
+          "machine": "SF23",
+          "team": "DELiGHTWORKS RACING",
+          "country": "",
+          "driver_list": [
+            "松下 信治"
+          ],
+          "driver_details": [
+            {
+              "name": "松下 信治",
+              "country": "JPN"
+            }
+          ],
+          "drivers": "松下 信治",
+          "image_url": "",
+          "liveries": []
+        },
+        {
+          "car_number": "36",
+          "machine": "SF23",
+          "team": "VANTELIN TEAM TOM’S",
+          "country": "",
+          "driver_list": [
+            "坪井 翔"
+          ],
+          "driver_details": [
+            {
+              "name": "坪井 翔",
+              "country": "JPN"
+            }
+          ],
+          "drivers": "坪井 翔",
+          "image_url": "",
+          "liveries": []
+        },
+        {
+          "car_number": "37",
+          "machine": "SF23",
+          "team": "VANTELIN TEAM TOM’S",
+          "country": "",
+          "driver_list": [
+            "サッシャ・フェネストラズ"
+          ],
+          "driver_details": [
+            {
+              "name": "サッシャ・フェネストラズ",
+              "country": "FRA"
+            }
+          ],
+          "drivers": "サッシャ・フェネストラズ",
+          "image_url": "",
+          "liveries": []
+        },
+        {
+          "car_number": "38",
+          "machine": "SF23",
+          "team": "SANKI VERTEX PARTNERS CERUMO･INGING",
+          "country": "",
+          "driver_list": [
+            "阪口 晴南"
+          ],
+          "driver_details": [
+            {
+              "name": "阪口 晴南",
+              "country": "JPN"
+            }
+          ],
+          "drivers": "阪口 晴南",
+          "image_url": "",
+          "liveries": []
+        },
+        {
+          "car_number": "39",
+          "machine": "SF23",
+          "team": "SANKI VERTEX PARTNERS CERUMO･INGING",
+          "country": "",
+          "driver_list": [
+            "大湯 都史樹"
+          ],
+          "driver_details": [
+            {
+              "name": "大湯 都史樹",
+              "country": "JPN"
+            }
+          ],
+          "drivers": "大湯 都史樹",
+          "image_url": "",
+          "liveries": []
+        },
+        {
+          "car_number": "50",
+          "machine": "SF23",
+          "team": "San-Ei Gen with B-Max",
+          "country": "",
+          "driver_list": [
+            "野村 勇斗"
+          ],
+          "driver_details": [
+            {
+              "name": "野村 勇斗",
+              "country": "JPN"
+            }
+          ],
+          "drivers": "野村 勇斗",
+          "image_url": "",
+          "liveries": []
+        },
+        {
+          "car_number": "53",
+          "machine": "SF23",
+          "team": "TEAM GOH",
+          "country": "",
+          "driver_list": [
+            "チャーリー・ブルツ"
+          ],
+          "driver_details": [
+            {
+              "name": "チャーリー・ブルツ",
+              "country": "AUT"
+            }
+          ],
+          "drivers": "チャーリー・ブルツ",
+          "image_url": "",
+          "liveries": []
+        },
+        {
+          "car_number": "64",
+          "machine": "SF23",
+          "team": "PONOS NAKAJIMA RACING",
+          "country": "",
+          "driver_list": [
+            "佐藤 蓮"
+          ],
+          "driver_details": [
+            {
+              "name": "佐藤 蓮",
+              "country": "JPN"
+            }
+          ],
+          "drivers": "佐藤 蓮",
+          "image_url": "",
+          "liveries": []
+        },
+        {
+          "car_number": "65",
+          "machine": "SF23",
+          "team": "PONOS NAKAJIMA RACING",
+          "country": "",
+          "driver_list": [
+            "イゴール・オオムラ・フラガ"
+          ],
+          "driver_details": [
+            {
+              "name": "イゴール・オオムラ・フラガ",
+              "country": "BRA"
+            }
+          ],
+          "drivers": "イゴール・オオムラ・フラガ",
+          "image_url": "",
+          "liveries": []
+        },
+        {
+          "car_number": "97",
+          "machine": "SF23",
+          "team": "ナビクル Buzz MK RACING",
+          "country": "",
+          "driver_list": [
+            "ロマン・スタネック"
+          ],
+          "driver_details": [
+            {
+              "name": "ロマン・スタネック",
+              "country": "CZE"
+            }
+          ],
+          "drivers": "ロマン・スタネック",
+          "image_url": "",
+          "liveries": []
+        }
       ]
     }
   }
