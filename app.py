@@ -3058,7 +3058,18 @@ with tab2:
                         axis=alt.Axis(title=None, labelAngle=-90),
                     ),
                     y=alt.Y("累計ポイント:Q", title=None),
-                    color=alt.Color("チーム / 車両:N", title=None),
+                    color=(
+                        alt.Color(
+                            "チーム / 車両:N",
+                            title=None,
+                            scale=alt.Scale(
+                                domain=["ALPINE", "ASTON MARTIN", "BMW", "CADILLAC", "FERRARI", "GENESIS", "PEUGEOT", "TOYOTA"],
+                                range=["#009FE3", "#00665E", "#0066B1", "#FFD700", "#E10600", "#FF5A1F", "#C7FF00", "#FF1E00"],
+                            ),
+                        )
+                        if is_wec_manufacturer
+                        else alt.Color("チーム / 車両:N", title=None)
+                    ),
                 )
             )
             st.altair_chart(cumulative_chart, use_container_width=True)
