@@ -4257,48 +4257,627 @@
   "points_master": {},
   "entries": {
     "2026年": {
-      "WEC_Hypercar": [],
+      "WEC_Hypercar": [
+        {
+          "car_number": "007",
+          "machine": "Aston Martin Valkyrie",
+          "team": "ASTON MARTIN THOR TEAM",
+          "country": "USA",
+          "driver_list": [],
+          "drivers": "",
+          "image_url": "",
+          "liveries": []
+        },
+        {
+          "car_number": "009",
+          "machine": "Aston Martin Valkyrie",
+          "team": "ASTON MARTIN THOR TEAM",
+          "country": "USA",
+          "driver_list": [],
+          "drivers": "",
+          "image_url": "",
+          "liveries": []
+        },
+        {
+          "car_number": "7",
+          "machine": "Toyota TR010 Hybrid",
+          "team": "TOYOTA RACING",
+          "country": "JPN",
+          "driver_list": [],
+          "drivers": "",
+          "image_url": "",
+          "liveries": []
+        },
+        {
+          "car_number": "8",
+          "machine": "Toyota TR010 Hybrid",
+          "team": "TOYOTA RACING",
+          "country": "JPN",
+          "driver_list": [],
+          "drivers": "",
+          "image_url": "",
+          "liveries": []
+        },
+        {
+          "car_number": "12",
+          "machine": "Cadillac V-Series.R",
+          "team": "CADILLAC HERTZ TEAM JOTA",
+          "country": "USA",
+          "driver_list": [],
+          "drivers": "",
+          "image_url": "",
+          "liveries": []
+        },
+        {
+          "car_number": "15",
+          "machine": "BMW M Hybrid V8",
+          "team": "BMW M TEAM WRT",
+          "country": "GER",
+          "driver_list": [],
+          "drivers": "",
+          "image_url": "",
+          "liveries": []
+        },
+        {
+          "car_number": "17",
+          "machine": "Genesis GMR-001-Hypercar",
+          "team": "GENESIS MAGMA RACING",
+          "country": "KOR",
+          "driver_list": [],
+          "drivers": "",
+          "image_url": "",
+          "liveries": []
+        },
+        {
+          "car_number": "19",
+          "machine": "Genesis GMR-001-Hypercar",
+          "team": "GENESIS MAGMA RACING",
+          "country": "KOR",
+          "driver_list": [],
+          "drivers": "",
+          "image_url": "",
+          "liveries": []
+        },
+        {
+          "car_number": "20",
+          "machine": "BMW M Hybrid V8",
+          "team": "BMW M TEAM WRT",
+          "country": "GER",
+          "driver_list": [],
+          "drivers": "",
+          "image_url": "",
+          "liveries": []
+        },
+        {
+          "car_number": "35",
+          "machine": "Alpine A424",
+          "team": "ALPINE ENDURANCE TEAM",
+          "country": "FRA",
+          "driver_list": [],
+          "drivers": "",
+          "image_url": "",
+          "liveries": []
+        },
+        {
+          "car_number": "36",
+          "machine": "Alpine A424",
+          "team": "ALPINE ENDURANCE TEAM",
+          "country": "FRA",
+          "driver_list": [],
+          "drivers": "",
+          "image_url": "",
+          "liveries": []
+        },
+        {
+          "car_number": "38",
+          "machine": "Cadillac V-Series.R",
+          "team": "CADILLAC HERTZ TEAM JOTA",
+          "country": "USA",
+          "driver_list": [],
+          "drivers": "",
+          "image_url": "",
+          "liveries": []
+        },
+        {
+          "car_number": "50",
+          "machine": "Ferrari 499P",
+          "team": "FERRARI AF CORSE",
+          "country": "ITA",
+          "driver_list": [],
+          "drivers": "",
+          "image_url": "",
+          "liveries": []
+        },
+        {
+          "car_number": "51",
+          "machine": "Ferrari 499P",
+          "team": "FERRARI AF CORSE",
+          "country": "ITA",
+          "driver_list": [],
+          "drivers": "",
+          "image_url": "",
+          "liveries": []
+        },
+        {
+          "car_number": "83",
+          "machine": "Ferrari 499P",
+          "team": "AF CORSE",
+          "country": "ITA",
+          "driver_list": [],
+          "drivers": "",
+          "image_url": "",
+          "liveries": []
+        },
+        {
+          "car_number": "93",
+          "machine": "Peugeot 9X8",
+          "team": "PEUGEOT TOTALENERGIES",
+          "country": "FRA",
+          "driver_list": [],
+          "drivers": "",
+          "image_url": "",
+          "liveries": []
+        },
+        {
+          "car_number": "94",
+          "machine": "Peugeot 9X8",
+          "team": "PEUGEOT TOTALENERGIES",
+          "country": "FRA",
+          "driver_list": [],
+          "drivers": "",
+          "image_url": "",
+          "liveries": []
+        },
+        {
+          "car_number": "101",
+          "machine": "Cadillac V-Series.R",
+          "team": "CADILLAC WTR",
+          "country": "USA",
+          "driver_list": [],
+          "drivers": "",
+          "image_url": "",
+          "liveries": []
+        }
+      ],
       "SUPER GT_GT500": [],
       "WEC_LMGT3": [
         {
+          "car_number": "2",
+          "machine": "Corvette Z06 LMGT3.R",
+          "team": "TF SPORT",
+          "country": "GBR",
+          "driver_list": [],
+          "drivers": "",
+          "image_url": "",
+          "liveries": []
+        },
+        {
+          "car_number": "10",
+          "machine": "McLaren 720S LMGT3 Evo",
+          "team": "GARAGE 59",
+          "country": "GBR",
+          "driver_list": [],
+          "drivers": "",
+          "image_url": "",
+          "liveries": []
+        },
+        {
           "car_number": "13",
           "machine": "Corvette Z06 LMGT3.R",
-          "team": "AUTOSPORT",
+          "team": "13 AUTOSPORT",
           "country": "CAN",
-          "driver_list": [
-            "Orey FIDANI",
-            "Lars KERN",
-            "Matthew BELL"
-          ],
-          "drivers": "Orey FIDANI / Lars KERN / Matthew BELL",
-          "image_url": "",
-          "liveries": []
-        },
-        {
-          "car_number": "1",
-          "machine": "Ferrari 296 LMGT3 Evo",
-          "team": "86 GR RACING",
-          "country": "GBR",
           "driver_list": [],
           "drivers": "",
           "image_url": "",
           "liveries": []
         },
         {
-          "car_number": "2",
-          "machine": "Aston Martin Vantage AMR LMGT3",
-          "team": "56 BLACKTHORN",
-          "country": "GBR",
-          "driver_list": [],
-          "drivers": "",
-          "image_url": "",
-          "liveries": []
-        },
-        {
-          "car_number": "5",
+          "car_number": "21",
           "machine": "Ferrari 296 LMGT3 Evo",
-          "team": "151AF CORSE",
+          "team": "VISTA AF CORSE",
           "country": "ITA",
+          "driver_list": [],
+          "drivers": "",
+          "image_url": "",
+          "liveries": []
+        },
+        {
+          "car_number": "23",
+          "machine": "Aston Martin Vantage AMR LMGT3",
+          "team": "HEART OF RACING TEAM",
+          "country": "USA",
+          "driver_list": [],
+          "drivers": "",
+          "image_url": "",
+          "liveries": []
+        },
+        {
+          "car_number": "27",
+          "machine": "Aston Martin Vantage AMR LMGT3",
+          "team": "HEART OF RACING TEAM",
+          "country": "USA",
+          "driver_list": [],
+          "drivers": "",
+          "image_url": "",
+          "liveries": []
+        },
+        {
+          "car_number": "32",
+          "machine": "BMW M4 LMGT3 Evo",
+          "team": "TEAM WRT",
+          "country": "BEL",
+          "driver_list": [],
+          "drivers": "",
+          "image_url": "",
+          "liveries": []
+        },
+        {
+          "car_number": "33",
+          "machine": "Corvette Z06 LMGT3.R",
+          "team": "TF SPORT",
+          "country": "GBR",
+          "driver_list": [],
+          "drivers": "",
+          "image_url": "",
+          "liveries": []
+        },
+        {
+          "car_number": "34",
+          "machine": "Corvette Z06 LMGT3.R",
+          "team": "RACING TEAM TURKEY BY TF",
+          "country": "TUR",
+          "driver_list": [],
+          "drivers": "",
+          "image_url": "",
+          "liveries": []
+        },
+        {
+          "car_number": "54",
+          "machine": "Ferrari 296 LMGT3 Evo",
+          "team": "VISTA AF CORSE",
+          "country": "ITA",
+          "driver_list": [],
+          "drivers": "",
+          "image_url": "",
+          "liveries": []
+        },
+        {
+          "car_number": "57",
+          "machine": "Ferrari 296 LMGT3 Evo",
+          "team": "KESSEL RACING",
+          "country": "SUI",
+          "driver_list": [],
+          "drivers": "",
+          "image_url": "",
+          "liveries": []
+        },
+        {
+          "car_number": "58",
+          "machine": "McLaren 720S LMGT3 Evo",
+          "team": "GARAGE 59",
+          "country": "GBR",
+          "driver_list": [],
+          "drivers": "",
+          "image_url": "",
+          "liveries": []
+        },
+        {
+          "car_number": "59",
+          "machine": "Aston Martin Vantage AMR LMGT3",
+          "team": "RACING SPIRIT OF LEMAN",
+          "country": "FRA",
+          "driver_list": [],
+          "drivers": "",
+          "image_url": "",
+          "liveries": []
+        },
+        {
+          "car_number": "61",
+          "machine": "Mercedes-AMG LMGT3",
+          "team": "IRON LYNX",
+          "country": "ITA",
+          "driver_list": [],
+          "drivers": "",
+          "image_url": "",
+          "liveries": []
+        },
+        {
+          "car_number": "62",
+          "machine": "Mercedes-AMG LMGT3",
+          "team": "TEAM QATAR BY IRON LYNX",
+          "country": "QAT",
+          "driver_list": [],
+          "drivers": "",
+          "image_url": "",
+          "liveries": []
+        },
+        {
+          "car_number": "69",
+          "machine": "BMW M4 LMGT3 Evo",
+          "team": "TEAM WRT",
+          "country": "BEL",
+          "driver_list": [],
+          "drivers": "",
+          "image_url": "",
+          "liveries": []
+        },
+        {
+          "car_number": "74",
+          "machine": "Ferrari 296 LMGT3 Evo",
+          "team": "KESSEL RACING",
+          "country": "SUI",
+          "driver_list": [],
+          "drivers": "",
+          "image_url": "",
+          "liveries": []
+        },
+        {
+          "car_number": "77",
+          "machine": "Ford Mustang LMGT3",
+          "team": "PROTON COMPETITION",
+          "country": "GER",
+          "driver_list": [],
+          "drivers": "",
+          "image_url": "",
+          "liveries": []
+        },
+        {
+          "car_number": "78",
+          "machine": "Lexus RC F LMGT3",
+          "team": "AKKODIS ASP TEAM",
+          "country": "FRA",
+          "driver_list": [],
+          "drivers": "",
+          "image_url": "",
+          "liveries": []
+        },
+        {
+          "car_number": "79",
+          "machine": "Mercedes-AMG LMGT3",
+          "team": "IRON LYNX",
+          "country": "ITA",
+          "driver_list": [],
+          "drivers": "",
+          "image_url": "",
+          "liveries": []
+        },
+        {
+          "car_number": "87",
+          "machine": "Lexus RC F LMGT3",
+          "team": "AKKODIS ASP TEAM",
+          "country": "FRA",
+          "driver_list": [],
+          "drivers": "",
+          "image_url": "",
+          "liveries": []
+        },
+        {
+          "car_number": "88",
+          "machine": "Ford Mustang LMGT3",
+          "team": "PROTON COMPETITION",
+          "country": "GER",
+          "driver_list": [],
+          "drivers": "",
+          "image_url": "",
+          "liveries": []
+        },
+        {
+          "car_number": "91",
+          "machine": "Porsche 911 GT3 R LMGT3",
+          "team": "MANTHEY DK ENGINEERING",
+          "country": "GER",
+          "driver_list": [],
+          "drivers": "",
+          "image_url": "",
+          "liveries": []
+        },
+        {
+          "car_number": "92",
+          "machine": "Porsche 911 GT3 R LMGT3",
+          "team": "THE BEND MANTHEY",
+          "country": "GER",
+          "driver_list": [],
+          "drivers": "",
+          "image_url": "",
+          "liveries": []
+        },
+        {
+          "car_number": "150",
+          "machine": "Ferrari 296 LMGT3 Evo",
+          "team": "RICHARD MILLE AF CORSE",
+          "country": "ITA",
+          "driver_list": [],
+          "drivers": "",
+          "image_url": "",
+          "liveries": []
+        }
+      ],
+      "WEC_LMP2": [
+        {
+          "car_number": "3",
+          "machine": "Oreca 07 - Gibson",
+          "team": "DKR ENGINEERING",
+          "country": "LUX",
+          "driver_list": [],
+          "drivers": "",
+          "image_url": "",
+          "liveries": []
+        },
+        {
+          "car_number": "4",
+          "machine": "Oreca 07 - Gibson",
+          "team": "CROWDSTRIKE RACING BY APR",
+          "country": "USA",
+          "driver_list": [],
+          "drivers": "",
+          "image_url": "",
+          "liveries": []
+        },
+        {
+          "car_number": "9",
+          "machine": "Oreca 07 - Gibson",
+          "team": "PROTON COMPETITION",
+          "country": "GER",
+          "driver_list": [],
+          "drivers": "",
+          "image_url": "",
+          "liveries": []
+        },
+        {
+          "car_number": "14",
+          "machine": "Oreca 07 - Gibson",
+          "team": "TDS RACING",
+          "country": "FRA",
+          "driver_list": [],
+          "drivers": "",
+          "image_url": "",
+          "liveries": []
+        },
+        {
+          "car_number": "22",
+          "machine": "Oreca 07 - Gibson",
+          "team": "UNITED AUTOSPORTS",
+          "country": "GBR",
+          "driver_list": [],
+          "drivers": "",
+          "image_url": "",
+          "liveries": []
+        },
+        {
+          "car_number": "24",
+          "machine": "Oreca 07 - Gibson",
+          "team": "NIELSEN RACING",
+          "country": "GBR",
+          "driver_list": [],
+          "drivers": "",
+          "image_url": "",
+          "liveries": []
+        },
+        {
+          "car_number": "25",
+          "machine": "Oreca 07 - Gibson",
+          "team": "ALGARVE PRO RACING",
+          "country": "POR",
+          "driver_list": [],
+          "drivers": "",
+          "image_url": "",
+          "liveries": []
+        },
+        {
+          "car_number": "26",
+          "machine": "Oreca 07 - Gibson",
+          "team": "VECTOR SPORT",
+          "country": "GBR",
+          "driver_list": [],
+          "drivers": "",
+          "image_url": "",
+          "liveries": []
+        },
+        {
+          "car_number": "28",
+          "machine": "Oreca 07 - Gibson",
+          "team": "IDEC SPORT",
+          "country": "FRA",
+          "driver_list": [],
+          "drivers": "",
+          "image_url": "",
+          "liveries": []
+        },
+        {
+          "car_number": "29",
+          "machine": "Oreca 07 - Gibson",
+          "team": "FORESTIER RACING BY PANIS",
+          "country": "FRA",
+          "driver_list": [],
+          "drivers": "",
+          "image_url": "",
+          "liveries": []
+        },
+        {
+          "car_number": "30",
+          "machine": "Oreca 07 - Gibson",
+          "team": "DUQUEINE TEAM",
+          "country": "FRA",
+          "driver_list": [],
+          "drivers": "",
+          "image_url": "",
+          "liveries": []
+        },
+        {
+          "car_number": "37",
+          "machine": "Oreca 07 - Gibson",
+          "team": "CLX MOTORSPORT",
+          "country": "SUI",
+          "driver_list": [],
+          "drivers": "",
+          "image_url": "",
+          "liveries": []
+        },
+        {
+          "car_number": "43",
+          "machine": "Oreca 07 - Gibson",
+          "team": "INTER EUROPOL COMPETITION",
+          "country": "POL",
+          "driver_list": [],
+          "drivers": "",
+          "image_url": "",
+          "liveries": []
+        },
+        {
+          "car_number": "44",
+          "machine": "Oreca 07 - Gibson",
+          "team": "PROTON COMPETITION",
+          "country": "GER",
+          "driver_list": [],
+          "drivers": "",
+          "image_url": "",
+          "liveries": []
+        },
+        {
+          "car_number": "48",
+          "machine": "Oreca 07 - Gibson",
+          "team": "RD LIMITED",
+          "country": "FRA",
+          "driver_list": [],
+          "drivers": "",
+          "image_url": "",
+          "liveries": []
+        },
+        {
+          "car_number": "99",
+          "machine": "Oreca 07 - Gibson",
+          "team": "AO BY TF",
+          "country": "USA",
+          "driver_list": [],
+          "drivers": "",
+          "image_url": "",
+          "liveries": []
+        },
+        {
+          "car_number": "183",
+          "machine": "Oreca 07 - Gibson",
+          "team": "AF CORSE",
+          "country": "ITA",
+          "driver_list": [],
+          "drivers": "",
+          "image_url": "",
+          "liveries": []
+        },
+        {
+          "car_number": "222",
+          "machine": "Oreca 07 - Gibson",
+          "team": "UNITED AUTOSPORTS",
+          "country": "GBR",
+          "driver_list": [],
+          "drivers": "",
+          "image_url": "",
+          "liveries": []
+        },
+        {
+          "car_number": "343",
+          "machine": "Oreca 07 - Gibson",
+          "team": "INTER EUROPOL COMPETITION",
+          "country": "POL",
           "driver_list": [],
           "drivers": "",
           "image_url": "",
