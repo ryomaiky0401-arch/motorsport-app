@@ -1869,8 +1869,11 @@ with tab_entry:
                     # 長いチーム名でもWEC等と同じ感覚になるよう見出しサイズも統一。
                     title_size = "1.0rem" if e_cat == "Super Formula" else "1.25rem"
                     title_height = "2.2rem" if e_cat == "Super Formula" else "2.9rem"
+                    # SF画像はカード列より左右に少し余白を持たせて表示しているため、
+                    # 見出しも同じ左端（画像の実表示位置）へ揃える。
+                    sf_text_inset = "8px" if e_cat == "Super Formula" else "0"
                     st.markdown(
-                        f"<div style='font-size:{title_size}; font-weight:700; line-height:1.25; min-height:{title_height}; margin-top:0.15rem;'>{no}{entry.get('team', '')}</div>",
+                        f"<div style='font-size:{title_size}; font-weight:700; line-height:1.25; min-height:{title_height}; margin-top:0.15rem; padding-left:{sf_text_inset};'>{no}{entry.get('team', '')}</div>",
                         unsafe_allow_html=True,
                     )
                     if entry.get("machine"):
