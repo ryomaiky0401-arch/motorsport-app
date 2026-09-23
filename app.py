@@ -765,14 +765,17 @@ def extract_wec_entry_list_url(url):
                 tail = re.sub(r"^(?:HY|Pro-Am)\\s+", "", tail, flags=re.I)
 
                 drivers = []
-                # "A. DRIVER (FRA) P B. DRIVER (GBR) G ..." のようなPDF表記を、
-                # 次の "(NAT)" を境界にしてドライバー名だけ抜き出す。
-                driver_matches = list(re.finditer(r"([^()]+?)\\s*\\(([A-Z]{3})\\)\\s*([PGBS])?", tail))
-                for dm in driver_matches:
+                # 2355本文は "NAME (NAT) C NAME (NAT) C NAME (NAT) C"。
+                # まずカテゴリ記号(P/G/S/B)を各ドライバーの終端として3人を分割する。
+                remaining = tail.strip()
+                for _ in range(3):
+                    dm = re.match(r"(.+?)(?:\\s*\\([A-Z]{3}\\))?\\s+([PGBS])(?:\\s+|$)", remaining)
+                    if not dm:
+                        break
                     name = re.sub(r"\\s+", " ", dm.group(1)).strip()
-                    name = re.sub(r"^[PGBS]\\s+", "", name).strip()
                     if name and name != "-":
                         drivers.append(name)
+                    remaining = remaining[dm.end():].strip()
                 rows_by_class[cls].append({
                     "car_number": no, "machine": machine, "team": team.strip(),
                     "country": nat.upper(), "driver_list": drivers[:3],
@@ -1502,7 +1505,7 @@ def country_code(country):
         "中国":"cn","China":"cn","CHN":"cn","韓国":"kr","South Korea":"kr","Korea":"kr","KOR":"kr","タイ":"th","Thailand":"th","THA":"th",
         "インドネシア":"id","Indonesia":"id","IDN":"id","マレーシア":"my","Malaysia":"my","MYS":"my","モナコ":"mc","Monaco":"mc","MCO":"mc","MON":"mc",
         "ポーランド":"pl","Poland":"pl","POL":"pl","フィンランド":"fi","Finland":"fi","FIN":"fi","スウェーデン":"se","Sweden":"se","SWE":"se",
-        "ノルウェー":"no","Norway":"no","NOR":"no","チェコ":"cz","チェコ共和国":"cz","Czechia":"cz","Czech Republic":"cz","CZE":"cz","トルコ":"tr","Türkiye":"tr","Turkey":"tr","TUR":"tr","カタール":"qa","Qatar":"qa","QAT":"qa","ROU":"ro","HKG":"hk","ANG":"ao"
+        "ノルウェー":"no","Norway":"no","NOR":"no","チェコ":"cz","チェコ共和国":"cz","Czechia":"cz","Czech Republic":"cz","CZE":"cz","トルコ":"tr","Türkiye":"tr","Turkey":"tr","TUR":"tr","カタール":"qa","Qatar":"qa","QAT":"qa","ROU":"ro","HKG":"hk","ANG":"ao","LUX":"lu","IRL":"ie","RSA":"za","GRN":"gd","MAS":"my","INA":"id"
     }
     return codes.get(str(country).strip())
 
