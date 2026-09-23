@@ -2705,7 +2705,30 @@ with tab2:
                     cumulative_points.append(running_total)
                 event_points[item["チーム / 車両"]] = cumulative_points
 
-            st.line_chart(pd.DataFrame(event_points, index=event_order))
+            # st.line_chart は文字列カテゴリのX軸を辞書順に並べる場合があるため、
+            # 大会名が "24 Heures..." → "6 Hours..." のように並び替わってしまう。
+            # Altairでevent_orderを明示し、開催順を必ず維持する。
+            import altair as alt
+            chart_df = (
+                pd.DataFrame(event_points, index=event_order)
+                .rename_axis("大会")
+                .reset_index()
+                .melt(id_vars="大会", var_name="チーム / 車両", value_name="累計ポイント")
+            )
+            cumulative_chart = (
+                alt.Chart(chart_df)
+                .mark_line(point=False)
+                .encode(
+                    x=alt.X(
+                        "大会:N",
+                        sort=event_order,
+                        axis=alt.Axis(title=None, labelAngle=-90),
+                    ),
+                    y=alt.Y("累計ポイント:Q", title=None),
+                    color=alt.Color("チーム / 車両:N", title=None),
+                )
+            )
+            st.altair_chart(cumulative_chart, use_container_width=True)
 
 
         with ranking_tab_driver:
