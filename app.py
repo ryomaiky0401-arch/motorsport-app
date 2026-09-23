@@ -1574,45 +1574,72 @@ with tab_entry:
                         st.error(f"Entry Listの読み込みに失敗しました: {ex}")
 
     with st.expander("🖼️ マシン画像URLをまとめて登録"):
-        st.caption("1行に「車番 URL」の形式で貼り付けてください。現在選択中のクラスだけ更新します。既存のエントリー情報や追加カラーリングは変更しません。")
+        st.caption("「車番 URL」で通常カラー、「車番 カラーリング名 URL」で追加カラーリングを登録できます。同じ車番を何行書いてもOKです。")
         bulk_image_text = st.text_area(
             "画像URL一覧",
-            placeholder="007 https://example.com/007.png\n009 https://example.com/009.png\n7 https://example.com/7.png",
-            height=220,
+            placeholder="007 https://example.com/007.png\n007 ル・マン https://example.com/007_le_mans.png\n009 https://example.com/009.png\n7 通常 https://example.com/7.png\n7 ル・マン https://example.com/7_le_mans.png",
+            height=260,
             key=f"entry_bulk_images_{e_year}_{entry_key}",
         )
+        st.caption("※「通常」は通常カラーとして登録。それ以外の名前は追加カラーリングとして登録します。既存の同名カラーリングはURLを更新します。")
         if st.button("画像URLを一括登録", use_container_width=True, key=f"entry_bulk_images_save_{e_year}_{entry_key}"):
             entry_by_no = {str(x.get("car_number", "")).strip(): x for x in entries}
-            updated = []
+            updated_normal = []
+            updated_liveries = []
             not_found = []
             invalid = []
             for line_no, raw_line in enumerate(bulk_image_text.splitlines(), start=1):
                 line = raw_line.strip()
                 if not line:
                     continue
-                parts = line.split(None, 1)
-                if len(parts) != 2:
+                parts = line.split()
+                if len(parts) == 2:
+                    car_no, image = parts
+                    livery_name = "通常"
+                elif len(parts) >= 3:
+                    car_no = parts[0]
+                    image = parts[-1]
+                    livery_name = " ".join(parts[1:-1]).strip()
+                else:
                     invalid.append(str(line_no))
                     continue
-                car_no, image = parts[0].strip().lstrip("#"), parts[1].strip()
-                if not image.startswith(("http://", "https://")):
+
+                car_no = car_no.strip().lstrip("#")
+                image = image.strip()
+                if not image.startswith(("http://", "https://")) or not livery_name:
                     invalid.append(str(line_no))
                     continue
                 target_entry = entry_by_no.get(car_no)
                 if target_entry is None:
                     not_found.append(car_no)
                     continue
-                target_entry["image_url"] = image
-                updated.append(car_no)
+
+                if livery_name.lower() in ("通常", "normal", "default"):
+                    target_entry["image_url"] = image
+                    updated_normal.append(car_no)
+                else:
+                    liveries = target_entry.setdefault("liveries", [])
+                    existing_livery = next((x for x in liveries if str(x.get("name", "")).strip() == livery_name), None)
+                    if existing_livery:
+                        existing_livery["image_url"] = image
+                    else:
+                        liveries.append({"name": livery_name, "image_url": image})
+                    updated_liveries.append(f"{car_no}:{livery_name}")
+
             if invalid:
-                st.error("形式を確認してください（行: " + ", ".join(invalid) + "）。「車番 URL」の形式です。")
-            elif not updated:
+                st.error("形式を確認してください（行: " + ", ".join(invalid) + "）。「車番 URL」または「車番 カラーリング名 URL」の形式です。")
+            elif not updated_normal and not updated_liveries:
                 st.warning("更新できる画像URLがありませんでした。")
             else:
                 save_data(data)
-                msg = f"{len(updated)}台の画像URLを一括登録しました！"
+                msg_parts = []
+                if updated_normal:
+                    msg_parts.append(f"通常カラー {len(updated_normal)}台")
+                if updated_liveries:
+                    msg_parts.append(f"追加カラーリング {len(updated_liveries)}件")
+                msg = " / ".join(msg_parts) + " を一括登録しました！"
                 if not_found:
-                    msg += " 未登録の車番: " + ", ".join(not_found)
+                    msg += " 未登録の車番: " + ", ".join(sorted(set(not_found)))
                 st.success(msg)
                 st.rerun()
 
