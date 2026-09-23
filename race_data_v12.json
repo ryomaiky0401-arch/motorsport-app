@@ -1528,6 +1528,85 @@
               0
             ],
             "wec_points_scale": null
+          },
+          {
+            "round_name": "Lone Star Le Mans",
+            "race_date": "2026-09-05",
+            "session_type": "ハイパーポール",
+            "is_custom_pts": true,
+            "points_table": [
+              1,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0
+            ],
+            "results": [
+              "Ferrari AF Corse",
+              "Cadillac Hertz Team Jota",
+              "Alpine Endurance Team",
+              "Aston Martin Thor Team",
+              "Ferrari AF Corse",
+              "Alpine Endurance Team",
+              "Toyota Racing",
+              "Genesis Magma Racing",
+              "Toyota Racing",
+              "Genesis Magma Racing"
+            ],
+            "drivers": [
+              "A. PIER GUIDI / J. CALADO / A. GIOVINAZZI",
+              "E. BAMBER / S. BOURDAIS / J. AITKEN",
+              "A. FÉLIX DA COSTA / C. MILESI / F. HABSBURG",
+              "H. TINCKNELL / T. GAMBLE",
+              "A. FUOCO / M. MOLINA / N. NIELSEN",
+              "F. MAKOWIECKI / J. GOUNON / V. MARTINS",
+              "S. BUEMI / B. HARTLEY / R. HIRAKAWA",
+              "A. LOTTERER / L. DERANI / M. JAUBERT",
+              "M. CONWAY / K. KOBAYASHI / N. DE VRIES",
+              "M. JAMINET / P. CHATIN / D. JUNCADELLA"
+            ],
+            "car_numbers": [
+              "51",
+              "38",
+              "35",
+              "007",
+              "50",
+              "36",
+              "8",
+              "17",
+              "7",
+              "19"
+            ],
+            "statuses": [
+              "完走",
+              "完走",
+              "完走",
+              "完走",
+              "完走",
+              "完走",
+              "完走",
+              "完走",
+              "完走",
+              "完走"
+            ],
+            "official_points": [
+              1,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0
+            ],
+            "wec_points_scale": null
           }
         ],
         "LMGT3": [
