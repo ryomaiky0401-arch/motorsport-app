@@ -4263,8 +4263,12 @@
           "machine": "Aston Martin Valkyrie",
           "team": "ASTON MARTIN THOR TEAM",
           "country": "USA",
-          "driver_list": [],
-          "drivers": "",
+          "driver_list": [
+            "Harry TINCKNELL",
+            "Tom GAMBLE",
+            "Ross GUNN"
+          ],
+          "drivers": "Harry TINCKNELL / Tom GAMBLE / Ross GUNN",
           "image_url": "",
           "liveries": []
         },
@@ -4273,8 +4277,12 @@
           "machine": "Aston Martin Valkyrie",
           "team": "ASTON MARTIN THOR TEAM",
           "country": "USA",
-          "driver_list": [],
-          "drivers": "",
+          "driver_list": [
+            "Alex RIBERAS",
+            "Marco SØRENSEN",
+            "Roman DE ANGELIS"
+          ],
+          "drivers": "Alex RIBERAS / Marco SØRENSEN / Roman DE ANGELIS",
           "image_url": "",
           "liveries": []
         },
@@ -4283,8 +4291,12 @@
           "machine": "Toyota TR010 Hybrid",
           "team": "TOYOTA RACING",
           "country": "JPN",
-          "driver_list": [],
-          "drivers": "",
+          "driver_list": [
+            "HY Mike CONWAY",
+            "Kamui KOBAYASHI",
+            "Nyck DE VRIES"
+          ],
+          "drivers": "HY Mike CONWAY / Kamui KOBAYASHI / Nyck DE VRIES",
           "image_url": "",
           "liveries": []
         },
@@ -4293,8 +4305,12 @@
           "machine": "Toyota TR010 Hybrid",
           "team": "TOYOTA RACING",
           "country": "JPN",
-          "driver_list": [],
-          "drivers": "",
+          "driver_list": [
+            "HY Sébastien BUEMI",
+            "Brendon HARTLEY",
+            "Ryō HIRAKAWA"
+          ],
+          "drivers": "HY Sébastien BUEMI / Brendon HARTLEY / Ryō HIRAKAWA",
           "image_url": "",
           "liveries": []
         },
@@ -4303,8 +4319,12 @@
           "machine": "Cadillac V-Series.R",
           "team": "CADILLAC HERTZ TEAM JOTA",
           "country": "USA",
-          "driver_list": [],
-          "drivers": "",
+          "driver_list": [
+            "HY Louis DELÉTRAZ",
+            "Will STEVENS",
+            "Norman NATO"
+          ],
+          "drivers": "HY Louis DELÉTRAZ / Will STEVENS / Norman NATO",
           "image_url": "",
           "liveries": []
         },
@@ -4313,8 +4333,12 @@
           "machine": "BMW M Hybrid V8",
           "team": "BMW M TEAM WRT",
           "country": "GER",
-          "driver_list": [],
-          "drivers": "",
+          "driver_list": [
+            "HY Kevin MAGNUSSEN",
+            "Raffaele MARCIELLO",
+            "Dries VANTHOOR"
+          ],
+          "drivers": "HY Kevin MAGNUSSEN / Raffaele MARCIELLO / Dries VANTHOOR",
           "image_url": "",
           "liveries": []
         },
@@ -4323,8 +4347,12 @@
           "machine": "Genesis GMR-001-Hypercar",
           "team": "GENESIS MAGMA RACING",
           "country": "KOR",
-          "driver_list": [],
-          "drivers": "",
+          "driver_list": [
+            "HY André LOTTERER",
+            "Luis Felipe DERANI",
+            "Mathys JAUBERT"
+          ],
+          "drivers": "HY André LOTTERER / Luis Felipe DERANI / Mathys JAUBERT",
           "image_url": "",
           "liveries": []
         },
@@ -4333,8 +4361,12 @@
           "machine": "Genesis GMR-001-Hypercar",
           "team": "GENESIS MAGMA RACING",
           "country": "KOR",
-          "driver_list": [],
-          "drivers": "",
+          "driver_list": [
+            "HY Mathieu JAMINET",
+            "Paul-Loup CHATIN",
+            "Daniel JUNCADELLA"
+          ],
+          "drivers": "HY Mathieu JAMINET / Paul-Loup CHATIN / Daniel JUNCADELLA",
           "image_url": "",
           "liveries": []
         },
@@ -4343,8 +4375,12 @@
           "machine": "BMW M Hybrid V8",
           "team": "BMW M TEAM WRT",
           "country": "GER",
-          "driver_list": [],
-          "drivers": "",
+          "driver_list": [
+            "HY Robin FRIJNS",
+            "René RAST",
+            "Sheldon VAN DER LINDE"
+          ],
+          "drivers": "HY Robin FRIJNS / René RAST / Sheldon VAN DER LINDE",
           "image_url": "",
           "liveries": []
         },
@@ -4353,8 +4389,12 @@
           "machine": "Alpine A424",
           "team": "ALPINE ENDURANCE TEAM",
           "country": "FRA",
-          "driver_list": [],
-          "drivers": "",
+          "driver_list": [
+            "HY António FÉLIX DA COSTA",
+            "Charles MILESI",
+            "Ferdinand HABSBURG"
+          ],
+          "drivers": "HY António FÉLIX DA COSTA / Charles MILESI / Ferdinand HABSBURG",
           "image_url": "",
           "liveries": []
         },
@@ -4363,8 +4403,12 @@
           "machine": "Alpine A424",
           "team": "ALPINE ENDURANCE TEAM",
           "country": "FRA",
-          "driver_list": [],
-          "drivers": "",
+          "driver_list": [
+            "HY Frédéric MAKOWIECKI",
+            "Jules GOUNON",
+            "Victor MARTINS"
+          ],
+          "drivers": "HY Frédéric MAKOWIECKI / Jules GOUNON / Victor MARTINS",
           "image_url": "",
           "liveries": []
         },
@@ -4373,8 +4417,12 @@
           "machine": "Cadillac V-Series.R",
           "team": "CADILLAC HERTZ TEAM JOTA",
           "country": "USA",
-          "driver_list": [],
-          "drivers": "",
+          "driver_list": [
+            "HY Sébastien BOURDAIS",
+            "Earl BAMBER",
+            "Jack AITKEN"
+          ],
+          "drivers": "HY Sébastien BOURDAIS / Earl BAMBER / Jack AITKEN",
           "image_url": "",
           "liveries": []
         },
@@ -4383,8 +4431,12 @@
           "machine": "Ferrari 499P",
           "team": "FERRARI AF CORSE",
           "country": "ITA",
-          "driver_list": [],
-          "drivers": "",
+          "driver_list": [
+            "HY Antonio FUOCO",
+            "Nicklas NIELSEN",
+            "Miguel MOLINA"
+          ],
+          "drivers": "HY Antonio FUOCO / Nicklas NIELSEN / Miguel MOLINA",
           "image_url": "",
           "liveries": []
         },
@@ -4393,8 +4445,12 @@
           "machine": "Ferrari 499P",
           "team": "FERRARI AF CORSE",
           "country": "ITA",
-          "driver_list": [],
-          "drivers": "",
+          "driver_list": [
+            "HY Alessandro PIER GUIDI",
+            "James CALADO",
+            "Antonio GIOVINAZZI"
+          ],
+          "drivers": "HY Alessandro PIER GUIDI / James CALADO / Antonio GIOVINAZZI",
           "image_url": "",
           "liveries": []
         },
@@ -4403,8 +4459,12 @@
           "machine": "Ferrari 499P",
           "team": "AF CORSE",
           "country": "ITA",
-          "driver_list": [],
-          "drivers": "",
+          "driver_list": [
+            "HY Yifei YE",
+            "Robert KUBICA",
+            "Philip HANSON"
+          ],
+          "drivers": "HY Yifei YE / Robert KUBICA / Philip HANSON",
           "image_url": "",
           "liveries": []
         },
@@ -4413,8 +4473,12 @@
           "machine": "Peugeot 9X8",
           "team": "PEUGEOT TOTALENERGIES",
           "country": "FRA",
-          "driver_list": [],
-          "drivers": "",
+          "driver_list": [
+            "HY Paul DI RESTA",
+            "Stoffel VANDOORNE",
+            "Nick CASSIDY"
+          ],
+          "drivers": "HY Paul DI RESTA / Stoffel VANDOORNE / Nick CASSIDY",
           "image_url": "",
           "liveries": []
         },
@@ -4423,8 +4487,12 @@
           "machine": "Peugeot 9X8",
           "team": "PEUGEOT TOTALENERGIES",
           "country": "FRA",
-          "driver_list": [],
-          "drivers": "",
+          "driver_list": [
+            "HY Loïc DUVAL",
+            "Malthe JAKOBSEN",
+            "Théo POURCHAIRE"
+          ],
+          "drivers": "HY Loïc DUVAL / Malthe JAKOBSEN / Théo POURCHAIRE",
           "image_url": "",
           "liveries": []
         },
@@ -4433,8 +4501,12 @@
           "machine": "Cadillac V-Series.R",
           "team": "CADILLAC WTR",
           "country": "USA",
-          "driver_list": [],
-          "drivers": "",
+          "driver_list": [
+            "HY Ricky TAYLOR",
+            "Jordan TAYLOR",
+            "Filipe ALBUQUERQUE"
+          ],
+          "drivers": "HY Ricky TAYLOR / Jordan TAYLOR / Filipe ALBUQUERQUE",
           "image_url": "",
           "liveries": []
         }
@@ -4446,8 +4518,12 @@
           "machine": "Corvette Z06 LMGT3.R",
           "team": "TF SPORT",
           "country": "GBR",
-          "driver_list": [],
-          "drivers": "",
+          "driver_list": [
+            "Prince JEFRI IBRAHIM",
+            "Afiq IKHWAN",
+            "Ben GREEN"
+          ],
+          "drivers": "Prince JEFRI IBRAHIM / Afiq IKHWAN / Ben GREEN",
           "image_url": "",
           "liveries": []
         },
@@ -4456,8 +4532,12 @@
           "machine": "McLaren 720S LMGT3 Evo",
           "team": "GARAGE 59",
           "country": "GBR",
-          "driver_list": [],
-          "drivers": "",
+          "driver_list": [
+            "Antares AU",
+            "Thomas FLEMING",
+            "Marvin KIRCHHÖFER"
+          ],
+          "drivers": "Antares AU / Thomas FLEMING / Marvin KIRCHHÖFER",
           "image_url": "",
           "liveries": []
         },
@@ -4466,8 +4546,12 @@
           "machine": "Corvette Z06 LMGT3.R",
           "team": "13 AUTOSPORT",
           "country": "CAN",
-          "driver_list": [],
-          "drivers": "",
+          "driver_list": [
+            "Orey FIDANI",
+            "Lars KERN",
+            "Matthew BELL"
+          ],
+          "drivers": "Orey FIDANI / Lars KERN / Matthew BELL",
           "image_url": "",
           "liveries": []
         },
@@ -4476,8 +4560,12 @@
           "machine": "Ferrari 296 LMGT3 Evo",
           "team": "VISTA AF CORSE",
           "country": "ITA",
-          "driver_list": [],
-          "drivers": "",
+          "driver_list": [
+            "François HÉRIAU",
+            "Simon MANN",
+            "Alessio ROVERA"
+          ],
+          "drivers": "François HÉRIAU / Simon MANN / Alessio ROVERA",
           "image_url": "",
           "liveries": []
         },
@@ -4486,8 +4574,12 @@
           "machine": "Aston Martin Vantage AMR LMGT3",
           "team": "HEART OF RACING TEAM",
           "country": "USA",
-          "driver_list": [],
-          "drivers": "",
+          "driver_list": [
+            "Gray NEWELL",
+            "Eduardo BARRICHELLO",
+            "Jonny ADAM"
+          ],
+          "drivers": "Gray NEWELL / Eduardo BARRICHELLO / Jonny ADAM",
           "image_url": "",
           "liveries": []
         },
@@ -4496,8 +4588,12 @@
           "machine": "Aston Martin Vantage AMR LMGT3",
           "team": "HEART OF RACING TEAM",
           "country": "USA",
-          "driver_list": [],
-          "drivers": "",
+          "driver_list": [
+            "Ian JAMES",
+            "Zacharie ROBICHON",
+            "Mattia DRUDI"
+          ],
+          "drivers": "Ian JAMES / Zacharie ROBICHON / Mattia DRUDI",
           "image_url": "",
           "liveries": []
         },
@@ -4506,8 +4602,12 @@
           "machine": "BMW M4 LMGT3 Evo",
           "team": "TEAM WRT",
           "country": "BEL",
-          "driver_list": [],
-          "drivers": "",
+          "driver_list": [
+            "Darren LEUNG",
+            "Sean GELAEL",
+            "Augusto FARFUS"
+          ],
+          "drivers": "Darren LEUNG / Sean GELAEL / Augusto FARFUS",
           "image_url": "",
           "liveries": []
         },
@@ -4516,8 +4616,12 @@
           "machine": "Corvette Z06 LMGT3.R",
           "team": "TF SPORT",
           "country": "GBR",
-          "driver_list": [],
-          "drivers": "",
+          "driver_list": [
+            "Ben KEATING",
+            "Jonny EDGAR",
+            "Nicky CATSBURG"
+          ],
+          "drivers": "Ben KEATING / Jonny EDGAR / Nicky CATSBURG",
           "image_url": "",
           "liveries": []
         },
@@ -4526,8 +4630,12 @@
           "machine": "Corvette Z06 LMGT3.R",
           "team": "RACING TEAM TURKEY BY TF",
           "country": "TUR",
-          "driver_list": [],
-          "drivers": "",
+          "driver_list": [
+            "Peter DEMPSEY",
+            "Salih YOLUÇ",
+            "Charlie EASTWOOD"
+          ],
+          "drivers": "Peter DEMPSEY / Salih YOLUÇ / Charlie EASTWOOD",
           "image_url": "",
           "liveries": []
         },
@@ -4536,8 +4644,12 @@
           "machine": "Ferrari 296 LMGT3 Evo",
           "team": "VISTA AF CORSE",
           "country": "ITA",
-          "driver_list": [],
-          "drivers": "",
+          "driver_list": [
+            "Thomas FLOHR",
+            "Francesco CASTELLACCI",
+            "Davide RIGON"
+          ],
+          "drivers": "Thomas FLOHR / Francesco CASTELLACCI / Davide RIGON",
           "image_url": "",
           "liveries": []
         },
@@ -4546,8 +4658,12 @@
           "machine": "Ferrari 296 LMGT3 Evo",
           "team": "KESSEL RACING",
           "country": "SUI",
-          "driver_list": [],
-          "drivers": "",
+          "driver_list": [
+            "Takeshi KIMURA",
+            "Conrad LAURSEN",
+            "Daniel SERRA"
+          ],
+          "drivers": "Takeshi KIMURA / Conrad LAURSEN / Daniel SERRA",
           "image_url": "",
           "liveries": []
         },
@@ -4556,8 +4672,12 @@
           "machine": "McLaren 720S LMGT3 Evo",
           "team": "GARAGE 59",
           "country": "GBR",
-          "driver_list": [],
-          "drivers": "",
+          "driver_list": [
+            "Alexander WEST",
+            "Finn GEHRSITZ",
+            "Benjamin GOETHE"
+          ],
+          "drivers": "Alexander WEST / Finn GEHRSITZ / Benjamin GOETHE",
           "image_url": "",
           "liveries": []
         },
@@ -4566,8 +4686,12 @@
           "machine": "Aston Martin Vantage AMR LMGT3",
           "team": "RACING SPIRIT OF LEMAN",
           "country": "FRA",
-          "driver_list": [],
-          "drivers": "",
+          "driver_list": [
+            "Clément MATEU",
+            "Marius FOSSARD",
+            "Valentin HASSE CLOT"
+          ],
+          "drivers": "Clément MATEU / Marius FOSSARD / Valentin HASSE CLOT",
           "image_url": "",
           "liveries": []
         },
@@ -4576,8 +4700,12 @@
           "machine": "Mercedes-AMG LMGT3",
           "team": "IRON LYNX",
           "country": "ITA",
-          "driver_list": [],
-          "drivers": "",
+          "driver_list": [
+            "Martin BERRY",
+            "Rui ANDRADE",
+            "Maxime MARTIN"
+          ],
+          "drivers": "Martin BERRY / Rui ANDRADE / Maxime MARTIN",
           "image_url": "",
           "liveries": []
         },
@@ -4586,8 +4714,12 @@
           "machine": "Mercedes-AMG LMGT3",
           "team": "TEAM QATAR BY IRON LYNX",
           "country": "QAT",
-          "driver_list": [],
-          "drivers": "",
+          "driver_list": [
+            "Abdulla AL-KHELAIFI",
+            "Julian HANSES",
+            "Giuliano ALESI"
+          ],
+          "drivers": "Abdulla AL-KHELAIFI / Julian HANSES / Giuliano ALESI",
           "image_url": "",
           "liveries": []
         },
@@ -4596,8 +4728,12 @@
           "machine": "BMW M4 LMGT3 Evo",
           "team": "TEAM WRT",
           "country": "BEL",
-          "driver_list": [],
-          "drivers": "",
+          "driver_list": [
+            "Anthony MCINTOSH",
+            "Parker THOMPSON",
+            "Daniel HARPER"
+          ],
+          "drivers": "Anthony MCINTOSH / Parker THOMPSON / Daniel HARPER",
           "image_url": "",
           "liveries": []
         },
@@ -4606,8 +4742,12 @@
           "machine": "Ferrari 296 LMGT3 Evo",
           "team": "KESSEL RACING",
           "country": "SUI",
-          "driver_list": [],
-          "drivers": "",
+          "driver_list": [
+            "Dustin BLATTNER",
+            "Lorenzo PATRESE",
+            "Dennis MARSCHALL"
+          ],
+          "drivers": "Dustin BLATTNER / Lorenzo PATRESE / Dennis MARSCHALL",
           "image_url": "",
           "liveries": []
         },
@@ -4616,8 +4756,12 @@
           "machine": "Ford Mustang LMGT3",
           "team": "PROTON COMPETITION",
           "country": "GER",
-          "driver_list": [],
-          "drivers": "",
+          "driver_list": [
+            "Eric POWELL",
+            "Ben TUCK",
+            "Sebastian PRIAULX"
+          ],
+          "drivers": "Eric POWELL / Ben TUCK / Sebastian PRIAULX",
           "image_url": "",
           "liveries": []
         },
@@ -4626,8 +4770,12 @@
           "machine": "Lexus RC F LMGT3",
           "team": "AKKODIS ASP TEAM",
           "country": "FRA",
-          "driver_list": [],
-          "drivers": "",
+          "driver_list": [
+            "Tom VAN ROMPUY",
+            "Hadrien DAVID",
+            "Jack HAWKSWORTH"
+          ],
+          "drivers": "Tom VAN ROMPUY / Hadrien DAVID / Jack HAWKSWORTH",
           "image_url": "",
           "liveries": []
         },
@@ -4636,8 +4784,12 @@
           "machine": "Mercedes-AMG LMGT3",
           "team": "IRON LYNX",
           "country": "ITA",
-          "driver_list": [],
-          "drivers": "",
+          "driver_list": [
+            "Johannes ZELGER",
+            "Matteo CRESSONI",
+            "Lin HODENIUS"
+          ],
+          "drivers": "Johannes ZELGER / Matteo CRESSONI / Lin HODENIUS",
           "image_url": "",
           "liveries": []
         },
@@ -4646,8 +4798,12 @@
           "machine": "Lexus RC F LMGT3",
           "team": "AKKODIS ASP TEAM",
           "country": "FRA",
-          "driver_list": [],
-          "drivers": "",
+          "driver_list": [
+            "Petru UMBRĂRESCU",
+            "Clemens SCHMID",
+            "José María LÓPEZ"
+          ],
+          "drivers": "Petru UMBRĂRESCU / Clemens SCHMID / José María LÓPEZ",
           "image_url": "",
           "liveries": []
         },
@@ -4656,8 +4812,12 @@
           "machine": "Ford Mustang LMGT3",
           "team": "PROTON COMPETITION",
           "country": "GER",
-          "driver_list": [],
-          "drivers": "",
+          "driver_list": [
+            "Stefano GATTUSO",
+            "Giammarco LEVORATO",
+            "Logan SARGEANT"
+          ],
+          "drivers": "Stefano GATTUSO / Giammarco LEVORATO / Logan SARGEANT",
           "image_url": "",
           "liveries": []
         },
@@ -4666,8 +4826,12 @@
           "machine": "Porsche 911 GT3 R LMGT3",
           "team": "MANTHEY DK ENGINEERING",
           "country": "GER",
-          "driver_list": [],
-          "drivers": "",
+          "driver_list": [
+            "James COTTINGHAM",
+            "Timur BOGUSLAVSKIY",
+            "Ayhancan GÜVEN"
+          ],
+          "drivers": "James COTTINGHAM / Timur BOGUSLAVSKIY / Ayhancan GÜVEN",
           "image_url": "",
           "liveries": []
         },
@@ -4676,8 +4840,12 @@
           "machine": "Porsche 911 GT3 R LMGT3",
           "team": "THE BEND MANTHEY",
           "country": "GER",
-          "driver_list": [],
-          "drivers": "",
+          "driver_list": [
+            "Yasser SHAHIN",
+            "Riccardo PERA",
+            "Richard LIETZ"
+          ],
+          "drivers": "Yasser SHAHIN / Riccardo PERA / Richard LIETZ",
           "image_url": "",
           "liveries": []
         },
@@ -4686,8 +4854,12 @@
           "machine": "Ferrari 296 LMGT3 Evo",
           "team": "RICHARD MILLE AF CORSE",
           "country": "ITA",
-          "driver_list": [],
-          "drivers": "",
+          "driver_list": [
+            "Custodio TOLEDO",
+            "Lilou WADOUX",
+            "Riccardo AGOSTINI"
+          ],
+          "drivers": "Custodio TOLEDO / Lilou WADOUX / Riccardo AGOSTINI",
           "image_url": "",
           "liveries": []
         }
@@ -4698,8 +4870,12 @@
           "machine": "Oreca 07 - Gibson",
           "team": "DKR ENGINEERING",
           "country": "LUX",
-          "driver_list": [],
-          "drivers": "",
+          "driver_list": [
+            "Pro-Am John FARANO",
+            "Sebastian ALVAREZ",
+            "Renger VAN DER ZANDE"
+          ],
+          "drivers": "Pro-Am John FARANO / Sebastian ALVAREZ / Renger VAN DER ZANDE",
           "image_url": "",
           "liveries": []
         },
@@ -4708,8 +4884,12 @@
           "machine": "Oreca 07 - Gibson",
           "team": "CROWDSTRIKE RACING BY APR",
           "country": "USA",
-          "driver_list": [],
-          "drivers": "",
+          "driver_list": [
+            "Pro-Am George KURTZ",
+            "Alexander QUINN",
+            "Laurin HEINRICH"
+          ],
+          "drivers": "Pro-Am George KURTZ / Alexander QUINN / Laurin HEINRICH",
           "image_url": "",
           "liveries": []
         },
@@ -4718,8 +4898,12 @@
           "machine": "Oreca 07 - Gibson",
           "team": "PROTON COMPETITION",
           "country": "GER",
-          "driver_list": [],
-          "drivers": "",
+          "driver_list": [
+            "Jonas RIED",
+            "Kakunoshin OHTA",
+            "Harry KING"
+          ],
+          "drivers": "Jonas RIED / Kakunoshin OHTA / Harry KING",
           "image_url": "",
           "liveries": []
         },
@@ -4728,8 +4912,12 @@
           "machine": "Oreca 07 - Gibson",
           "team": "TDS RACING",
           "country": "FRA",
-          "driver_list": [],
-          "drivers": "",
+          "driver_list": [
+            "Pro-Am Tobias LUTKE",
+            "Mathias BECHE",
+            "Kevin ESTRE"
+          ],
+          "drivers": "Pro-Am Tobias LUTKE / Mathias BECHE / Kevin ESTRE",
           "image_url": "",
           "liveries": []
         },
@@ -4738,8 +4926,12 @@
           "machine": "Oreca 07 - Gibson",
           "team": "UNITED AUTOSPORTS",
           "country": "GBR",
-          "driver_list": [],
-          "drivers": "",
+          "driver_list": [
+            "Rasmus LINDH",
+            "Grégoire SAUCY",
+            "Mikkel JENSEN"
+          ],
+          "drivers": "Rasmus LINDH / Grégoire SAUCY / Mikkel JENSEN",
           "image_url": "",
           "liveries": []
         },
@@ -4748,8 +4940,12 @@
           "machine": "Oreca 07 - Gibson",
           "team": "NIELSEN RACING",
           "country": "GBR",
-          "driver_list": [],
-          "drivers": "",
+          "driver_list": [
+            "David HEINEMEIER HANSSON",
+            "Edward PEARSON",
+            "Jack DOOHAN"
+          ],
+          "drivers": "David HEINEMEIER HANSSON / Edward PEARSON / Jack DOOHAN",
           "image_url": "",
           "liveries": []
         },
@@ -4758,8 +4954,12 @@
           "machine": "Oreca 07 - Gibson",
           "team": "ALGARVE PRO RACING",
           "country": "POR",
-          "driver_list": [],
-          "drivers": "",
+          "driver_list": [
+            "Pro-Am Michael JENSEN",
+            "Enzo TRULLI",
+            "Jake HUGHES"
+          ],
+          "drivers": "Pro-Am Michael JENSEN / Enzo TRULLI / Jake HUGHES",
           "image_url": "",
           "liveries": []
         },
@@ -4768,8 +4968,12 @@
           "machine": "Oreca 07 - Gibson",
           "team": "VECTOR SPORT",
           "country": "GBR",
-          "driver_list": [],
-          "drivers": "",
+          "driver_list": [
+            "Ryan CULLEN",
+            "Vladislav LOMKO",
+            "Pietro FITTIPALDI"
+          ],
+          "drivers": "Ryan CULLEN / Vladislav LOMKO / Pietro FITTIPALDI",
           "image_url": "",
           "liveries": []
         },
@@ -4778,8 +4982,12 @@
           "machine": "Oreca 07 - Gibson",
           "team": "IDEC SPORT",
           "country": "FRA",
-          "driver_list": [],
-          "drivers": "",
+          "driver_list": [
+            "Paul LAFARGUE",
+            "Valerio RINICELLA",
+            "Job VAN UITERT"
+          ],
+          "drivers": "Paul LAFARGUE / Valerio RINICELLA / Job VAN UITERT",
           "image_url": "",
           "liveries": []
         },
@@ -4788,8 +4996,12 @@
           "machine": "Oreca 07 - Gibson",
           "team": "FORESTIER RACING BY PANIS",
           "country": "FRA",
-          "driver_list": [],
-          "drivers": "",
+          "driver_list": [
+            "Louis ROUSSET",
+            "Esteban MASSON",
+            "Oliver GRAY"
+          ],
+          "drivers": "Louis ROUSSET / Esteban MASSON / Oliver GRAY",
           "image_url": "",
           "liveries": []
         },
@@ -4798,8 +5010,12 @@
           "machine": "Oreca 07 - Gibson",
           "team": "DUQUEINE TEAM",
           "country": "FRA",
-          "driver_list": [],
-          "drivers": "",
+          "driver_list": [
+            "Doriane PIN",
+            "Julien ANDLAUER",
+            "Richard VERSCHOOR"
+          ],
+          "drivers": "Doriane PIN / Julien ANDLAUER / Richard VERSCHOOR",
           "image_url": "",
           "liveries": []
         },
@@ -4808,8 +5024,12 @@
           "machine": "Oreca 07 - Gibson",
           "team": "CLX MOTORSPORT",
           "country": "SUI",
-          "driver_list": [],
-          "drivers": "",
+          "driver_list": [
+            "Adrien CLOSMENIL",
+            "Ian AGUILERA",
+            "Theodor JENSEN"
+          ],
+          "drivers": "Adrien CLOSMENIL / Ian AGUILERA / Theodor JENSEN",
           "image_url": "",
           "liveries": []
         },
@@ -4818,8 +5038,12 @@
           "machine": "Oreca 07 - Gibson",
           "team": "INTER EUROPOL COMPETITION",
           "country": "POL",
-          "driver_list": [],
-          "drivers": "",
+          "driver_list": [
+            "Jakub SMIECHOWSKI",
+            "Tom DILLMANN",
+            "Nicholas YELLOLY"
+          ],
+          "drivers": "Jakub SMIECHOWSKI / Tom DILLMANN / Nicholas YELLOLY",
           "image_url": "",
           "liveries": []
         },
@@ -4828,8 +5052,12 @@
           "machine": "Oreca 07 - Gibson",
           "team": "PROTON COMPETITION",
           "country": "GER",
-          "driver_list": [],
-          "drivers": "",
+          "driver_list": [
+            "Pro-Am Horst Jr FELBERMAYR",
+            "Horst Felix FELBERMAYR",
+            "Lorenzo FLUXÀ"
+          ],
+          "drivers": "Pro-Am Horst Jr FELBERMAYR / Horst Felix FELBERMAYR / Lorenzo FLUXÀ",
           "image_url": "",
           "liveries": []
         },
@@ -4838,8 +5066,12 @@
           "machine": "Oreca 07 - Gibson",
           "team": "RD LIMITED",
           "country": "FRA",
-          "driver_list": [],
-          "drivers": "",
+          "driver_list": [
+            "Pro-Am Fred POORDAD",
+            "Tristan VAUTIER",
+            "Romain DUMAS"
+          ],
+          "drivers": "Pro-Am Fred POORDAD / Tristan VAUTIER / Romain DUMAS",
           "image_url": "",
           "liveries": []
         },
@@ -4848,8 +5080,12 @@
           "machine": "Oreca 07 - Gibson",
           "team": "AO BY TF",
           "country": "USA",
-          "driver_list": [],
-          "drivers": "",
+          "driver_list": [
+            "Pro-Am PJ HYETT",
+            "James ALLEN",
+            "Dane CAMERON"
+          ],
+          "drivers": "Pro-Am PJ HYETT / James ALLEN / Dane CAMERON",
           "image_url": "",
           "liveries": []
         },
@@ -4858,8 +5094,12 @@
           "machine": "Oreca 07 - Gibson",
           "team": "AF CORSE",
           "country": "ITA",
-          "driver_list": [],
-          "drivers": "",
+          "driver_list": [
+            "Pro-Am François PERRODO",
+            "Matthieu VAXIVIERE",
+            "Ben BARNICOAT"
+          ],
+          "drivers": "Pro-Am François PERRODO / Matthieu VAXIVIERE / Ben BARNICOAT",
           "image_url": "",
           "liveries": []
         },
@@ -4868,8 +5108,12 @@
           "machine": "Oreca 07 - Gibson",
           "team": "UNITED AUTOSPORTS",
           "country": "GBR",
-          "driver_list": [],
-          "drivers": "",
+          "driver_list": [
+            "Pro-Am Daniel SCHNEIDER",
+            "Benjamin HANLEY",
+            "Oliver JARVIS"
+          ],
+          "drivers": "Pro-Am Daniel SCHNEIDER / Benjamin HANLEY / Oliver JARVIS",
           "image_url": "",
           "liveries": []
         },
@@ -4878,8 +5122,12 @@
           "machine": "Oreca 07 - Gibson",
           "team": "INTER EUROPOL COMPETITION",
           "country": "POL",
-          "driver_list": [],
-          "drivers": "",
+          "driver_list": [
+            "Bijoy GARG",
+            "Reshad DE GÉRUS",
+            "Nico MÜLLER"
+          ],
+          "drivers": "Bijoy GARG / Reshad DE GÉRUS / Nico MÜLLER",
           "image_url": "",
           "liveries": []
         }
