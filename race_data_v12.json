@@ -1207,6 +1207,85 @@
               0
             ],
             "wec_points_scale": null
+          },
+          {
+            "round_name": "6 Hours of Sao Paulo",
+            "race_date": "2026-07-11",
+            "session_type": "ハイパーポール",
+            "is_custom_pts": true,
+            "points_table": [
+              1,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0
+            ],
+            "results": [
+              "Cadillac Hertz Team Jota",
+              "Cadillac Hertz Team Jota",
+              "Alpine Endurance Team",
+              "BMW M Team WRT",
+              "Alpine Endurance Team",
+              "Genesis Magma Racing",
+              "Ferrari AF Corse",
+              "Peugeot Totalenergies",
+              "Aston Martin Thor Team",
+              "AF Corse"
+            ],
+            "drivers": [
+              "W. STEVENS / N. NATO",
+              "E. BAMBER / S. BOURDAIS / J. AITKEN",
+              "F. MAKOWIECKI / J. GOUNON / V. MARTINS",
+              "K. MAGNUSSEN / R. MARCIELLO / D. VANTHOOR",
+              "A. FÉLIX DA COSTA / C. MILESI / F. HABSBURG",
+              "M. JAMINET / P. CHATIN / D. JUNCADELLA",
+              "A. FUOCO / M. MOLINA / N. NIELSEN",
+              "L. DUVAL / M. JAKOBSEN / T. POURCHAIRE",
+              "H. TINCKNELL / T. GAMBLE",
+              "Y. YE / R. KUBICA / P. HANSON"
+            ],
+            "car_numbers": [
+              "12",
+              "38",
+              "36",
+              "15",
+              "35",
+              "19",
+              "50",
+              "94",
+              "007",
+              "83"
+            ],
+            "statuses": [
+              "完走",
+              "完走",
+              "完走",
+              "完走",
+              "完走",
+              "完走",
+              "完走",
+              "完走",
+              "完走",
+              "完走"
+            ],
+            "official_points": [
+              1,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0
+            ],
+            "wec_points_scale": null
           }
         ],
         "LMGT3": [
