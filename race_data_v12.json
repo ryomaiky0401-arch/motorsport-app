@@ -2407,6 +2407,85 @@
               0
             ],
             "wec_points_scale": null
+          },
+          {
+            "round_name": "6 Hours of Sao Paulo",
+            "race_date": "2026-07-11",
+            "session_type": "ハイパーポール",
+            "is_custom_pts": true,
+            "points_table": [
+              1,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0
+            ],
+            "results": [
+              "Heart of Racing Team",
+              "Iron Lynx",
+              "Akkodis ASP Team",
+              "Team WRT",
+              "Proton Competition",
+              "Iron Lynx",
+              "The Bend Manthey",
+              "Proton Competition",
+              "Team WRT",
+              "Racing Team Turkey by TF"
+            ],
+            "drivers": [
+              "G. NEWELL / K. PAUWELS / J. ADAM",
+              "J. ZELGER / M. CRESSONI / L. HODENIUS",
+              "P. UMBRÄRESCU / C. SCHMID / J. LÓPEZ",
+              "A. MCINTOSH / P. THOMPSON / D. HARPER",
+              "E. POWELL / B. TUCK / S. PRIAULX",
+              "M. BERRY / R. ANDRADE / M. MARTIN",
+              "Y. SHAHIN / R. PERA / R. LIETZ",
+              "S. GATTUSO / G. LEVORATO / L. SARGEANT",
+              "D. LEUNG / S. GELAEL / A. FARFUS",
+              "P. DEMPSEY / S. YOLUÇ / C. EASTWOOD"
+            ],
+            "car_numbers": [
+              "23",
+              "79",
+              "87",
+              "69",
+              "77",
+              "61",
+              "92",
+              "88",
+              "32",
+              "34"
+            ],
+            "statuses": [
+              "完走",
+              "完走",
+              "完走",
+              "完走",
+              "完走",
+              "完走",
+              "完走",
+              "完走",
+              "完走",
+              "完走"
+            ],
+            "official_points": [
+              1,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0
+            ],
+            "wec_points_scale": null
           }
         ],
         "LMP2": [
