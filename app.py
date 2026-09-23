@@ -2805,7 +2805,27 @@ with tab2:
                         cumulative_points.append(running_total)
                     driver_event_points[item["ドライバー"]] = cumulative_points
 
-                st.line_chart(pd.DataFrame(driver_event_points, index=event_order))
+                # ドライバー側も大会順を明示して、文字列の辞書順への並び替えを防ぐ。
+                driver_chart_df = (
+                    pd.DataFrame(driver_event_points, index=event_order)
+                    .rename_axis("大会")
+                    .reset_index()
+                    .melt(id_vars="大会", var_name="ドライバー", value_name="累計ポイント")
+                )
+                driver_cumulative_chart = (
+                    alt.Chart(driver_chart_df)
+                    .mark_line(point=False)
+                    .encode(
+                        x=alt.X(
+                            "大会:N",
+                            sort=event_order,
+                            axis=alt.Axis(title=None, labelAngle=-90),
+                        ),
+                        y=alt.Y("累計ポイント:Q", title=None),
+                        color=alt.Color("ドライバー:N", title=None),
+                    )
+                )
+                st.altair_chart(driver_cumulative_chart, use_container_width=True)
 
     else:
         st.info(f"{r_year} {r_cat} ({r_cls}) の集計対象データがまだありません。")
