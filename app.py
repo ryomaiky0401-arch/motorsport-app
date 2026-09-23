@@ -2241,9 +2241,19 @@ with tab1:
     )
 
     if races_list:
+        # 大会選択も開催日順にする。同一大会に複数セッションがあるため、
+        # 各大会で最も早い登録日を開催順の基準にする。
+        round_dates = {}
+        for r in races_list:
+            round_name = r.get("round_name", r.get("race_name"))
+            if not round_name:
+                continue
+            race_date = r.get("race_date", "")
+            if round_name not in round_dates or (race_date and race_date < round_dates[round_name]):
+                round_dates[round_name] = race_date
         rounds = sorted(
-            list(set(r.get("round_name", r.get("race_name")) for r in races_list)),
-            reverse=True,
+            round_dates.keys(),
+            key=lambda name: (round_dates.get(name, ""), name),
         )
 
         r_col1, r_col2 = st.columns(2)
