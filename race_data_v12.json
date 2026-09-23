@@ -123,6 +123,85 @@
               0
             ],
             "wec_points_scale": null
+          },
+          {
+            "round_name": "6 Hours of Imola",
+            "race_date": "2026-04-18",
+            "session_type": "ハイパーポール",
+            "is_custom_pts": true,
+            "points_table": [
+              1,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0
+            ],
+            "results": [
+              "Ferrari AF Corse",
+              "Toyota Racing",
+              "Ferrari AF Corse",
+              "Peugeot Totalenergies",
+              "Cadillac Hertz Team Jota",
+              "Toyota Racing",
+              "Alpine Endurance Team",
+              "AF Corse",
+              "BMW M Team WRT",
+              "BMW M Team WRT"
+            ],
+            "drivers": [
+              "A. PIER GUIDI / J. CALADO / A. GIOVINAZZI",
+              "S. BUEMI / B. HARTLEY / R. HIRAKAWA",
+              "A. FUOCO / M. MOLINA / N. NIELSEN",
+              "L. DUVAL / M. JAKOBSEN / T. POURCHAIRE",
+              "W. STEVENS / N. NATO",
+              "M. CONWAY / K. KOBAYASHI / N. DE VRIES",
+              "A. FÉLIX DA COSTA / C. MILESI / F. HABSBURG",
+              "Y. YE / R. KUBICA / P. HANSON",
+              "R. FRIJNS / R. RAST",
+              "K. MAGNUSSEN / R. MARCIELLO"
+            ],
+            "car_numbers": [
+              "51",
+              "8",
+              "50",
+              "94",
+              "12",
+              "7",
+              "35",
+              "83",
+              "20",
+              "15"
+            ],
+            "statuses": [
+              "完走",
+              "完走",
+              "完走",
+              "完走",
+              "完走",
+              "完走",
+              "完走",
+              "完走",
+              "完走",
+              "完走"
+            ],
+            "official_points": [
+              1,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0
+            ],
+            "wec_points_scale": null
           }
         ],
         "LMGT3": [
