@@ -1546,38 +1546,39 @@ with tab_entry:
                     st.error("この一括登録は2026年用です。年度を2026年にしてください。")
                 else:
                     sf_2026_entries = [
-                        ("1", "岩佐 歩夢", "JPN", "TEAM MUGEN AUTOBACS"),
-                        ("16", "野尻 智紀", "JPN", "TEAM MUGEN AUTOBACS"),
-                        ("3", "ルーク・ブラウニング", "GBR", "REALIZE KONDO RACING"),
-                        ("4", "笹原 右京", "JPN", "REALIZE KONDO RACING"),
-                        ("5", "牧野 任祐", "JPN", "DOCOMO TEAM DANDELION RACING"),
-                        ("6", "太田 格之進", "JPN", "DOCOMO TEAM DANDELION RACING"),
-                        ("8", "山下 健太", "JPN", "KCMG"),
-                        ("9", "ジュリアーノ・アレジ", "FRA", "KCMG"),
-                        ("7", "小林 可夢偉", "JPN", "KDDI TGMGP TGR-DC"),
-                        ("28", "小林 利徠斗", "JPN", "KDDI TGMGP TGR-DC"),
-                        ("10", "Juju", "JPN", "HAZAMA ANDO Triple Tree Racing"),
-                        ("12", "小出 峻", "JPN", "ThreeBond Racing"),
-                        ("14", "福住 仁嶺", "JPN", "NTT docomo Business ROOKIE"),
-                        ("19", "ザック・オサリバン", "GBR", "TEAM IMPUL"),
-                        ("22", "松下 信治", "JPN", "DELiGHTWORKS RACING"),
-                        ("36", "坪井 翔", "JPN", "VANTELIN TEAM TOM’S"),
-                        ("37", "サッシャ・フェネストラズ", "FRA", "VANTELIN TEAM TOM’S"),
-                        ("38", "阪口 晴南", "JPN", "SANKI VERTEX PARTNERS CERUMO･INGING"),
-                        ("39", "大湯 都史樹", "JPN", "SANKI VERTEX PARTNERS CERUMO･INGING"),
-                        ("50", "野村 勇斗", "JPN", "San-Ei Gen with B-Max"),
-                        ("53", "チャーリー・ブルツ", "AUT", "TEAM GOH"),
-                        ("64", "佐藤 蓮", "JPN", "PONOS NAKAJIMA RACING"),
-                        ("65", "イゴール・オオムラ・フラガ", "BRA", "PONOS NAKAJIMA RACING"),
-                        ("97", "ロマン・スタネック", "CZE", "ナビクル Buzz MK RACING"),
+                        ("1", "岩佐 歩夢", "JPN", "TEAM MUGEN AUTOBACS", "HONDA / M-TEC HR-417E"),
+                        ("16", "野尻 智紀", "JPN", "TEAM MUGEN AUTOBACS", "HONDA / M-TEC HR-417E"),
+                        ("3", "ルーク・ブラウニング", "GBR", "REALIZE KONDO RACING", "TOYOTA / TGR-D TRD01F"),
+                        ("4", "笹原 右京", "JPN", "REALIZE KONDO RACING", "TOYOTA / TGR-D TRD01F"),
+                        ("5", "牧野 任祐", "JPN", "DOCOMO TEAM DANDELION RACING", "HONDA / M-TEC HR-417E"),
+                        ("6", "太田 格之進", "JPN", "DOCOMO TEAM DANDELION RACING", "HONDA / M-TEC HR-417E"),
+                        ("8", "山下 健太", "JPN", "KCMG", "TOYOTA / TGR-D TRD01F"),
+                        ("9", "ジュリアーノ・アレジ", "FRA", "KCMG", "TOYOTA / TGR-D TRD01F"),
+                        ("7", "小林 可夢偉", "JPN", "KDDI TGMGP TGR-DC", "TOYOTA / TGR-D TRD01F"),
+                        ("28", "小林 利徠斗", "JPN", "KDDI TGMGP TGR-DC", "TOYOTA / TGR-D TRD01F"),
+                        ("10", "Juju", "JPN", "HAZAMA ANDO Triple Tree Racing", "HONDA / M-TEC HR-417E"),
+                        ("12", "小出 峻", "JPN", "ThreeBond Racing", "HONDA / M-TEC HR-417E"),
+                        ("14", "福住 仁嶺", "JPN", "NTT docomo Business ROOKIE", "TOYOTA / TGR-D TRD01F"),
+                        ("19", "ザック・オサリバン", "GBR", "TEAM IMPUL", "TOYOTA / TGR-D TRD01F"),
+                        ("22", "松下 信治", "JPN", "DELiGHTWORKS RACING", "TOYOTA / TGR-D TRD01F"),
+                        ("36", "坪井 翔", "JPN", "VANTELIN TEAM TOM’S", "TOYOTA / TGR-D TRD01F"),
+                        ("37", "サッシャ・フェネストラズ", "FRA", "VANTELIN TEAM TOM’S", "TOYOTA / TGR-D TRD01F"),
+                        ("38", "阪口 晴南", "JPN", "SANKI VERTEX PARTNERS CERUMO･INGING", "TOYOTA / TGR-D TRD01F"),
+                        ("39", "大湯 都史樹", "JPN", "SANKI VERTEX PARTNERS CERUMO･INGING", "TOYOTA / TGR-D TRD01F"),
+                        ("50", "野村 勇斗", "JPN", "San-Ei Gen with B-Max", "HONDA / M-TEC HR-417E"),
+                        ("53", "チャーリー・ブルツ", "AUT", "TEAM GOH", "TOYOTA / TGR-D TRD01F"),
+                        ("64", "佐藤 蓮", "JPN", "PONOS NAKAJIMA RACING", "HONDA / M-TEC HR-417E"),
+                        ("65", "イゴール・オオムラ・フラガ", "BRA", "PONOS NAKAJIMA RACING", "HONDA / M-TEC HR-417E"),
+                        ("97", "ロマン・スタネック", "CZE", "ナビクル Buzz MK RACING", "HONDA / M-TEC HR-417E"),
                     ]
                     existing = {str(x.get("car_number", "")): x for x in entries}
                     merged = []
-                    for no, driver, nat, team in sf_2026_entries:
+                    for no, driver, nat, team, engine in sf_2026_entries:
                         old = existing.get(no, {})
                         merged.append({
                             "car_number": no,
                             "machine": "SF23",
+                            "engine": engine,
                             "team": team,
                             "country": old.get("country", ""),
                             "driver_list": [driver],
@@ -1880,6 +1881,9 @@ with tab_entry:
                             st.markdown(f"<div style='padding-left:48px; font-size:0.85rem; opacity:0.6; line-height:1.15; margin:0 0 0.15rem 0;'>{entry['machine']}</div>", unsafe_allow_html=True)
                         else:
                             st.caption(entry["machine"])
+                    if e_cat == "Super Formula" and entry.get("engine"):
+                        engine_label = "Honda / M-TEC HR-417E" if str(entry["engine"]).upper().startswith("HONDA") else "Toyota / TGR-D TRD01F"
+                        st.markdown(f"<div style='padding-left:48px; font-size:0.82rem; opacity:0.78; line-height:1.15; margin:0 0 0.2rem 0;'>⚙️ {engine_label}</div>", unsafe_allow_html=True)
                     if entry.get("country"):
                         code = country_code(entry["country"])
                         if code:
