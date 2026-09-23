@@ -762,9 +762,11 @@ def extract_wec_entry_list_url(url):
                 if not team:
                     raise ValueError(f"No.{no} のチーム名が空です。")
                 tail = line[machine_at + len(machine):].strip()
-                tail = re.sub(r"^(?:HY|Pro-Am)\\s+", "", tail, flags=re.I)
+                # 車両区分(HY / Pro-Am)はドライバー名ではないので先頭から除外。
+                tail = re.sub(r"^(?:HY|Pro-Am)\s+", "", tail, flags=re.I)
 
                 drivers = []
+                driver_details = []
                 # 2355は "Harry TINCKNELL (GBR) P Tom GAMBLE (GBR) G ..." の形。
                 # PDF抽出済みテキストでは普通の空白なので、Python側では通常の \\s を使う。
                 remaining = tail.strip()
@@ -776,12 +778,18 @@ def extract_wec_entry_list_url(url):
                     if not dm:
                         break
                     name = re.sub(r"\s+", " ", dm.group(1)).strip()
+                    nat_match = re.search(r"\(([A-Z]{3})\)\s*$", dm.group(1))
+                    driver_nat = nat_match.group(1).upper() if nat_match else ""
+                    name = re.sub(r"\s*\([A-Z]{3}\)\s*$", "", name).strip()
+                    name = re.sub(r"^(?:HY|Pro-Am)\s+", "", name, flags=re.I).strip()
                     if name and name != "-":
                         drivers.append(name)
+                        driver_details.append({"name": name, "country": driver_nat})
                     remaining = remaining[dm.end():].strip()
                 rows_by_class[cls].append({
                     "car_number": no, "machine": machine, "team": team.strip(),
                     "country": nat.upper(), "driver_list": drivers[:3],
+                    "driver_details": driver_details[:3],
                     "drivers": " / ".join(drivers[:3]),
                 })
     else:
@@ -1715,8 +1723,19 @@ with tab_entry:
                         else:
                             st.write(f"🌍 {entry['country']}")
                     display_drivers = entry.get("driver_list") or [x.strip() for x in entry.get("drivers", "").split("/") if x.strip()]
+                    driver_details = entry.get("driver_details", [])
+                    driver_country_by_name = {x.get("name", ""): x.get("country", "") for x in driver_details if isinstance(x, dict)}
                     for driver in display_drivers:
-                        st.write(f"👤 {driver}")
+                        dnat = driver_country_by_name.get(driver, "")
+                        dcode = country_code(dnat) if dnat else None
+                        if dcode:
+                            dflag, dname = st.columns([1, 7], vertical_alignment="center")
+                            with dflag:
+                                st.image(f"https://flagcdn.com/w80/{dcode}.png", width=24)
+                            with dname:
+                                st.write(driver)
+                        else:
+                            st.write(f"👤 {driver}")
     else:
         st.info("このカテゴリーのエントリーはまだ登録されていません。上の「エントリーを追加 / 編集」から追加できます。")
 
