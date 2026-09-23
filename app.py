@@ -1838,7 +1838,7 @@ with tab_entry:
                         st.markdown(
                             f"""
                             <div style="height:190px; display:flex; align-items:center; justify-content:center; overflow:hidden;">
-                                <img src="{image_src}" style="width:100%; height:100%; object-fit:contain; object-position:center;" />
+                                <img src="{image_src}" style="width:{'122%' if e_cat == 'Super Formula' else '100%'}; height:{'122%' if e_cat == 'Super Formula' else '100%'}; object-fit:contain; object-position:center;" />
                             </div>
                             """,
                             unsafe_allow_html=True,
@@ -1865,7 +1865,13 @@ with tab_entry:
                             unsafe_allow_html=True,
                         )
                     no = f"No.{entry.get('car_number')}  " if entry.get("car_number") else ""
-                    st.subheader(f"{no}{entry.get('team', '')}")
+                    # SF公式画像は余白が大きめなので、SFだけカード内で少し大きく見せる。
+                    # 長いチーム名でもWEC等と同じ感覚になるよう見出しサイズも統一。
+                    title_size = "1.15rem" if e_cat == "Super Formula" else "1.25rem"
+                    st.markdown(
+                        f"<div style='font-size:{title_size}; font-weight:700; line-height:1.25; min-height:2.9rem; margin-top:0.15rem;'>{no}{entry.get('team', '')}</div>",
+                        unsafe_allow_html=True,
+                    )
                     if entry.get("machine"):
                         st.caption(entry["machine"])
                     if entry.get("country"):
