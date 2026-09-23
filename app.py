@@ -765,14 +765,17 @@ def extract_wec_entry_list_url(url):
                 tail = re.sub(r"^(?:HY|Pro-Am)\\s+", "", tail, flags=re.I)
 
                 drivers = []
-                # 2355本文は "NAME (NAT) C NAME (NAT) C NAME (NAT) C"。
-                # まずカテゴリ記号(P/G/S/B)を各ドライバーの終端として3人を分割する。
+                # 2355は "Harry TINCKNELL (GBR) P Tom GAMBLE (GBR) G ..." の形。
+                # PDF抽出済みテキストでは普通の空白なので、Python側では通常の \\s を使う。
                 remaining = tail.strip()
                 for _ in range(3):
-                    dm = re.match(r"(.+?)(?:\\s*\\([A-Z]{3}\\))?\\s+([PGBS])(?:\\s+|$)", remaining)
+                    dm = re.match(r"(.+?)(?:\s*\([A-Z]{3}\))?\s+([PGBS])(?:\s+|$)", remaining)
+                    if not dm:
+                        # #91の2人目のように国籍コードが欠けても、カテゴリ記号を終端に拾う。
+                        dm = re.match(r"(.+?)\s+([PGBS])(?:\s+|$)", remaining)
                     if not dm:
                         break
-                    name = re.sub(r"\\s+", " ", dm.group(1)).strip()
+                    name = re.sub(r"\s+", " ", dm.group(1)).strip()
                     if name and name != "-":
                         drivers.append(name)
                     remaining = remaining[dm.end():].strip()
