@@ -765,10 +765,13 @@ def extract_wec_entry_list_url(url):
                 tail = re.sub(r"^(?:HY|Pro-Am)\\s+", "", tail, flags=re.I)
 
                 drivers = []
-                # 名前 (NAT) カテゴリー の繰り返し。カテゴリ欠落の稀な行も次の(NAT)を境界に処理。
-                for dm in re.finditer(r"(.+?)\\s*\\(([A-Z]{3})\\)\\s*(?:[PGBS])?(?=\\s+[^()]+\\s*\\([A-Z]{3}\\)|$)", tail):
+                # "A. DRIVER (FRA) P B. DRIVER (GBR) G ..." のようなPDF表記を、
+                # 次の "(NAT)" を境界にしてドライバー名だけ抜き出す。
+                driver_matches = list(re.finditer(r"([^()]+?)\\s*\\(([A-Z]{3})\\)\\s*([PGBS])?", tail))
+                for dm in driver_matches:
                     name = re.sub(r"\\s+", " ", dm.group(1)).strip()
-                    if name:
+                    name = re.sub(r"^[PGBS]\\s+", "", name).strip()
+                    if name and name != "-":
                         drivers.append(name)
                 rows_by_class[cls].append({
                     "car_number": no, "machine": machine, "team": team.strip(),
@@ -1489,17 +1492,17 @@ tab1, tab2, tab_entry, tab3, tab4 = st.tabs([
 def country_code(country):
     """国・地域名から国旗画像用の2文字コードを返す。"""
     codes = {
-        "日本":"jp","Japan":"jp","イギリス":"gb","英国":"gb","United Kingdom":"gb","UK":"gb",
-        "フランス":"fr","France":"fr","ドイツ":"de","Germany":"de","イタリア":"it","Italy":"it",
-        "アメリカ":"us","アメリカ合衆国":"us","USA":"us","United States":"us","スペイン":"es","Spain":"es",
-        "ベルギー":"be","Belgium":"be","オランダ":"nl","Netherlands":"nl","スイス":"ch","Switzerland":"ch",
-        "オーストリア":"at","Austria":"at","デンマーク":"dk","Denmark":"dk","ポルトガル":"pt","Portugal":"pt",
-        "ブラジル":"br","Brazil":"br","アルゼンチン":"ar","Argentina":"ar","オーストラリア":"au","Australia":"au",
-        "ニュージーランド":"nz","New Zealand":"nz","カナダ":"ca","Canada":"ca","メキシコ":"mx","Mexico":"mx",
-        "中国":"cn","China":"cn","韓国":"kr","South Korea":"kr","Korea":"kr","タイ":"th","Thailand":"th",
-        "インドネシア":"id","Indonesia":"id","マレーシア":"my","Malaysia":"my","モナコ":"mc","Monaco":"mc",
-        "ポーランド":"pl","Poland":"pl","フィンランド":"fi","Finland":"fi","スウェーデン":"se","Sweden":"se",
-        "ノルウェー":"no","Norway":"no","チェコ":"cz","チェコ共和国":"cz","Czechia":"cz","Czech Republic":"cz","トルコ":"tr","Türkiye":"tr","Turkey":"tr","カタール":"qa","Qatar":"qa"
+        "日本":"jp","Japan":"jp","JPN":"jp","イギリス":"gb","英国":"gb","United Kingdom":"gb","UK":"gb","GBR":"gb",
+        "フランス":"fr","France":"fr","FRA":"fr","ドイツ":"de","Germany":"de","GER":"de","DEU":"de","イタリア":"it","Italy":"it","ITA":"it",
+        "アメリカ":"us","アメリカ合衆国":"us","USA":"us","United States":"us","スペイン":"es","Spain":"es","ESP":"es",
+        "ベルギー":"be","Belgium":"be","BEL":"be","オランダ":"nl","Netherlands":"nl","NLD":"nl","NED":"nl","スイス":"ch","Switzerland":"ch","CHE":"ch","SUI":"ch",
+        "オーストリア":"at","Austria":"at","AUT":"at","デンマーク":"dk","Denmark":"dk","DNK":"dk","DEN":"dk","ポルトガル":"pt","Portugal":"pt","PRT":"pt","POR":"pt",
+        "ブラジル":"br","Brazil":"br","BRA":"br","アルゼンチン":"ar","Argentina":"ar","ARG":"ar","オーストラリア":"au","Australia":"au","AUS":"au",
+        "ニュージーランド":"nz","New Zealand":"nz","NZL":"nz","カナダ":"ca","Canada":"ca","CAN":"ca","メキシコ":"mx","Mexico":"mx","MEX":"mx",
+        "中国":"cn","China":"cn","CHN":"cn","韓国":"kr","South Korea":"kr","Korea":"kr","KOR":"kr","タイ":"th","Thailand":"th","THA":"th",
+        "インドネシア":"id","Indonesia":"id","IDN":"id","マレーシア":"my","Malaysia":"my","MYS":"my","モナコ":"mc","Monaco":"mc","MCO":"mc","MON":"mc",
+        "ポーランド":"pl","Poland":"pl","POL":"pl","フィンランド":"fi","Finland":"fi","FIN":"fi","スウェーデン":"se","Sweden":"se","SWE":"se",
+        "ノルウェー":"no","Norway":"no","NOR":"no","チェコ":"cz","チェコ共和国":"cz","Czechia":"cz","Czech Republic":"cz","CZE":"cz","トルコ":"tr","Türkiye":"tr","Turkey":"tr","TUR":"tr","カタール":"qa","Qatar":"qa","QAT":"qa","ROU":"ro","HKG":"hk","ANG":"ao"
     }
     return codes.get(str(country).strip())
 
