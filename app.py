@@ -756,6 +756,23 @@ def extract_wec_timing_url(url):
         "150": ("Richard Mille AF Corse", "LMGT3"),
     }
 
+    # LMP2と追加招待車はLe Mans専用。
+    # これらを通常戦でも候補に残すと、例えばSpaのProton Competition行に含まれる
+    # 別の数字を「#9 LMP2」と誤認したり、TF Sport行を「#2」と誤認するため除外する。
+    event_upper = f"{urllib.parse.unquote(url).upper()} {upper}"
+    is_le_mans = "LE MANS" in event_upper and "LONE STAR" not in event_upper
+    if not is_le_mans:
+        le_mans_only_numbers = {
+            "101",  # Cadillac WTR
+            "3", "4", "9", "14", "22", "24", "25", "26", "28", "37",
+            "29", "30", "43", "44", "48", "99", "183", "199", "222", "343",
+            "2", "13", "57", "59", "62", "63", "74", "150",
+        }
+        entries = {
+            num: info for num, info in entries.items()
+            if num not in le_mans_only_numbers
+        }
+
     # 行の並びがPDF内部で前後することがあるので、順位+車番を全文から探す。
     # ドライバー列は「A. NAME / B. NAME ...」の形を独立して取得。
     driver_pat = re.compile(
