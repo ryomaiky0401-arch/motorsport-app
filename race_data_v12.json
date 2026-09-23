@@ -6180,14 +6180,14 @@
           "team": "INTER EUROPOL COMPETITION",
           "country": "POL",
           "driver_list": [
-            "Bijoy",
+            "Bijoy GARG",
             "(USA) S Reshad DE GÉRUS",
             "Nico MÜLLER"
           ],
           "driver_details": [
             {
-              "name": "Bijoy",
-              "country": "GAR"
+              "name": "Bijoy GARG",
+              "country": "USA"
             },
             {
               "name": "(USA) S Reshad DE GÉRUS",
@@ -6198,7 +6198,7 @@
               "country": "SUI"
             }
           ],
-          "drivers": "Bijoy / (USA) S Reshad DE GÉRUS / Nico MÜLLER",
+          "drivers": "Bijoy GARG / (USA) S Reshad DE GÉRUS / Nico MÜLLER",
           "image_url": "https://www.fiawec.com/media/cache/resolve/news_card/uploads/2026-lm-343-oreca-07-droite-6a23f4630d96a243964806.png",
           "liveries": []
         }
