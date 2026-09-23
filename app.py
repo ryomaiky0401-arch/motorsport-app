@@ -668,27 +668,23 @@ def extract_sf_result_url(url):
         raise ValueError("順位データを取得できませんでした。")
     return rows, session
 
-def extract_wec_timing_url(source):
-    """Al Kamel Timing ResultsのClassification PDFをURLまたはアップロードファイルから解析する。"""
+def extract_wec_timing_url(url):
+    """Al Kamel Timing Resultsのテキスト入りClassification PDFを直接解析する。OCRは使わない。"""
     import re
     import requests
     import pdfplumber
 
     from urllib.parse import urlparse
 
-    # URLでも、StreamlitのUploadedFileでも同じ解析処理へ流す。
-    if isinstance(source, str):
-        url = source.strip()
-        parsed = urlparse(url)
-        if parsed.netloc.lower() != "fiawec.alkamelsystems.com" or "/Results/" not in parsed.path or not parsed.path.lower().endswith(".pdf"):
-            raise ValueError("Al Kamel Timing ResultsのPDF URLを入力してください。")
-        response = requests.get(url, timeout=20, headers={"User-Agent": "Mozilla/5.0"})
-        response.raise_for_status()
-        pdf_bytes = io.BytesIO(response.content)
-    else:
-        url = getattr(source, "name", "uploaded_wec_result.pdf")
-        raw = source.getvalue() if hasattr(source, "getvalue") else source.read()
-        pdf_bytes = io.BytesIO(raw)
+    url = url.strip()
+    parsed = urlparse(url)
+    if parsed.netloc.lower() != "fiawec.alkamelsystems.com" or "/Results/" not in parsed.path or not parsed.path.lower().endswith(".pdf"):
+        raise ValueError("Al Kamel Timing ResultsのPDF URLを入力してください。")
+
+    # URL末尾に ?utm_source=... などが付いていても受け付ける
+    response = requests.get(url, timeout=20, headers={"User-Agent": "Mozilla/5.0"})
+    response.raise_for_status()
+    pdf_bytes = io.BytesIO(response.content)
 
     with pdfplumber.open(pdf_bytes) as pdf:
         text = "\n".join((p.extract_text(x_tolerance=2, y_tolerance=2) or "") for p in pdf.pages)
@@ -1813,22 +1809,16 @@ if s_cat == "WEC":
     with st.sidebar.expander("🌐 WEC Timing Resultsを読み込む"):
         if st.session_state.get("wec_import_success"):
             st.success(st.session_state.pop("wec_import_success"))
-        st.caption("Al Kamel Timing ResultsのClassification PDFを、URL貼り付けまたはPDFファイル直接アップロードで読み込めます。OCRは使いません。")
+        st.caption("Al Kamel Timing Resultsの「CLASSIFICATION BY CATEGORY」PDFのURLを貼り付けます。OCRは使いません。")
         wec_url = st.text_input(
             "Classification PDF URL",
             placeholder="https://fiawec.alkamelsystems.com/Results/.../05_ClassificationByCategory_....PDF",
             key="wec_timing_url",
         )
-        wec_upload = st.file_uploader(
-            "または Classification PDFを直接アップロード",
-            type=["pdf"],
-            key="wec_timing_pdf_upload",
-        )
-        wec_source = wec_upload if wec_upload is not None else (wec_url.strip() if wec_url.strip() else None)
-        if wec_source is not None:
+        if wec_url.strip():
             try:
                 with st.spinner("公式Timing Resultsを読み込み中…"):
-                    wec_groups = extract_wec_timing_url(wec_source)
+                    wec_groups = extract_wec_timing_url(wec_url.strip())
                 if wec_groups:
                     for g in wec_groups:
                         scale_note = f" / 配点: {g['配点区分']}" if g.get("配点区分") else ""
