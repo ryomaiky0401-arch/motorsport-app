@@ -2466,15 +2466,16 @@ with tab2:
     ):
         races = data["races"][r_year][r_cat][r_cls]
 
-        # 日付 → 同一イベント内は「予選 → スプリント → 決勝」の順に固定。
-        # PDFを読み込んだ順番には左右されない。
+        # 大会は開催日順、同一大会内だけセッション順に固定する。
+        # session_typeを先に並べると「全大会の予選→全大会の決勝」になり、
+        # 累計グラフの大会順まで崩れるため、日付を最優先にする。
         session_order = {"予選": 0, "ハイパーポール1": 1, "ハイパーポール": 2, "ハイパーポール2": 2, "スプリント": 3, "決勝": 4}
         races = sorted(
             races,
             key=lambda x: (
-                session_order.get(x.get("session_type", "決勝"), 99),
                 x.get("race_date", ""),
                 x.get("round_name", ""),
+                session_order.get(x.get("session_type", "決勝"), 99),
             ),
         )
 
