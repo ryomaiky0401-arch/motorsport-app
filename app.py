@@ -554,97 +554,75 @@ def extract_sf_result_url(url):
     rows = []
     race_points = [20, 15, 11, 8, 6, 5, 4, 3, 2, 1]
     qual_points = [3, 2, 1]
-    # 公式ページの結果部分から各2026車番の出現位置を探し、その直前にある順位を採用する。
-    # 決勝はラップ数/タイム等の数字が多いため「順位 車番」の連続regexには頼らない。
-    found = []
-    seen_ranks = set()
-    used_nums = set()
-    for num, (driver, team) in sf_entries.items():
-        # 車番の後ろ180文字以内にそのドライバー名がある出現だけを結果行候補にする。
-        for nm in re.finditer(r"(?<!\d)" + re.escape(num) + r"(?!\d)", result_text):
-            # 対象ラウンドだけに切り出しているので、順位(+Group)→車番で安全に特定する。
-            # 車番の直前には決勝なら順位、予選なら「順位 A/B」がある。
-            before = result_text[max(0, nm.start() - 25):nm.start()]
-            if session == "予選":
-                rm = re.search(r"(\d{1,2})(?:\s+\*?\d+)?\s+[AB]\s*$", before)
-            else:
-                rm = re.search(r"(\d{1,2})\s*$", before)
-            if not rm:
-                continue
-            rank = int(rm.group(1))
-            if not (1 <= rank <= 30) or rank in seen_ranks or num in used_nums:
-                continue
 
-            seen_ranks.add(rank)
-            used_nums.add(num)
-            pts = (qual_points[rank - 1] if session == "予選" and rank <= 3
-                   else race_points[rank - 1] if session == "決勝" and rank <= 10 else 0)
-            found.append((nm.start(), {
-                "順位": rank, "カーナンバー": num, "ドライバー": driver,
-                "チーム": team, "ポイント": pts, "ステータス": "完走"
-            }))
-            break
+    # 公式表は予選でも最終順位がすでに1～22位で振られている。
+    # A/Bは順位ではなくQ1グループなので、「順位 + Group + 車番」を1行として直接読む。
+    # 決勝は「順位 + 車番」を読む。
+    if session == "予選":
+        row_re = re.compile(r"(?:^|\\s)(\\d{1,2})(?:\\s+\\*?\\d+)?\\s+([AB])\\s+(\\d{1,2})(?=\\s)")
+    else:
+        row_re = re.compile(r"(?:^|\\s)(\\d{1,2})(?:\\s+\\*?\\d+)?\\s+(\\d{1,2})(?=\\s)")
 
-    # 決勝の未分類車は順位自体が無い場合もあるので、NOT CLASSIFIED部から未取得車を追加。
+    seen_nums = set()
+    for m in row_re.finditer(result_text):
+        rank = int(m.group(1))
+        group = m.group(2) if session == "予選" else ""
+        num = m.group(3) if session == "予選" else m.group(2)
+        if num not in sf_entries or num in seen_nums or not (1 <= rank <= 30):
+            continue
+        driver, team = sf_entries[num]
+        pts = (qual_points[rank - 1] if session == "予選" and rank <= 3
+               else race_points[rank - 1] if session == "決勝" and rank <= 10 else 0)
+        row = {
+            "順位": rank, "カーナンバー": num, "ドライバー": driver,
+            "チーム": team, "ポイント": pts, "ステータス": "完走"
+        }
+        if group:
+            row["グループ"] = group
+        rows.append(row)
+        seen_nums.add(num)
+
+    # 予選のNOT CLASSIFIEDは順位番号が無いのでA/B + 車番から末尾へ追加。
+    if session == "予選":
+        nc_pos = result_text.find("NOT CLASSIFIED")
+        if nc_pos >= 0:
+            nc_text = result_text[nc_pos:]
+            next_rank = max([x["順位"] for x in rows], default=0) + 1
+            nc_matches = []
+            for num, (driver, team) in sf_entries.items():
+                if num in seen_nums:
+                    continue
+                m = re.search(r"(?:^|\\s)([AB])\\s+" + re.escape(num) + r"(?=\\s)", nc_text)
+                if m:
+                    nc_matches.append((m.start(), m.group(1), num, driver, team))
+            for _, group, num, driver, team in sorted(nc_matches):
+                rows.append({
+                    "順位": next_rank, "カーナンバー": num, "ドライバー": driver,
+                    "チーム": team, "ポイント": 0, "ステータス": "予選未分類",
+                    "グループ": group,
+                })
+                seen_nums.add(num)
+                next_rank += 1
+
+    # 決勝のNOT CLASSIFIEDも車番順ではなく公式掲載順で追加。
     if session == "決勝":
         nc_pos = result_text.find("NOT CLASSIFIED")
         if nc_pos >= 0:
             nc_text = result_text[nc_pos:]
-            next_rank = max([row["順位"] for _, row in found], default=0) + 1
-            for num, (driver, team) in sf_entries.items():
-                if num in used_nums:
-                    continue
-                for nm in re.finditer(r"(?<!\d)" + re.escape(num) + r"(?!\d)", nc_text):
-                    after = nc_text[nm.end():nm.end() + 180]
-                    compact_after = re.sub(r"\s+", "", after).replace("・", "･")
-                    compact_driver = re.sub(r"\s+", "", driver).replace("・", "･")
-                    driver_parts = [p for p in re.split(r"[ ･・]+", driver) if p]
-                    if compact_driver in compact_after or (
-                        driver_parts and all(p in after for p in driver_parts)
-                    ):
-                        found.append((nc_pos + nm.start(), {
-                            "順位": next_rank, "カーナンバー": num, "ドライバー": driver,
-                            "チーム": team, "ポイント": 0, "ステータス": "リタイア"
-                        }))
-                        used_nums.add(num)
-                        next_rank += 1
-                        break
-
-    rows.extend(row for _, row in found)
-
-    # 予選のNOT CLASSIFIEDは順位番号が付かないため、通常の順位regexでは拾えない。
-    # 公式ページに掲載された未分類車も末尾へ追加し、24台すべて保持する。
-    if session == "予選":
-        not_classified_pos = result_text.find("NOT CLASSIFIED")
-        if not_classified_pos >= 0:
-            nc_text = result_text[not_classified_pos:]
-            already_nums = {x["カーナンバー"] for x in rows}
-            nc_order = []
-            for num, (driver, team) in sf_entries.items():
-                if num in already_nums:
-                    continue
-                # NOT CLASSIFIED部分で「A/B + 車番 + ドライバー名」の並びを確認する。
-                pat = re.compile(r"(?:^|\s)[AB]\s+" + re.escape(num) + r"(?=\s)")
-                m_nc = pat.search(nc_text)
-                if not m_nc:
-                    continue
-                tail = nc_text[m_nc.end():]
-                next_entry = re.search(r"\s[AB]\s+\d{1,2}(?=\s)", tail)
-                chunk = tail[:next_entry.start()] if next_entry else tail
-                driver_parts = [p for p in re.split(r"[ ･・]+", driver) if p]
-                if driver_parts and all(p in chunk for p in driver_parts):
-                    nc_order.append((m_nc.start(), num, driver, team))
-            nc_order.sort()
             next_rank = max([x["順位"] for x in rows], default=0) + 1
-            for _, num, driver, team in nc_order:
+            nc_matches = []
+            for num, (driver, team) in sf_entries.items():
+                if num in seen_nums:
+                    continue
+                m = re.search(r"(?<!\\d)" + re.escape(num) + r"(?!\\d)", nc_text)
+                if m:
+                    nc_matches.append((m.start(), num, driver, team))
+            for _, num, driver, team in sorted(nc_matches):
                 rows.append({
-                    "順位": next_rank,
-                    "カーナンバー": num,
-                    "ドライバー": driver,
-                    "チーム": team,
-                    "ポイント": 0,
-                    "ステータス": "予選未分類",
+                    "順位": next_rank, "カーナンバー": num, "ドライバー": driver,
+                    "チーム": team, "ポイント": 0, "ステータス": "リタイア"
                 })
+                seen_nums.add(num)
                 next_rank += 1
 
     rows.sort(key=lambda x: x["順位"])
