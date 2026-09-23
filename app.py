@@ -1569,7 +1569,7 @@ with tab_entry:
                         ("53", "チャーリー・ブルツ", "AUT", "TEAM GOH", "TOYOTA / TGR-D TRD01F"),
                         ("64", "佐藤 蓮", "JPN", "PONOS NAKAJIMA RACING", "HONDA / M-TEC HR-417E"),
                         ("65", "イゴール・オオムラ・フラガ", "BRA", "PONOS NAKAJIMA RACING", "HONDA / M-TEC HR-417E"),
-                        ("97", "ロマン・スタネック", "CZE", "ナビクル Buzz MK RACING", "HONDA / M-TEC HR-417E"),
+                        ("97", "ロマン・スタネック", "CZE", "ナビクル Buzz MK RACING", "TOYOTA / TGR-D TRD01F"),
                     ]
                     existing = {str(x.get("car_number", "")): x for x in entries}
                     merged = []
