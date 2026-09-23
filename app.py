@@ -511,7 +511,9 @@ def extract_sf_result_url(url):
     text = unescape(re.sub(r"<[^>]+>", " ", html))
     text = re.sub(r"\s+", " ", text)
 
-    section_start = text.find(section_heading)
+    # 同じ見出しがページ上部のナビにも出るため、最初ではなく実リザルト側（最後の出現）を使う。
+    # 例: "Rd.1予選" はナビと結果表見出しの2回現れる。
+    section_start = text.rfind(section_heading)
     if section_start < 0:
         raise ValueError(f"公式ページ内に {section_heading} を見つけられませんでした。")
     section_end = text.find(next_heading, section_start + len(section_heading))
