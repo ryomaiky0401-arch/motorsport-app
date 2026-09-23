@@ -1826,6 +1826,85 @@
               0
             ],
             "wec_points_scale": null
+          },
+          {
+            "round_name": "24 Heures du Mans",
+            "race_date": "2026-06-11",
+            "session_type": "ハイパーポール2",
+            "is_custom_pts": true,
+            "points_table": [
+              1,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0
+            ],
+            "results": [
+              "Heart of Racing Team",
+              "Vista AF Corse",
+              "Akkodis ASP Team",
+              "Akkodis ASP Team",
+              "Team WRT",
+              "Team WRT",
+              "Kessel Racing",
+              "Heart of Racing Team",
+              "Manthey DK Engineering",
+              "Proton Competition"
+            ],
+            "drivers": [
+              "I. JAMES / Z. ROBICHON / M. DRUDI",
+              "F. HÉRIAU / S. MANN / A. ROVERA",
+              "P. UMBRÄRESCU / C. SCHMID / J. LÓPEZ",
+              "T. VAN ROMPUY / H. DAVID / J. HAWKSWORTH",
+              "D. LEUNG / S. GELAEL / A. FARFUS",
+              "A. MCINTOSH / P. THOMPSON / D. HARPER",
+              "D. BLATTNER / L. PATRESE / D. MARSCHALL",
+              "G. NEWELL / E. BARRICHELLO / J. ADAM",
+              "J. COTTINGHAM / T. BOGUSLAVSKIY / A. GÜVEN",
+              "E. POWELL / B. TUCK / S. PRIAULX"
+            ],
+            "car_numbers": [
+              "27",
+              "21",
+              "87",
+              "78",
+              "32",
+              "69",
+              "74",
+              "23",
+              "91",
+              "77"
+            ],
+            "statuses": [
+              "完走",
+              "完走",
+              "完走",
+              "完走",
+              "完走",
+              "完走",
+              "完走",
+              "完走",
+              "完走",
+              "完走"
+            ],
+            "official_points": [
+              1,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0
+            ],
+            "wec_points_scale": null
           }
         ],
         "LMP2": [
@@ -2059,6 +2138,85 @@
               0,
               0,
               0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0
+            ],
+            "wec_points_scale": null
+          },
+          {
+            "round_name": "24 Heures du Mans",
+            "race_date": "2026-06-11",
+            "session_type": "ハイパーポール2",
+            "is_custom_pts": true,
+            "points_table": [
+              1,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0
+            ],
+            "results": [
+              "Forestier Racing by Panis",
+              "IDEC SPORT",
+              "Nielsen Racing",
+              "Inter Europol Competition",
+              "CrowdStrike Racing by APR",
+              "Duqueine Team",
+              "TDS Racing",
+              "AO by TF",
+              "AF Corse",
+              "Inter Europol Competition"
+            ],
+            "drivers": [
+              "L. ROUSSET / E. MASSON / O. GRAY",
+              "P. LAFARGUE / V. RINICELLA / J. VAN UITERT",
+              "D. HEINEMEIER HANSSON / E. PEARSON / J. DOOHAN",
+              "J. SMIECHOWSKI / T. DILLMANN / N. YELLOLY",
+              "G. KURTZ / A. QUINN / L. HEINRICH",
+              "D. PIN / J. ANDLAUER / R. VERSCHOOR",
+              "T. LUTKE / M. BECHE / K. ESTRE",
+              "P. HYETT / J. ALLEN / D. CAMERON",
+              "F. PERRODO / M. VAXIVIERE / B. BARNICOAT",
+              "B. GARG / R. DE GÉRUS / N. MÜLLER"
+            ],
+            "car_numbers": [
+              "29",
+              "28",
+              "24",
+              "43",
+              "4",
+              "30",
+              "14",
+              "99",
+              "183",
+              "343"
+            ],
+            "statuses": [
+              "完走",
+              "完走",
+              "完走",
+              "完走",
+              "完走",
+              "完走",
+              "完走",
+              "完走",
+              "完走",
+              "完走"
+            ],
+            "official_points": [
+              1,
               0,
               0,
               0,
