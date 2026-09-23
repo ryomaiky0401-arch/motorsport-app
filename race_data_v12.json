@@ -4258,7 +4258,53 @@
   "entries": {
     "2026年": {
       "WEC_Hypercar": [],
-      "SUPER GT_GT500": []
+      "SUPER GT_GT500": [],
+      "WEC_LMGT3": [
+        {
+          "car_number": "13",
+          "machine": "Corvette Z06 LMGT3.R",
+          "team": "AUTOSPORT",
+          "country": "CAN",
+          "driver_list": [
+            "Orey FIDANI",
+            "Lars KERN",
+            "Matthew BELL"
+          ],
+          "drivers": "Orey FIDANI / Lars KERN / Matthew BELL",
+          "image_url": "",
+          "liveries": []
+        },
+        {
+          "car_number": "1",
+          "machine": "Ferrari 296 LMGT3 Evo",
+          "team": "86 GR RACING",
+          "country": "GBR",
+          "driver_list": [],
+          "drivers": "",
+          "image_url": "",
+          "liveries": []
+        },
+        {
+          "car_number": "2",
+          "machine": "Aston Martin Vantage AMR LMGT3",
+          "team": "56 BLACKTHORN",
+          "country": "GBR",
+          "driver_list": [],
+          "drivers": "",
+          "image_url": "",
+          "liveries": []
+        },
+        {
+          "car_number": "5",
+          "machine": "Ferrari 296 LMGT3 Evo",
+          "team": "151AF CORSE",
+          "country": "ITA",
+          "driver_list": [],
+          "drivers": "",
+          "image_url": "",
+          "liveries": []
+        }
+      ]
     }
   }
 }
