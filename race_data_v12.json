@@ -252,6 +252,85 @@
               0
             ],
             "wec_points_scale": null
+          },
+          {
+            "round_name": "6 Hours of Imola",
+            "race_date": "2026-04-18",
+            "session_type": "ハイパーポール",
+            "is_custom_pts": true,
+            "points_table": [
+              1,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0
+            ],
+            "results": [
+              "Garage 59",
+              "Akkodis ASP Team",
+              "Akkodis ASP Team",
+              "Team WRT",
+              "Team WRT",
+              "Iron Lynx",
+              "Vista AF Corse",
+              "Manthey DK Engineering",
+              "Proton Competition",
+              "Racing Team Turkey by TF"
+            ],
+            "drivers": [
+              "A. AU / T. FLEMING / M. KIRCHHÖFER",
+              "T. VAN ROMPUY / H. DAVID / E. MASSON",
+              "P. UMBRÄRESCU / C. SCHMID / J. LÓPEZ",
+              "A. MCINTOSH / P. THOMPSON / D. HARPER",
+              "D. LEUNG / S. GELAEL / A. FARFUS",
+              "M. BERRY / R. ANDRADE / M. MARTIN",
+              "F. HÉRIAU / S. MANN / A. ROVERA",
+              "J. COTTINGHAM / T. BOGUSLAVSKIY / A. GÜVEN",
+              "S. GATTUSO / G. LEVORATO / L. SARGEANT",
+              "P. DEMPSEY / S. YOLUÇ / C. EASTWOOD"
+            ],
+            "car_numbers": [
+              "10",
+              "78",
+              "87",
+              "69",
+              "32",
+              "61",
+              "21",
+              "91",
+              "88",
+              "34"
+            ],
+            "statuses": [
+              "完走",
+              "完走",
+              "完走",
+              "完走",
+              "完走",
+              "完走",
+              "完走",
+              "完走",
+              "完走",
+              "完走"
+            ],
+            "official_points": [
+              1,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0
+            ],
+            "wec_points_scale": null
           }
         ]
       }
