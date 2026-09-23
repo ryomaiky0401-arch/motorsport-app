@@ -494,41 +494,31 @@ def extract_sf_result_url(url):
     response.raise_for_status()
     response.encoding = response.apparent_encoding or "utf-8"
 
-    lower_url = url.lower()
-    if "qf" in lower_url:
-        session = "予選"
-    elif "race" in lower_url:
-        session = "決勝"
-    else:
-        raise ValueError("予選 / 決勝をURLから判定できませんでした。")
+    # SF公式ページは1ページ内に複数ラウンドの結果があるため、URL末尾のアンカーで対象を限定する。
+    fragment = (parsed.fragment or "").lower()
+    fragment_map = {
+        "qf-1": ("予選", 1, "Rd.1予選", "Rd.1 RACE"),
+        "race-1": ("決勝", 1, "Rd.1 RACE", "Rd.2予選"),
+        "qf-2": ("予選", 2, "Rd.2予選", "Rd.2 RACE"),
+        "race-2": ("決勝", 2, "Rd.2 RACE", "ドライバーコメント"),
+    }
+    if fragment not in fragment_map:
+        raise ValueError("URL末尾を #qf-1 / #race-1 / #qf-2 / #race-2 のいずれかにしてください。")
+    session, sf_round_no, section_heading, next_heading = fragment_map[fragment]
 
-    # script/styleを除去し、HTMLをプレーンテキスト化。
-    html = re.sub(r"<script[\s\\S]*?</script>", " ", response.text, flags=re.I)
-    html = re.sub(r"<style[\s\\S]*?</style>", " ", html, flags=re.I)
+    html = re.sub(r"<script[\\s\\S]*?</script>", " ", response.text, flags=re.I)
+    html = re.sub(r"<style[\\s\\S]*?</style>", " ", html, flags=re.I)
     text = unescape(re.sub(r"<[^>]+>", " ", html))
-    text = re.sub(r"\s+", " ", text)
+    text = re.sub(r"\\s+", " ", text)
 
-    # 2026の公式ページは「Po. No. Driver Team ／ Engine Lap ...」の順。
-    # 公式HTMLではヘッダーの区切りが装飾要素で崩れる場合があるため、
-    # 厳密な1本の正規表現ではなく No. / Driver / Team の位置関係で結果開始点を探す。
-    marker = re.search(r"No\\.?\s+Driver\s+Team", text, flags=re.I)
-    if not marker:
-        # さらに装飾文字を無視したフォールバック。
-        compact = re.sub(r"[^A-Za-z0-9一-龥ぁ-んァ-ヶ]+", " ", text)
-        marker2 = re.search(r"No\s+Driver\s+Team", compact, flags=re.I)
-        if not marker2:
-            raise ValueError("公式ページの結果ヘッダーを見つけられませんでした。")
-        # compact側の位置は元HTML本文に対応しないので、最初の2026エントリー順位列を直接探す。
-        start = re.search(r"\b1\s+[AB]\s+\d{1,2}\s+", text) if session == "予選" else re.search(r"\b1\s+\d{1,2}\s+", text)
-        if not start:
-            raise ValueError("公式ページの順位データ開始位置を見つけられませんでした。")
-        result_text = text[start.start():]
-    else:
-        result_text = text[marker.end():]
-    end_markers = ["車両：", "Fastest Lap", "PENALTIES", "GO TO TOP"]
-    end_positions = [result_text.find(x) for x in end_markers if result_text.find(x) >= 0]
-    if end_positions:
-        result_text = result_text[:min(end_positions)]
+    section_start = text.find(section_heading)
+    if section_start < 0:
+        raise ValueError(f"公式ページ内に {section_heading} を見つけられませんでした。")
+    section_end = text.find(next_heading, section_start + len(section_heading))
+    result_text = text[section_start:section_end if section_end >= 0 else None]
+    cut_positions = [result_text.find(x) for x in ["PENALTIES", "GO TO TOP"] if result_text.find(x) >= 0]
+    if cut_positions:
+        result_text = result_text[:min(cut_positions)]
 
     # 2026エントリーの車番→ドライバー/チーム。
     # 日本語名の直後に英語名が連結される公式HTMLなので、車番を境界として各行を切り出す。
@@ -542,7 +532,7 @@ def extract_sf_result_url(url):
         "7": ("小林 可夢偉", "KDDI TGMGP TGR-DC"),
         "28": ("小林 利徠斗", "KDDI TGMGP TGR-DC"),
         "8": ("山下 健太", "KCMG"),
-        "9": ("ジュリアーノ･アレジ", "KCMG"),
+        "9": ("野中 誠太" if "Seita Nonaka" in result_text or "野中" in result_text else "ジュリアーノ･アレジ", "KCMG"),
         "10": ("Juju", "HAZAMA ANDO Triple Tree Racing"),
         "12": ("小出 峻", "ThreeBond Racing"),
         "14": ("福住 仁嶺", "NTT docomo Business ROOKIE"),
@@ -570,19 +560,11 @@ def extract_sf_result_url(url):
     for num, (driver, team) in sf_entries.items():
         # 車番の後ろ180文字以内にそのドライバー名がある出現だけを結果行候補にする。
         for nm in re.finditer(r"(?<!\d)" + re.escape(num) + r"(?!\d)", result_text):
-            after = result_text[nm.end():nm.end() + 180]
-            compact_after = re.sub(r"\s+", "", after).replace("・", "･")
-            compact_driver = re.sub(r"\s+", "", driver).replace("・", "･")
-            driver_parts = [p for p in re.split(r"[ ･・]+", driver) if p]
-            if compact_driver not in compact_after and not (
-                driver_parts and all(p in after for p in driver_parts)
-            ):
-                continue
-
+            # 対象ラウンドだけに切り出しているので、順位(+Group)→車番で安全に特定する。
             # 車番の直前には決勝なら順位、予選なら「順位 A/B」がある。
             before = result_text[max(0, nm.start() - 25):nm.start()]
             if session == "予選":
-                rm = re.search(r"(\d{1,2})\s+[AB]\s*$", before)
+                rm = re.search(r"(\d{1,2})(?:\s+\*?\d+)?\s+[AB]\s*$", before)
             else:
                 rm = re.search(r"(\d{1,2})\s*$", before)
             if not rm:
@@ -666,7 +648,7 @@ def extract_sf_result_url(url):
     rows.sort(key=lambda x: x["順位"])
     if not rows:
         raise ValueError("順位データを取得できませんでした。")
-    return rows, session
+    return rows, session, sf_round_no
 
 def extract_wec_entry_list_url(url):
     """FIA WEC公式のEntry List PDF URLからクラス別エントリーを抽出する。"""
@@ -2149,13 +2131,15 @@ if s_cat == "Super Formula":
         if sf_url.strip():
             try:
                 with st.spinner("SF公式リザルトを読み込み中…"):
-                    sf_rows, sf_session = extract_sf_result_url(sf_url.strip())
+                    sf_rows, sf_session, sf_round_no = extract_sf_result_url(sf_url.strip())
                 st.success(f"{len(sf_rows)}台を読み取れました！ セッション: {sf_session}")
                 st.dataframe(pd.DataFrame(sf_rows), use_container_width=True, hide_index=True)
 
                 sf_year = st.selectbox("登録年度", YEARS, key="sf_import_year")
-                sf_round = st.text_input("レース名 / ラウンド", placeholder="例: Rd.1 もてぎ", key="sf_import_round")
-                sf_date = st.date_input("開催日", datetime.date.today(), key="sf_import_date")
+                sf_round_default = f"Rd.{sf_round_no} もてぎ" if "/24415/" in sf_url else f"Rd.{sf_round_no}"
+                sf_round = st.text_input("レース名 / ラウンド", value=sf_round_default, key="sf_import_round")
+                sf_date_default = datetime.date(2026, 4, 4) if "/24415/" in sf_url and sf_round_no == 1 else (datetime.date(2026, 4, 5) if "/24415/" in sf_url and sf_round_no == 2 else datetime.date.today())
+                sf_date = st.date_input("開催日", sf_date_default, key="sf_import_date")
                 sf_multiplier = 1.0
                 if sf_session == "決勝":
                     sf_multiplier = st.selectbox(
