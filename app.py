@@ -771,17 +771,19 @@ def extract_wec_entry_list_url(url):
                 # PDF抽出済みテキストでは普通の空白なので、Python側では通常の \\s を使う。
                 remaining = tail.strip()
                 for _ in range(3):
-                    dm = re.match(r"(.+?)(?:\s*\([A-Z]{3}\))?\s+([PGBS])(?:\s+|$)", remaining)
-                    if not dm:
-                        # #91の2人目のように国籍コードが欠けても、カテゴリ記号を終端に拾う。
+                    # 国籍コードを任意グループにすると正規表現が名前側へ吸収してしまうため、
+                    # 通常行では NAME / NAT / category を別グループで必ず取得する。
+                    dm = re.match(r"(.+?)\s*\(([A-Z]{3})\)\s*([PGBS])(?:\s+|$)", remaining)
+                    if dm:
+                        name = re.sub(r"\s+", " ", dm.group(1)).strip()
+                        driver_nat = dm.group(2).upper()
+                    else:
+                        # PDF側で国籍コードが欠けている例だけフォールバック。
                         dm = re.match(r"(.+?)\s+([PGBS])(?:\s+|$)", remaining)
-                    if not dm:
-                        break
-                    raw_driver = dm.group(1).strip()
-                    nat_match = re.search(r"\(([A-Z]{3})\)\s*$", raw_driver)
-                    driver_nat = nat_match.group(1).upper() if nat_match else ""
-                    name = re.sub(r"\s*\([A-Z]{3}\)\s*$", "", raw_driver).strip()
-                    name = re.sub(r"\s+", " ", name).strip()
+                        if not dm:
+                            break
+                        name = re.sub(r"\s+", " ", dm.group(1)).strip()
+                        driver_nat = ""
                     name = re.sub(r"^(?:HY|Pro-Am)\s+", "", name, flags=re.I).strip()
                     if name and name != "-":
                         drivers.append(name)
