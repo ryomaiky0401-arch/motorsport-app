@@ -191,25 +191,100 @@ DEFAULT_PTS_SPRINT = [8, 7, 6, 5, 4, 3, 2, 1, 0, 0]
 YEARS = ["2026年", "2025年", "2024年", "2023年"]
 
 
+def _github_storage_config():
+    """Streamlit Secretsに設定されたGitHub永続保存先を返す。未設定ならNone。"""
+    try:
+        token = st.secrets.get("GITHUB_DATA_TOKEN")
+        repo = st.secrets.get("GITHUB_DATA_REPO", "ryomaiky0401-arch/motorsport-app")
+        branch = st.secrets.get("GITHUB_DATA_BRANCH", "main")
+        path = st.secrets.get("GITHUB_DATA_PATH", DATA_FILE)
+        if token:
+            return {"token": token, "repo": repo, "branch": branch, "path": path}
+    except Exception:
+        pass
+    return None
+
+
+def _load_data_from_github():
+    cfg = _github_storage_config()
+    if not cfg:
+        return None
+    import requests
+    api = f"https://api.github.com/repos/{cfg['repo']}/contents/{cfg['path']}"
+    r = requests.get(
+        api,
+        params={"ref": cfg["branch"]},
+        headers={"Authorization": f"Bearer {cfg['token']}", "Accept": "application/vnd.github+json"},
+        timeout=15,
+    )
+    if r.status_code == 404:
+        return None
+    r.raise_for_status()
+    import base64
+    raw = base64.b64decode(r.json()["content"]).decode("utf-8")
+    return json.loads(raw)
+
+
+def _save_data_to_github(data):
+    """GitHub Contents APIへ保存。成功時True、未設定時False。"""
+    cfg = _github_storage_config()
+    if not cfg:
+        return False
+    import requests
+    import base64
+    api = f"https://api.github.com/repos/{cfg['repo']}/contents/{cfg['path']}"
+    headers = {"Authorization": f"Bearer {cfg['token']}", "Accept": "application/vnd.github+json"}
+    current = requests.get(api, params={"ref": cfg["branch"]}, headers=headers, timeout=15)
+    payload = {
+        "message": "Auto-save motorsport app data",
+        "content": base64.b64encode(json.dumps(data, ensure_ascii=False, indent=2).encode("utf-8")).decode("ascii"),
+        "branch": cfg["branch"],
+    }
+    if current.status_code == 200:
+        payload["sha"] = current.json()["sha"]
+    elif current.status_code != 404:
+        current.raise_for_status()
+    saved = requests.put(api, headers=headers, json=payload, timeout=20)
+    saved.raise_for_status()
+    return True
+
+
+def _normalize_data(data):
+    if "teams" not in data:
+        data["teams"] = PRESET_TEAMS.copy()
+    else:
+        for k, v in PRESET_TEAMS.items():
+            if k not in data["teams"] or not data["teams"][k]:
+                data["teams"][k] = v
+    data.setdefault("races", {})
+    data.setdefault("points_master", {})
+    data.setdefault("entries", {})
+    return data
+
+
 def load_data():
+    # 本番ではGitHubを正本にする。Streamlitの一時ディスク消失に影響されない。
+    try:
+        cloud_data = _load_data_from_github()
+        if cloud_data is not None:
+            return _normalize_data(cloud_data)
+    except Exception as e:
+        st.warning(f"GitHub保存データを取得できなかったためローカルデータを使用します: {e}")
+
     if os.path.exists(DATA_FILE):
         with open(DATA_FILE, "r", encoding="utf-8") as f:
-            data = json.load(f)
-            if "teams" in data:
-                for k, v in PRESET_TEAMS.items():
-                    if k not in data["teams"] or not data["teams"][k]:
-                        data["teams"][k] = v
-            if "points_master" not in data:
-                data["points_master"] = {}
-            if "entries" not in data:
-                data["entries"] = {}
-            return data
-    return {"races": {}, "teams": PRESET_TEAMS.copy(), "points_master": {}, "entries": {}}
+            return _normalize_data(json.load(f))
+    return _normalize_data({})
 
 
 def save_data(data):
+    # ローカルにも書くが、GitHub設定済みなら同時に永続保存する。
     with open(DATA_FILE, "w", encoding="utf-8") as f:
         json.dump(data, f, ensure_ascii=False, indent=2)
+    try:
+        _save_data_to_github(data)
+    except Exception as e:
+        st.error(f"GitHubへの自動保存に失敗しました: {e}")
 
 
 def extract_supergt_result_url(url):
