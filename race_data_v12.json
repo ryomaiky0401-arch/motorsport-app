@@ -4287,7 +4287,7 @@
           "liveries": [
             {
               "name": "ルマン",
-              "image_url": "https://www.fiawec.com/uploads/2026-lm-007-aston-martin-valkyrie-droite-6a23f429b758d200643365.png"
+              "url": "https://www.fiawec.com/uploads/2026-lm-007-aston-martin-valkyrie-droite-6a23f429b758d200643365.png"
             }
           ]
         },
@@ -4320,7 +4320,7 @@
           "liveries": [
             {
               "name": "ルマン",
-              "image_url": "https://www.fiawec.com/uploads/2026-lm-009-aston-martin-valkyrie-droite-6a2445c9db7a5747790382.png"
+              "url": "https://www.fiawec.com/uploads/2026-lm-009-aston-martin-valkyrie-droite-6a2445c9db7a5747790382.png"
             }
           ]
         },
@@ -4353,7 +4353,7 @@
           "liveries": [
             {
               "name": "ルマン",
-              "image_url": "https://www.fiawec.com/uploads/2026-lm-7-toyota-gr010-droite-6a26fd966719f513419808.png"
+              "url": "https://www.fiawec.com/uploads/2026-lm-7-toyota-gr010-droite-6a26fd966719f513419808.png"
             }
           ]
         },
@@ -4386,7 +4386,7 @@
           "liveries": [
             {
               "name": "ルマン",
-              "image_url": "https://www.fiawec.com/uploads/2026-lm-8-toyota-gr010-droite-6a23f429e7199801099749.png"
+              "url": "https://www.fiawec.com/uploads/2026-lm-8-toyota-gr010-droite-6a23f429e7199801099749.png"
             }
           ]
         },
@@ -4419,7 +4419,7 @@
           "liveries": [
             {
               "name": "ルマン",
-              "image_url": "https://www.fiawec.com/uploads/2026-lm-12-cadillac-droite-6a2586c2c8f46935182024.png"
+              "url": "https://www.fiawec.com/uploads/2026-lm-12-cadillac-droite-6a2586c2c8f46935182024.png"
             }
           ]
         },
@@ -4452,7 +4452,7 @@
           "liveries": [
             {
               "name": "ルマン",
-              "image_url": "https://www.fiawec.com/uploads/2026-lm-15-bmwm-hybrid-v8-droite-6a23f42a84871843672959.png"
+              "url": "https://www.fiawec.com/uploads/2026-lm-15-bmwm-hybrid-v8-droite-6a23f42a84871843672959.png"
             }
           ]
         },
@@ -4485,7 +4485,7 @@
           "liveries": [
             {
               "name": "ルマン",
-              "image_url": "https://www.fiawec.com/uploads/2026-lm-17-genesis-droite-6a23f42ab7564435785600.png"
+              "url": "https://www.fiawec.com/uploads/2026-lm-17-genesis-droite-6a23f42ab7564435785600.png"
             }
           ]
         },
@@ -4518,7 +4518,7 @@
           "liveries": [
             {
               "name": "ルマン",
-              "image_url": "https://www.fiawec.com/uploads/2026-lm-19-genesis-droite-6a23f42ae5ffc933140298.png"
+              "url": "https://www.fiawec.com/uploads/2026-lm-19-genesis-droite-6a23f42ae5ffc933140298.png"
             }
           ]
         },
@@ -4551,7 +4551,7 @@
           "liveries": [
             {
               "name": "ルマン",
-              "image_url": "https://www.fiawec.com/uploads/2026-lm-20-bmwm-hybrid-v8-droite-6a23f42b2307f957621104.png"
+              "url": "https://www.fiawec.com/uploads/2026-lm-20-bmwm-hybrid-v8-droite-6a23f42b2307f957621104.png"
             }
           ]
         },
@@ -4584,7 +4584,7 @@
           "liveries": [
             {
               "name": "ルマン",
-              "image_url": "https://www.fiawec.com/uploads/2026-lm-35-alpine-droite-6a2445ca3bcde641089806.png"
+              "url": "https://www.fiawec.com/uploads/2026-lm-35-alpine-droite-6a2445ca3bcde641089806.png"
             }
           ]
         },
@@ -4617,7 +4617,7 @@
           "liveries": [
             {
               "name": "ルマン",
-              "image_url": "https://www.fiawec.com/uploads/2026-lm-36-alpine-droite-6a23f42b849da447833868.png"
+              "url": "https://www.fiawec.com/uploads/2026-lm-36-alpine-droite-6a23f42b849da447833868.png"
             }
           ]
         },
@@ -4650,7 +4650,7 @@
           "liveries": [
             {
               "name": "ルマン",
-              "image_url": "https://www.fiawec.com/uploads/2026-lm-38-cadillac-droite-6a2586c3028d2165133795.png"
+              "url": "https://www.fiawec.com/uploads/2026-lm-38-cadillac-droite-6a2586c3028d2165133795.png"
             }
           ]
         },
@@ -4683,7 +4683,7 @@
           "liveries": [
             {
               "name": "ルマン",
-              "image_url": "https://www.fiawec.com/uploads/2026-lm-50-ferrari-droite-6a23f42be13ce192484583.png"
+              "url": "https://www.fiawec.com/uploads/2026-lm-50-ferrari-droite-6a23f42be13ce192484583.png"
             }
           ]
         },
@@ -4716,7 +4716,7 @@
           "liveries": [
             {
               "name": "ルマン",
-              "image_url": "https://www.fiawec.com/uploads/2026-lm-51-ferrari-droite-6a24388ee2b5f553483886.png"
+              "url": "https://www.fiawec.com/uploads/2026-lm-51-ferrari-droite-6a24388ee2b5f553483886.png"
             }
           ]
         },
@@ -4749,7 +4749,7 @@
           "liveries": [
             {
               "name": "ルマン",
-              "image_url": "https://www.fiawec.com/uploads/2026-lm-83-ferrari-droite-6a23f42c4b83b193938633.png"
+              "url": "https://www.fiawec.com/uploads/2026-lm-83-ferrari-droite-6a23f42c4b83b193938633.png"
             }
           ]
         },
@@ -4782,7 +4782,7 @@
           "liveries": [
             {
               "name": "ルマン",
-              "image_url": "https://www.fiawec.com/uploads/2026-lm-93-peugeot-9x8-droite-6a23f45941b5c773534759.png"
+              "url": "https://www.fiawec.com/uploads/2026-lm-93-peugeot-9x8-droite-6a23f45941b5c773534759.png"
             }
           ]
         },
@@ -4815,7 +4815,7 @@
           "liveries": [
             {
               "name": "ルマン",
-              "image_url": "https://www.fiawec.com/uploads/2026-lm-94-peugeot-9x8-droite-6a23f45972dd4058598378.png"
+              "url": "https://www.fiawec.com/uploads/2026-lm-94-peugeot-9x8-droite-6a23f45972dd4058598378.png"
             }
           ]
         },
@@ -4848,7 +4848,7 @@
           "liveries": [
             {
               "name": "ルマン",
-              "image_url": "https://www.fiawec.com/uploads/2026-lm-101-cadillac-droite-6a26774633fed334664395.png"
+              "url": "https://www.fiawec.com/uploads/2026-lm-101-cadillac-droite-6a26774633fed334664395.png"
             }
           ]
         }
