@@ -704,57 +704,115 @@ def extract_wec_entry_list_url(url):
     ]
 
     rows_by_class = {"Hypercar": [], "LMP2": [], "LMGT3": []}
+
+    # Le Mans 2026 Provisional Entry List V3 (document 2355) は、
+    # PDF内部で車番列が本文とは別の描画順になっている。
+    # 公式PDFの各クラス掲載順と車番列を対応させて62台を確実に復元する。
+    is_le_mans_v3 = parsed.path.rstrip("/").endswith("/2355")
+    le_mans_v3_numbers = {
+        "Hypercar": ["007", "009", "7", "8", "12", "15", "17", "19", "20", "35", "36", "38", "50", "51", "83", "93", "94", "101"],
+        "LMP2": ["3", "4", "9", "14", "22", "24", "25", "26", "28", "29", "30", "37", "43", "44", "48", "99", "183", "222", "343"],
+        "LMGT3": ["2", "10", "13", "21", "23", "27", "32", "33", "34", "54", "57", "58", "59", "61", "62", "69", "74", "77", "78", "79", "87", "88", "91", "92", "150"],
+    }
     current_cls = None
-    lines = [re.sub(r"\s+", " ", x).strip() for x in text.splitlines() if x.strip()]
-    for line in lines:
-        u = line.upper()
-        if "HYPERCAR COMPETITORS" in u:
-            current_cls = "Hypercar"
-            continue
-        if "LMP2 COMPETITORS" in u:
-            current_cls = "LMP2"
-            continue
-        if "LMGT3 COMPETITORS" in u:
-            current_cls = "LMGT3"
-            continue
-        if not current_cls:
-            continue
+    lines = [re.sub(r"\\s+", " ", x).strip() for x in text.splitlines() if x.strip()]
 
-        m = re.match(r"^(\d{1,3})\s+(.+?)\s+(" + nat_codes + r")\s+[MG]\s+(.+)$", line, re.I)
-        if not m:
-            continue
-        no, team, nat, rest = m.groups()
-
-        # 車種名は既知のWEC車種を優先。未知車種は最初のドライバーまでの文字列から推定する。
-        machine = next((x for x in car_markers if rest.lower().startswith(x.lower())), "")
-        if machine:
-            tail = rest[len(machine):].strip()
-        else:
-            dm0 = re.search(r"\b[^()]+\s\([A-Z]{3}\)\s*[PGBS]\b", rest)
-            if not dm0:
+    if is_le_mans_v3:
+        section_rows = {"Hypercar": [], "LMP2": [], "LMGT3": []}
+        current_cls = None
+        for line in lines:
+            u = line.upper()
+            if "HYPERCAR COMPETITORS" in u:
+                current_cls = "Hypercar"
                 continue
-            machine = rest[:dm0.start()].strip()
-            # HypercarのMISC列 HYなどを除去
-            machine = re.sub(r"\s+HY$", "", machine, flags=re.I).strip()
-            tail = rest[dm0.start():].strip()
+            if "LMP2 COMPETITORS" in u:
+                current_cls = "LMP2"
+                continue
+            if "LMGT3 COMPETITORS" in u:
+                current_cls = "LMGT3"
+                continue
+            if "RESERVE COMPETITORS" in u:
+                current_cls = None
+                break
+            if current_cls:
+                section_rows[current_cls].append(line)
 
-        # 車種直後のMISC列(HY等)を除く。
-        tail = re.sub(r"^(?:HY)\s+", "", tail, flags=re.I)
-        drivers = []
-        for dm in driver_re.finditer(tail):
-            name = re.sub(r"\s+", " ", dm.group(1)).strip()
-            # 前ドライバーのカテゴリ記号等が混ざった場合を除去
-            name = re.sub(r"^[PGBS]\s+", "", name).strip()
-            if name and name != "-":
-                drivers.append(name)
-        rows_by_class[current_cls].append({
-            "car_number": no,
-            "machine": machine,
-            "team": team.strip(),
-            "country": nat.upper(),
-            "driver_list": drivers[:3],
-            "drivers": " / ".join(drivers[:3]),
-        })
+        for cls, nums in le_mans_v3_numbers.items():
+            source_rows = section_rows[cls][:len(nums)]
+            if len(source_rows) != len(nums):
+                raise ValueError(f"{cls}の台数を正しく取得できませんでした（{len(source_rows)}/{len(nums)}台）。")
+            for no, line in zip(nums, source_rows):
+                # TEAM [WEC] NAT T MACHINE ... の順。WEC表記はチーム名から除く。
+                machine = next((x for x in car_markers if x.lower() in line.lower()), "")
+                if not machine:
+                    if cls == "LMP2" and "Oreca 07 - Gibson" in line:
+                        machine = "Oreca 07 - Gibson"
+                    else:
+                        raise ValueError(f"No.{no} の車種を取得できませんでした。")
+                machine_at = line.lower().index(machine.lower())
+                prefix = line[:machine_at].strip()
+                # 末尾の国籍3文字＋タイヤ1文字を落とし、その前のWECも落とす。
+                pm = re.match(r"^(.*?)\\s+(?:WEC\\s+)?([A-Z]{3})\\s+[MG]$", prefix, re.I)
+                if not pm:
+                    raise ValueError(f"No.{no} のチーム名を取得できませんでした。")
+                team, nat = pm.groups()
+                tail = line[machine_at + len(machine):].strip()
+                tail = re.sub(r"^(?:HY|Pro-Am)\\s+", "", tail, flags=re.I)
+
+                drivers = []
+                # 名前 (NAT) カテゴリー の繰り返し。カテゴリ欠落の稀な行も次の(NAT)を境界に処理。
+                for dm in re.finditer(r"(.+?)\\s*\\(([A-Z]{3})\\)\\s*(?:[PGBS])?(?=\\s+[^()]+\\s*\\([A-Z]{3}\\)|$)", tail):
+                    name = re.sub(r"\\s+", " ", dm.group(1)).strip()
+                    if name:
+                        drivers.append(name)
+                rows_by_class[cls].append({
+                    "car_number": no, "machine": machine, "team": team.strip(),
+                    "country": nat.upper(), "driver_list": drivers[:3],
+                    "drivers": " / ".join(drivers[:3]),
+                })
+    else:
+        for line in lines:
+            u = line.upper()
+            if "HYPERCAR COMPETITORS" in u:
+                current_cls = "Hypercar"
+                continue
+            if "LMP2 COMPETITORS" in u:
+                current_cls = "LMP2"
+                continue
+            if "LMGT3 COMPETITORS" in u:
+                current_cls = "LMGT3"
+                continue
+            if not current_cls:
+                continue
+
+            m = re.match(r"^(\\d{1,3})\\s+(.+?)\\s+(" + nat_codes + r")\\s+[MG]\\s+(.+)$", line, re.I)
+            if not m:
+                continue
+            no, team, nat, rest = m.groups()
+
+            machine = next((x for x in car_markers if rest.lower().startswith(x.lower())), "")
+            if machine:
+                tail = rest[len(machine):].strip()
+            else:
+                dm0 = re.search(r"\\b[^()]+\\s\\([A-Z]{3}\\)\\s*[PGBS]\\b", rest)
+                if not dm0:
+                    continue
+                machine = rest[:dm0.start()].strip()
+                machine = re.sub(r"\\s+HY$", "", machine, flags=re.I).strip()
+                tail = rest[dm0.start():].strip()
+
+            tail = re.sub(r"^(?:HY)\\s+", "", tail, flags=re.I)
+            drivers = []
+            for dm in driver_re.finditer(tail):
+                name = re.sub(r"\\s+", " ", dm.group(1)).strip()
+                name = re.sub(r"^[PGBS]\\s+", "", name).strip()
+                if name and name != "-":
+                    drivers.append(name)
+            rows_by_class[current_cls].append({
+                "car_number": no, "machine": machine, "team": team.strip(),
+                "country": nat.upper(), "driver_list": drivers[:3],
+                "drivers": " / ".join(drivers[:3]),
+            })
 
     groups = {k: v for k, v in rows_by_class.items() if v}
     if not groups:
@@ -1457,10 +1515,11 @@ with tab_entry:
 
     if e_cat == "WEC":
         with st.expander("⚡ FIA WEC公式Entry Listから一括登録", expanded=False):
-            st.caption("FIA WEC公式の Entry List PDF URL を貼ると、車番・チーム・車種・ドライバーをクラス別にまとめて登録します。画像URLは後から追加できます。")
+            st.caption("FIA WEC公式の Entry List PDF URL を貼ると、車番・チーム・車種・ドライバーをクラス別にまとめて登録します。2026年はル・マンV3（2355）を初期入力しています。画像URLは後から追加できます。")
             entry_pdf_url = st.text_input(
                 "Entry List PDF URL",
-                placeholder="https://www.fiawec.com/en/race/document/download/2322",
+                value="https://www.fiawec.com/en/race/document/download/2355" if e_year == 2026 else "",
+                placeholder="https://www.fiawec.com/en/race/document/download/...",
                 key=f"wec_entry_pdf_{e_year}",
             )
             if st.button("Entry Listを読み込んで一括登録", type="primary", use_container_width=True, key=f"wec_entry_import_{e_year}"):
