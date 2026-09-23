@@ -771,12 +771,12 @@ def extract_wec_entry_list_url(url):
                 # PDF抽出済みテキストでは普通の空白なので、Python側では通常の \\s を使う。
                 remaining = tail.strip()
                 for _ in range(3):
-                    # 国籍コードを任意グループにすると正規表現が名前側へ吸収してしまうため、
-                    # 通常行では NAME / NAT / category を別グループで必ず取得する。
-                    dm = re.match(r"(.+?)\s*\(([A-Z]{3})\)\s*([PGBS])(?:\s+|$)", remaining)
+                    # 通常行は NAME / NAT / category を別グループで取得。
+                    # FIA PDFではドライバー国籍が "(GBR)" ではなく "GBR" の行もあるため括弧は任意。
+                    dm = re.match(r"(.+?)\s+(?:\(([A-Z]{3})\)|([A-Z]{3}))\s*([PGBS])(?:\s+|$)", remaining)
                     if dm:
                         name = re.sub(r"\s+", " ", dm.group(1)).strip()
-                        driver_nat = dm.group(2).upper()
+                        driver_nat = (dm.group(2) or dm.group(3) or "").upper()
                     else:
                         # PDF側で国籍コードが欠けている例だけフォールバック。
                         dm = re.match(r"(.+?)\s+([PGBS])(?:\s+|$)", remaining)
