@@ -785,6 +785,85 @@
               0
             ],
             "wec_points_scale": null
+          },
+          {
+            "round_name": "6 Hours of Spa-Francorchamps",
+            "race_date": "2026-05-08",
+            "session_type": "ハイパーポール",
+            "is_custom_pts": true,
+            "points_table": [
+              1,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0
+            ],
+            "results": [
+              "Akkodis ASP Team",
+              "Heart of Racing Team",
+              "Proton Competition",
+              "Akkodis ASP Team",
+              "Proton Competition",
+              "Vista AF Corse",
+              "Team WRT",
+              "Iron Lynx",
+              "Manthey DK Engineering",
+              "Racing Team Turkey by TF"
+            ],
+            "drivers": [
+              "T. VAN ROMPUY / H. DAVID / E. MASSON",
+              "I. JAMES / Z. ROBICHON / M. DRUDI",
+              "E. POWELL / B. TUCK / S. PRIAULX",
+              "P. UMBRÄRESCU / C. SCHMID / J. LÓPEZ",
+              "S. GATTUSO / G. LEVORATO / L. SARGEANT",
+              "F. HÉRIAU / S. MANN / A. ROVERA",
+              "D. LEUNG / S. GELAEL / A. FARFUS",
+              "M. BERRY / R. ANDRADE / M. MARTIN",
+              "J. COTTINGHAM / T. BOGUSLAVSKIY / A. GÜVEN",
+              "P. DEMPSEY / S. YOLUÇ / C. EASTWOOD"
+            ],
+            "car_numbers": [
+              "78",
+              "27",
+              "77",
+              "87",
+              "88",
+              "21",
+              "32",
+              "61",
+              "91",
+              "34"
+            ],
+            "statuses": [
+              "完走",
+              "完走",
+              "完走",
+              "完走",
+              "完走",
+              "完走",
+              "完走",
+              "完走",
+              "完走",
+              "完走"
+            ],
+            "official_points": [
+              1,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0
+            ],
+            "wec_points_scale": null
           }
         ]
       }
