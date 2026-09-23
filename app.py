@@ -1621,9 +1621,10 @@ with tab_entry:
                     liveries = target_entry.setdefault("liveries", [])
                     existing_livery = next((x for x in liveries if str(x.get("name", "")).strip() == livery_name), None)
                     if existing_livery:
-                        existing_livery["image_url"] = image
+                        existing_livery["url"] = image
+                        existing_livery.pop("image_url", None)
                     else:
-                        liveries.append({"name": livery_name, "image_url": image})
+                        liveries.append({"name": livery_name, "url": image})
                     updated_liveries.append(f"{car_no}:{livery_name}")
 
             if invalid:
