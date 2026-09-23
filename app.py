@@ -1584,6 +1584,17 @@ with tab_entry:
         if not saved_drivers:
             saved_drivers = [x.strip() for x in current.get("drivers", "").split("/") if x.strip()]
         saved_drivers = (saved_drivers + ["", "", ""])[:3]
+        saved_driver_details = current.get("driver_details", [])
+        saved_driver_countries = []
+        for di, driver_name in enumerate(saved_drivers):
+            dcountry = ""
+            if di < len(saved_driver_details) and isinstance(saved_driver_details[di], dict):
+                dcountry = saved_driver_details[di].get("country", "")
+            if not dcountry:
+                match_detail = next((x for x in saved_driver_details if isinstance(x, dict) and x.get("name") == driver_name), None)
+                if match_detail:
+                    dcountry = match_detail.get("country", "")
+            saved_driver_countries.append(dcountry)
 
         ec1, ec2 = st.columns(2)
         with ec1:
@@ -1592,9 +1603,21 @@ with tab_entry:
             team = st.text_input("チーム名", value=current.get("team", ""), key=f"entry_team_{edit_choice}")
             country = st.text_input("国 / 地域", value=current.get("country", ""), placeholder="例: イギリス", key=f"entry_country_{edit_choice}")
         with ec2:
-            driver1 = st.text_input("ドライバー 1", value=saved_drivers[0], key=f"entry_driver1_{edit_choice}")
-            driver2 = st.text_input("ドライバー 2", value=saved_drivers[1], key=f"entry_driver2_{edit_choice}")
-            driver3 = st.text_input("ドライバー 3", value=saved_drivers[2], key=f"entry_driver3_{edit_choice}")
+            d11, d12 = st.columns([3, 1])
+            with d11:
+                driver1 = st.text_input("ドライバー 1", value=saved_drivers[0], key=f"entry_driver1_{edit_choice}")
+            with d12:
+                driver_country1 = st.text_input("国籍 1", value=saved_driver_countries[0], placeholder="GBR", key=f"entry_driver_country1_{edit_choice}")
+            d21, d22 = st.columns([3, 1])
+            with d21:
+                driver2 = st.text_input("ドライバー 2", value=saved_drivers[1], key=f"entry_driver2_{edit_choice}")
+            with d22:
+                driver_country2 = st.text_input("国籍 2", value=saved_driver_countries[1], placeholder="GBR", key=f"entry_driver_country2_{edit_choice}")
+            d31, d32 = st.columns([3, 1])
+            with d31:
+                driver3 = st.text_input("ドライバー 3", value=saved_drivers[2], key=f"entry_driver3_{edit_choice}")
+            with d32:
+                driver_country3 = st.text_input("国籍 3", value=saved_driver_countries[2], placeholder="GBR", key=f"entry_driver_country3_{edit_choice}")
             image_url = st.text_input("通常カラー画像URL", value=current.get("image_url", ""), placeholder="https://...", key=f"entry_image_{edit_choice}")
 
         # カラーリングは何種類でも追加可能。旧「特別カラー」データも自動で引き継ぐ。
@@ -1643,7 +1666,13 @@ with tab_entry:
                         for name, url in livery_inputs
                         if name.strip() and url.strip()
                     ]
-                    item = {"car_number": car_number.strip(), "machine": machine.strip(), "team": team.strip(), "country": country.strip(), "driver_list": driver_list, "drivers": " / ".join(driver_list), "image_url": image_url.strip(), "liveries": liveries}
+                    driver_country_inputs = [driver_country1.strip().upper(), driver_country2.strip().upper(), driver_country3.strip().upper()]
+                    driver_names_all = [driver1.strip(), driver2.strip(), driver3.strip()]
+                    driver_details = [
+                        {"name": name, "country": driver_country_inputs[idx]}
+                        for idx, name in enumerate(driver_names_all) if name
+                    ]
+                    item = {"car_number": car_number.strip(), "machine": machine.strip(), "team": team.strip(), "country": country.strip(), "driver_list": driver_list, "driver_details": driver_details, "drivers": " / ".join(driver_list), "image_url": image_url.strip(), "liveries": liveries}
                     if edit_idx >= 0:
                         entries[edit_idx] = item
                     else:
