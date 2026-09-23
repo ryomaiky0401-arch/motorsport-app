@@ -1897,11 +1897,21 @@ with tab_entry:
                         dnat = driver_country_by_name.get(driver, "")
                         dcode = country_code(dnat) if dnat else None
                         if dcode:
-                            dflag, dname = st.columns([1, 7], vertical_alignment="center")
-                            with dflag:
-                                st.image(f"https://flagcdn.com/w80/{dcode}.png", width=24)
-                            with dname:
-                                st.write(driver)
+                            if e_cat == "Super Formula":
+                                # SFは本文の左端を画像内コンテンツに合わせて48px下げているので、
+                                # 国旗とドライバー名も同じ1行を48pxから開始する。
+                                st.markdown(
+                                    f"<div style='padding-left:48px; display:flex; align-items:center; gap:28px; min-height:38px;'>"
+                                    f"<img src='https://flagcdn.com/w80/{dcode}.png' style='width:24px; height:auto; display:block;' />"
+                                    f"<span>{driver}</span></div>",
+                                    unsafe_allow_html=True,
+                                )
+                            else:
+                                dflag, dname = st.columns([1, 7], vertical_alignment="center")
+                                with dflag:
+                                    st.image(f"https://flagcdn.com/w80/{dcode}.png", width=24)
+                                with dname:
+                                    st.write(driver)
                         else:
                             st.write(f"👤 {driver}")
     else:
