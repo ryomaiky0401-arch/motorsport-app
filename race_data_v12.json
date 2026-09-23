@@ -444,6 +444,85 @@
               0
             ],
             "wec_points_scale": null
+          },
+          {
+            "round_name": "6 Hours of Spa-Francorchamps",
+            "race_date": "2026-05-08",
+            "session_type": "ハイパーポール",
+            "is_custom_pts": true,
+            "points_table": [
+              1,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0
+            ],
+            "results": [
+              "Peugeot Totalenergies",
+              "Cadillac Hertz Team Jota",
+              "Alpine Endurance Team",
+              "Alpine Endurance Team",
+              "Cadillac Hertz Team Jota",
+              "Aston Martin Thor Team",
+              "Aston Martin Thor Team",
+              "Ferrari AF Corse",
+              "Peugeot Totalenergies",
+              "BMW M Team WRT"
+            ],
+            "drivers": [
+              "L. DUVAL / M. JAKOBSEN / T. POURCHAIRE",
+              "W. STEVENS / N. NATO / L. DELÉTRAZ",
+              "A. FÉLIX DA COSTA / C. MILESI / F. HABSBURG",
+              "F. MAKOWIECKI / J. GOUNON / V. MARTINS",
+              "E. BAMBER / S. BOURDAIS / J. AITKEN",
+              "A. RIBERAS / M. SØRENSEN",
+              "H. TINCKNELL / T. GAMBLE",
+              "A. FUOCO / M. MOLINA / N. NIELSEN",
+              "P. DI RESTA / S. VANDOORNE / N. CASSIDY",
+              "K. MAGNUSSEN / R. MARCIELLO / D. VANTHOOR"
+            ],
+            "car_numbers": [
+              "94",
+              "12",
+              "35",
+              "36",
+              "38",
+              "009",
+              "007",
+              "50",
+              "93",
+              "15"
+            ],
+            "statuses": [
+              "完走",
+              "完走",
+              "完走",
+              "完走",
+              "完走",
+              "完走",
+              "完走",
+              "完走",
+              "完走",
+              "完走"
+            ],
+            "official_points": [
+              1,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0
+            ],
+            "wec_points_scale": null
           }
         ],
         "LMGT3": [
