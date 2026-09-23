@@ -5734,7 +5734,7 @@
           "driver_list": [
             "Jonas RIED",
             "Kakunoshin OHTA",
-            "Harry"
+            "Harry KING"
           ],
           "driver_details": [
             {
@@ -5746,11 +5746,11 @@
               "country": "JPN"
             },
             {
-              "name": "Harry",
-              "country": "KIN"
+              "name": "Harry KING",
+              "country": "GBR"
             }
           ],
-          "drivers": "Jonas RIED / Kakunoshin OHTA / Harry",
+          "drivers": "Jonas RIED / Kakunoshin OHTA / Harry KING",
           "image_url": "https://www.fiawec.com/media/cache/resolve/news_card/uploads/2026-lm-9-oreca-07-droite-6a2677347d0c3665065352.png",
           "liveries": []
         },
