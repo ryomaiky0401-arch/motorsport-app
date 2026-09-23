@@ -3061,6 +3061,85 @@
               0
             ],
             "wec_points_scale": null
+          },
+          {
+            "round_name": "Lone Star Le Mans",
+            "race_date": "2026-09-05",
+            "session_type": "ハイパーポール",
+            "is_custom_pts": true,
+            "points_table": [
+              1,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0
+            ],
+            "results": [
+              "Heart of Racing Team",
+              "Heart of Racing Team",
+              "Manthey DK Engineering",
+              "Proton Competition",
+              "Garage 59",
+              "Vista AF Corse",
+              "Team WRT",
+              "Iron Lynx",
+              "Akkodis ASP Team",
+              "Proton Competition"
+            ],
+            "drivers": [
+              "G. NEWELL / E. BARRICHELLO / J. ADAM",
+              "I. JAMES / Z. ROBICHON / M. DRUDI",
+              "J. COTTINGHAM / T. BOGUSLAVSKIY / A. GÜVEN",
+              "E. POWELL / B. TUCK / S. PRIAULX",
+              "A. WEST / F. GEHRSITZ / B. GOETHE",
+              "F. HÉRIAU / S. MANN / A. ROVERA",
+              "D. LEUNG / S. GELAEL / A. FARFUS",
+              "M. BERRY / R. ANDRADE / M. MARTIN",
+              "P. UMBRÄRESCU / C. SCHMID / J. LÓPEZ",
+              "S. GATTUSO / G. LEVORATO / L. SARGEANT"
+            ],
+            "car_numbers": [
+              "23",
+              "27",
+              "91",
+              "77",
+              "58",
+              "21",
+              "32",
+              "61",
+              "87",
+              "88"
+            ],
+            "statuses": [
+              "完走",
+              "完走",
+              "完走",
+              "完走",
+              "完走",
+              "完走",
+              "完走",
+              "完走",
+              "完走",
+              "完走"
+            ],
+            "official_points": [
+              1,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0
+            ],
+            "wec_points_scale": null
           }
         ],
         "LMP2": [
