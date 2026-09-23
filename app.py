@@ -1865,19 +1865,21 @@ with tab_entry:
                             unsafe_allow_html=True,
                         )
                     no = f"No.{entry.get('car_number')}  " if entry.get("car_number") else ""
-                    # SF公式画像は余白が大きめなので、SFだけカード内で少し大きく見せる。
-                    # 長いチーム名でもWEC等と同じ感覚になるよう見出しサイズも統一。
+                    # SF公式JPG自体に左右の黒い余白が入っている。
+                    # CSSの数px調整では「実際に見えている写真の左端」と揃わないため、
+                    # SFカード本文を画像内の実コンテンツ位置に合わせて大きくインデントする。
                     title_size = "1.0rem" if e_cat == "Super Formula" else "1.25rem"
                     title_height = "2.2rem" if e_cat == "Super Formula" else "2.9rem"
-                    # SF画像はカード列より左右に少し余白を持たせて表示しているため、
-                    # 見出しも同じ左端（画像の実表示位置）へ揃える。
-                    sf_text_inset = "8px" if e_cat == "Super Formula" else "0"
+                    sf_text_inset = "48px" if e_cat == "Super Formula" else "0"
                     st.markdown(
                         f"<div style='font-size:{title_size}; font-weight:700; line-height:1.25; min-height:{title_height}; margin-top:0.15rem; padding-left:{sf_text_inset};'>{no}{entry.get('team', '')}</div>",
                         unsafe_allow_html=True,
                     )
                     if entry.get("machine"):
-                        st.caption(entry["machine"])
+                        if e_cat == "Super Formula":
+                            st.markdown(f"<div style='padding-left:48px; font-size:0.85rem; opacity:0.6; margin-bottom:0.7rem;'>{entry['machine']}</div>", unsafe_allow_html=True)
+                        else:
+                            st.caption(entry["machine"])
                     if entry.get("country"):
                         code = country_code(entry["country"])
                         if code:
