@@ -542,7 +542,7 @@ def extract_sf_result_url(url):
         "7": ("小林 可夢偉", "KDDI TGMGP TGR-DC"),
         "28": ("小林 利徠斗", "KDDI TGMGP TGR-DC"),
         "8": ("山下 健太", "KCMG"),
-        "9": ("野中 誠太", "KCMG"),
+        "9": ("ジュリアーノ･アレジ", "KCMG"),
         "10": ("Juju", "HAZAMA ANDO Triple Tree Racing"),
         "12": ("小出 峻", "ThreeBond Racing"),
         "14": ("福住 仁嶺", "NTT docomo Business ROOKIE"),
@@ -1537,6 +1537,59 @@ with tab_entry:
 
     entry_key = f"{e_cat}_{e_cls}"
     entries = data.setdefault("entries", {}).setdefault(e_year, {}).setdefault(entry_key, [])
+
+    if e_cat == "Super Formula":
+        with st.expander("⚡ SUPER FORMULA公式2026エントリーを一括登録", expanded=False):
+            st.caption("SUPER FORMULA公式の2026 TEAM一覧に合わせて、車番・ドライバー・チーム・SF23を24台まとめて登録します。既存の画像URL・追加カラーリングは保持します。")
+            if st.button("2026 SFエントリーを一括登録", type="primary", use_container_width=True, key=f"sf_entry_import_{e_year}"):
+                if str(e_year) not in ("2026", "2026年"):
+                    st.error("この一括登録は2026年用です。年度を2026年にしてください。")
+                else:
+                    sf_2026_entries = [
+                        ("1", "岩佐 歩夢", "JPN", "TEAM MUGEN AUTOBACS"),
+                        ("16", "野尻 智紀", "JPN", "TEAM MUGEN AUTOBACS"),
+                        ("3", "ルーク・ブラウニング", "GBR", "REALIZE KONDO RACING"),
+                        ("4", "笹原 右京", "JPN", "REALIZE KONDO RACING"),
+                        ("5", "牧野 任祐", "JPN", "DOCOMO TEAM DANDELION RACING"),
+                        ("6", "太田 格之進", "JPN", "DOCOMO TEAM DANDELION RACING"),
+                        ("8", "山下 健太", "JPN", "KCMG"),
+                        ("9", "ジュリアーノ・アレジ", "FRA", "KCMG"),
+                        ("7", "小林 可夢偉", "JPN", "KDDI TGMGP TGR-DC"),
+                        ("28", "小林 利徠斗", "JPN", "KDDI TGMGP TGR-DC"),
+                        ("10", "Juju", "JPN", "HAZAMA ANDO Triple Tree Racing"),
+                        ("12", "小出 峻", "JPN", "ThreeBond Racing"),
+                        ("14", "福住 仁嶺", "JPN", "NTT docomo Business ROOKIE"),
+                        ("19", "ザック・オサリバン", "GBR", "TEAM IMPUL"),
+                        ("22", "松下 信治", "JPN", "DELiGHTWORKS RACING"),
+                        ("36", "坪井 翔", "JPN", "VANTELIN TEAM TOM’S"),
+                        ("37", "サッシャ・フェネストラズ", "FRA", "VANTELIN TEAM TOM’S"),
+                        ("38", "阪口 晴南", "JPN", "SANKI VERTEX PARTNERS CERUMO･INGING"),
+                        ("39", "大湯 都史樹", "JPN", "SANKI VERTEX PARTNERS CERUMO･INGING"),
+                        ("50", "野村 勇斗", "JPN", "San-Ei Gen with B-Max"),
+                        ("53", "チャーリー・ブルツ", "AUT", "TEAM GOH"),
+                        ("64", "佐藤 蓮", "JPN", "PONOS NAKAJIMA RACING"),
+                        ("65", "イゴール・オオムラ・フラガ", "BRA", "PONOS NAKAJIMA RACING"),
+                        ("97", "ロマン・スタネック", "CZE", "ナビクル Buzz MK RACING"),
+                    ]
+                    existing = {str(x.get("car_number", "")): x for x in entries}
+                    merged = []
+                    for no, driver, nat, team in sf_2026_entries:
+                        old = existing.get(no, {})
+                        merged.append({
+                            "car_number": no,
+                            "machine": "SF23",
+                            "team": team,
+                            "country": old.get("country", ""),
+                            "driver_list": [driver],
+                            "driver_details": [{"name": driver, "country": nat}],
+                            "drivers": driver,
+                            "image_url": old.get("image_url", ""),
+                            "liveries": old.get("liveries", []),
+                        })
+                    data["entries"][e_year][entry_key] = merged
+                    save_data(data)
+                    st.success(f"2026 SUPER FORMULA {len(merged)}台を一括登録しました！既存の画像URL・追加カラーリングは保持しています。")
+                    st.rerun()
 
     if e_cat == "WEC":
         with st.expander("⚡ FIA WEC公式Entry Listから一括登録", expanded=False):
