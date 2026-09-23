@@ -1837,8 +1837,8 @@ with tab_entry:
                         image_src = image_options[selected_livery]
                         st.markdown(
                             f"""
-                            <div style="height:190px; display:flex; align-items:center; justify-content:center; overflow:hidden;">
-                                <img src="{image_src}" style="width:{'122%' if e_cat == 'Super Formula' else '100%'}; height:{'122%' if e_cat == 'Super Formula' else '100%'}; object-fit:contain; object-position:center;" />
+                            <div style="height:{'220px' if e_cat == 'Super Formula' else '190px'}; display:flex; align-items:center; justify-content:center; overflow:hidden;">
+                                <img src="{image_src}" style="width:{'100%' if e_cat == 'Super Formula' else '100%'}; height:100%; object-fit:contain; object-position:center;" />
                             </div>
                             """,
                             unsafe_allow_html=True,
@@ -1858,8 +1858,8 @@ with tab_entry:
                             if st.button("▶", key=f"{switch_key}_next", use_container_width=True):
                                 st.session_state[switch_key] = names[(pos + 1) % len(names)]
                                 st.rerun()
-                    else:
-                        # Streamlit標準ボタン行と同じ高さを確保する。margin分も含めて揃える。
+                    elif e_cat != "Super Formula":
+                        # 複数カラー対応カードだけに必要な操作欄。SFは通常画像1枚なので余白を作らない。
                         st.markdown(
                             "<div style='height:52px; margin-bottom:0.25rem;'></div>",
                             unsafe_allow_html=True,
@@ -1867,9 +1867,10 @@ with tab_entry:
                     no = f"No.{entry.get('car_number')}  " if entry.get("car_number") else ""
                     # SF公式画像は余白が大きめなので、SFだけカード内で少し大きく見せる。
                     # 長いチーム名でもWEC等と同じ感覚になるよう見出しサイズも統一。
-                    title_size = "1.15rem" if e_cat == "Super Formula" else "1.25rem"
+                    title_size = "1.0rem" if e_cat == "Super Formula" else "1.25rem"
+                    title_height = "2.2rem" if e_cat == "Super Formula" else "2.9rem"
                     st.markdown(
-                        f"<div style='font-size:{title_size}; font-weight:700; line-height:1.25; min-height:2.9rem; margin-top:0.15rem;'>{no}{entry.get('team', '')}</div>",
+                        f"<div style='font-size:{title_size}; font-weight:700; line-height:1.25; min-height:{title_height}; margin-top:0.15rem;'>{no}{entry.get('team', '')}</div>",
                         unsafe_allow_html=True,
                     )
                     if entry.get("machine"):
