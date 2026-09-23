@@ -1361,6 +1361,96 @@ with tab_entry:
     entry_key = f"{e_cat}_{e_cls}"
     entries = data.setdefault("entries", {}).setdefault(e_year, {}).setdefault(entry_key, [])
 
+    # 2026 WECは台数が多いため、公式シーズンエントリー35台を一括作成できる。
+    # 画像URL/追加カラーリングは既存値を必ず保持し、再実行しても消さない。
+    if e_cat == "WEC" and e_year == 2026:
+        wec_2026_entries = {
+            "Hypercar": [
+                ("007", "Aston Martin Valkyrie", "Aston Martin Thor Team", "United States"),
+                ("009", "Aston Martin Valkyrie", "Aston Martin Thor Team", "United States"),
+                ("7", "Toyota GR010 - Hybrid", "Toyota Racing", "Japan"),
+                ("8", "Toyota GR010 - Hybrid", "Toyota Racing", "Japan"),
+                ("12", "Cadillac V-Series.R", "Cadillac Hertz Team Jota", "United States"),
+                ("15", "BMW M Hybrid V8", "BMW M Team WRT", "Germany"),
+                ("17", "Genesis GMR-001-Hypercar", "Genesis Magma Racing", "South Korea"),
+                ("19", "Genesis GMR-001-Hypercar", "Genesis Magma Racing", "South Korea"),
+                ("20", "BMW M Hybrid V8", "BMW M Team WRT", "Germany"),
+                ("35", "Alpine A424", "Alpine Endurance Team", "France"),
+                ("36", "Alpine A424", "Alpine Endurance Team", "France"),
+                ("38", "Cadillac V-Series.R", "Cadillac Hertz Team Jota", "United States"),
+                ("50", "Ferrari 499P", "Ferrari AF Corse", "Italy"),
+                ("51", "Ferrari 499P", "Ferrari AF Corse", "Italy"),
+                ("83", "Ferrari 499P", "AF Corse", "Italy"),
+                ("93", "Peugeot 9X8", "Peugeot Totalenergies", "France"),
+                ("94", "Peugeot 9X8", "Peugeot Totalenergies", "France"),
+            ],
+            "LMGT3": [
+                ("10", "McLaren 720S LMGT3 Evo", "Garage 59", "United Kingdom"),
+                ("21", "Ferrari 296 LMGT3 Evo", "Vista AF Corse", "Italy"),
+                ("23", "Aston Martin Vantage AMR LMGT3", "Heart of Racing Team", "United States"),
+                ("27", "Aston Martin Vantage AMR LMGT3", "Heart of Racing Team", "United States"),
+                ("32", "BMW M4 LMGT3 Evo", "Team WRT", "Belgium"),
+                ("33", "Corvette Z06 LMGT3.R", "TF Sport", "United Kingdom"),
+                ("34", "Corvette Z06 LMGT3.R", "Racing Team Turkey by TF", "Turkey"),
+                ("54", "Ferrari 296 LMGT3 Evo", "Vista AF Corse", "Italy"),
+                ("58", "McLaren 720S LMGT3 Evo", "Garage 59", "United Kingdom"),
+                ("61", "Mercedes-AMG LMGT3", "Iron Lynx", "Italy"),
+                ("69", "BMW M4 LMGT3 Evo", "Team WRT", "Belgium"),
+                ("77", "Ford Mustang LMGT3", "Proton Competition", "Germany"),
+                ("78", "Lexus RC F LMGT3", "Akkodis ASP Team", "France"),
+                ("79", "Mercedes-AMG LMGT3", "Iron Lynx", "Italy"),
+                ("87", "Lexus RC F LMGT3", "Akkodis ASP Team", "France"),
+                ("88", "Ford Mustang LMGT3", "Proton Competition", "Germany"),
+                ("91", "Porsche 911 GT3 R LMGT3", "Manthey DK Engineering", "Germany"),
+                ("92", "Porsche 911 GT3 R LMGT3", "The Bend Manthey", "Germany"),
+            ],
+        }
+
+        def latest_wec_drivers(cls, car_no):
+            """登録済み公式結果から、その車番の最新ドライバー3名を回収する。"""
+            found = []
+            races_for_cls = data.get("races", {}).get(2026, {}).get("WEC", {}).get(cls, [])
+            races_for_cls = sorted(races_for_cls, key=lambda r: (r.get("race_date", ""), r.get("session_type", "")), reverse=True)
+            for race in races_for_cls:
+                nums = [str(x) for x in race.get("car_numbers", [])]
+                if str(car_no) not in nums:
+                    continue
+                idx = nums.index(str(car_no))
+                ds = race.get("drivers", [])
+                if idx < len(ds) and ds[idx]:
+                    found = [x.strip() for x in str(ds[idx]).split("/") if x.strip()]
+                    if found:
+                        return found[:3]
+            return found
+
+        if st.button("⚡ 2026 WEC公式エントリー35台を一括登録 / 更新", use_container_width=True, key="wec_entry_bulk"):
+            for cls, official_rows in wec_2026_entries.items():
+                key = f"WEC_{cls}"
+                target = data.setdefault("entries", {}).setdefault(2026, {}).setdefault(key, [])
+                existing = {str(x.get("car_number", "")): x for x in target}
+                merged = []
+                for no, machine_name, team_name, nat in official_rows:
+                    old = existing.get(no, {})
+                    driver_list = latest_wec_drivers(cls, no)
+                    if not driver_list:
+                        driver_list = old.get("driver_list", [])
+                        if not driver_list:
+                            driver_list = [x.strip() for x in old.get("drivers", "").split("/") if x.strip()]
+                    merged.append({
+                        "car_number": no,
+                        "machine": machine_name,
+                        "team": team_name,
+                        "country": nat,
+                        "driver_list": driver_list[:3],
+                        "drivers": " / ".join(driver_list[:3]),
+                        "image_url": old.get("image_url", ""),
+                        "liveries": old.get("liveries", []),
+                    })
+                data["entries"][2026][key] = merged
+            save_data(data)
+            st.success("2026 WECのHypercar 17台＋LMGT3 18台を登録しました！画像URL・追加カラーリングは既存のものを保持しています。")
+            st.rerun()
+
     with st.expander("➕ エントリーを追加 / 編集"):
         edit_options = ["新規追加"] + [f"No.{x.get('car_number', '')} {x.get('team', '')}" for x in entries]
         edit_choice = st.selectbox("編集対象", edit_options, key="entry_edit_choice")
