@@ -506,10 +506,10 @@ def extract_sf_result_url(url):
         raise ValueError("URL末尾を #qf-1 / #race-1 / #qf-2 / #race-2 のいずれかにしてください。")
     session, sf_round_no, section_heading, next_heading = fragment_map[fragment]
 
-    html = re.sub(r"<script[\\s\\S]*?</script>", " ", response.text, flags=re.I)
-    html = re.sub(r"<style[\\s\\S]*?</style>", " ", html, flags=re.I)
+    html = re.sub(r"<script[\s\S]*?</script>", " ", response.text, flags=re.I)
+    html = re.sub(r"<style[\s\S]*?</style>", " ", html, flags=re.I)
     text = unescape(re.sub(r"<[^>]+>", " ", html))
-    text = re.sub(r"\\s+", " ", text)
+    text = re.sub(r"\s+", " ", text)
 
     section_start = text.find(section_heading)
     if section_start < 0:
@@ -697,7 +697,7 @@ def extract_wec_entry_list_url(url):
         "LMGT3": ["2", "10", "13", "21", "23", "27", "32", "33", "34", "54", "57", "58", "59", "61", "62", "69", "74", "77", "78", "79", "87", "88", "91", "92", "150"],
     }
     current_cls = None
-    lines = [re.sub(r"\\s+", " ", x).strip() for x in text.splitlines() if x.strip()]
+    lines = [re.sub(r"\s+", " ", x).strip() for x in text.splitlines() if x.strip()]
 
     if is_le_mans_v3:
         section_rows = {"Hypercar": [], "LMP2": [], "LMGT3": []}
@@ -750,7 +750,7 @@ def extract_wec_entry_list_url(url):
                 drivers = []
                 driver_details = []
                 # 2355は "Harry TINCKNELL (GBR) P Tom GAMBLE (GBR) G ..." の形。
-                # PDF抽出済みテキストでは普通の空白なので、Python側では通常の \\s を使う。
+                # PDF抽出済みテキストでは普通の空白なので、Python側では通常の \s を使う。
                 remaining = tail.strip()
                 for _ in range(3):
                     # 通常行は NAME / NAT / category を別グループで取得。
@@ -792,7 +792,7 @@ def extract_wec_entry_list_url(url):
             if not current_cls:
                 continue
 
-            m = re.match(r"^(\\d{1,3})\\s+(.+?)\\s+(" + nat_codes + r")\\s+[MG]\\s+(.+)$", line, re.I)
+            m = re.match(r"^(\\d{1,3})\s+(.+?)\s+(" + nat_codes + r")\s+[MG]\s+(.+)$", line, re.I)
             if not m:
                 continue
             no, team, nat, rest = m.groups()
@@ -801,18 +801,18 @@ def extract_wec_entry_list_url(url):
             if machine:
                 tail = rest[len(machine):].strip()
             else:
-                dm0 = re.search(r"\\b[^()]+\\s\\([A-Z]{3}\\)\\s*[PGBS]\\b", rest)
+                dm0 = re.search(r"\\b[^()]+\s\\([A-Z]{3}\\)\s*[PGBS]\\b", rest)
                 if not dm0:
                     continue
                 machine = rest[:dm0.start()].strip()
-                machine = re.sub(r"\\s+HY$", "", machine, flags=re.I).strip()
+                machine = re.sub(r"\s+HY$", "", machine, flags=re.I).strip()
                 tail = rest[dm0.start():].strip()
 
-            tail = re.sub(r"^(?:HY)\\s+", "", tail, flags=re.I)
+            tail = re.sub(r"^(?:HY)\s+", "", tail, flags=re.I)
             drivers = []
             for dm in driver_re.finditer(tail):
-                name = re.sub(r"\\s+", " ", dm.group(1)).strip()
-                name = re.sub(r"^[PGBS]\\s+", "", name).strip()
+                name = re.sub(r"\s+", " ", dm.group(1)).strip()
+                name = re.sub(r"^[PGBS]\s+", "", name).strip()
                 if name and name != "-":
                     drivers.append(name)
             rows_by_class[current_cls].append({
