@@ -777,10 +777,11 @@ def extract_wec_entry_list_url(url):
                         dm = re.match(r"(.+?)\s+([PGBS])(?:\s+|$)", remaining)
                     if not dm:
                         break
-                    name = re.sub(r"\s+", " ", dm.group(1)).strip()
-                    nat_match = re.search(r"\(([A-Z]{3})\)\s*$", dm.group(1))
+                    raw_driver = dm.group(1).strip()
+                    nat_match = re.search(r"\(([A-Z]{3})\)\s*$", raw_driver)
                     driver_nat = nat_match.group(1).upper() if nat_match else ""
-                    name = re.sub(r"\s*\([A-Z]{3}\)\s*$", "", name).strip()
+                    name = re.sub(r"\s*\([A-Z]{3}\)\s*$", "", raw_driver).strip()
+                    name = re.sub(r"\s+", " ", name).strip()
                     name = re.sub(r"^(?:HY|Pro-Am)\s+", "", name, flags=re.I).strip()
                     if name and name != "-":
                         drivers.append(name)
