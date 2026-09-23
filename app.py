@@ -1837,8 +1837,8 @@ with tab_entry:
                         image_src = image_options[selected_livery]
                         st.markdown(
                             f"""
-                            <div style="height:{'220px' if e_cat == 'Super Formula' else '190px'}; display:flex; align-items:center; justify-content:center; overflow:hidden;">
-                                <img src="{image_src}" style="width:{'100%' if e_cat == 'Super Formula' else '100%'}; height:100%; object-fit:contain; object-position:center;" />
+                            <div style="height:{'220px' if e_cat == 'Super Formula' else '190px'}; display:flex; align-items:center; justify-content:center; overflow:hidden; {'margin:0 8px;' if e_cat == 'Super Formula' else ''}">
+                                <img src="{image_src}" style="width:100%; height:100%; object-fit:contain; object-position:center;" />
                             </div>
                             """,
                             unsafe_allow_html=True,
